@@ -37,8 +37,8 @@ This document describes RPM::Grill version 0.0.1
     Brief code example(s) here showing commonest usage(s).
     This section will be as far as many users bother reading
     so make it as educational and exeplary as possible.
-  
-  
+
+
 =head1 DESCRIPTION
 
 =for author to fill in:
@@ -46,7 +46,7 @@ This document describes RPM::Grill version 0.0.1
     Use subsections (=head2, =head3) as appropriate.
 
 
-=head1 INTERFACE 
+=head1 INTERFACE
 
 =for author to fill in:
     Write a separate section listing the public components of the modules
@@ -86,7 +86,7 @@ This document describes RPM::Grill version 0.0.1
     files, and the meaning of any environment variables or properties
     that can be set. These descriptions must also include details of any
     configuration language used.
-  
+
 RPM::Grill requires no configuration files or environment variables.
 
 
