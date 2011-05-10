@@ -67,7 +67,7 @@ sub new {
     my $class = ref($proto) || $proto;
     my $dir   = shift;                   # in: base directory to check
 
-    my $self = { _dir => $dir };
+    my $self = bless { _dir => $dir }, $class;
 
     # FIXME: should our unpacker write a file with n-v-r ?
 
@@ -104,13 +104,24 @@ sub new {
 
         # Track all the subpackages we encounter, for later
         $all_subpackages{$_}++ for @subp;
+
+        # Initialize RPMs
+        for my $subp (@subp) {
+            my $rpm = RPM::Grill::RPM->new( path => "$dir/$arch/$subp/rpm.rpm" );
+
+            $rpm->grill( $self );
+
+            push @{ $self->{_rpms} }, $rpm;
+        }
     }
+
+    # FIXME: cross-reference 32- and 64-bit peers
 
     $self->{subpackages} = [ sort keys %all_subpackages ];
 
     # FIXME: run sanity checks?  eg src has only one subpackage
 
-    return bless $self, $class;
+    return $self;
 }
 
 ##############
@@ -416,6 +427,15 @@ sub AUTOLOAD {
     croak "$ME: Unknown field " . __PACKAGE__ . "->$field()";
 }
 
+##########
+#  rpms  #  Returns list of RPM::Grill::RPM objects
+##########
+sub rpms {
+    my $self = shift;
+
+    return @{ $self->{_rpms} };
+}
+
 ####################
 #  non_src_arches  #  Return all arches except src/srpm
 ####################
@@ -517,23 +537,6 @@ sub matching_plugins {
     }
 
     return @retval;
-}
-
-###########
-#  files  #  FIXME! Complicated!
-###########
-sub files {
-    my $self       = shift;
-    my $arch       = shift;    # FIXME: test
-    my $subpackage = shift;
-
-    # First time through, iterate using File::Find
-    # FIXME: move to xxx/Files.pm ?
-    $self->{files}{$arch}{$subpackage}
-        ||= BrewLint::Files::gather( $self, $arch, $subpackage );
-    my $aref = $self->{files}{$arch}{$subpackage};
-
-    return wantarray ? @{$aref} : $aref;
 }
 
 # END   accessors
