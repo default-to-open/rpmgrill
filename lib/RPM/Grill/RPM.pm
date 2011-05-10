@@ -60,7 +60,7 @@ sub BUILD {
 
     $self->_set_dir( dirname($path) );
 
-    use Data::Dumper; print Dumper($self);
+#    use Data::Dumper; print Dumper($self);
 }
 
 #########
