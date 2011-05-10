@@ -77,7 +77,7 @@ sub new {
 
     # Read the RPM.metadata file for this arch + subpackage
     open my $rpminfo_fh, '<', $rpminfo_file
-        or die "$ME: Internal error: Cannot read $rpminfo_file: $!";
+        or confess "$ME: Internal error: Cannot read $rpminfo_file: $!";
     my $in_description;
 
 LINE:
