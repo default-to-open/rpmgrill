@@ -112,6 +112,14 @@ sub new {
             $rpm->grill( $self );
 
             push @{ $self->{_rpms} }, $rpm;
+
+            # Preserve the srpm
+            if ($rpm->arch eq 'src') {
+                if (exists $self->{_srpm}) {
+                    warn "$ME: WARNING! Multiple srpms!";
+                }
+                $self->{_srpm} = $rpm;
+            }
         }
     }
 
@@ -132,15 +140,11 @@ sub specfile {
 
     # Read it in the first time; keep it cached for subsequent calls.
     $self->{specfile} ||= do {
+        my $srpm = $self->srpm;         # Specfile is always in the srpm
 
-        # specfile is in the SRPM.  If I understand rpm/lib/psm.c correctly,
-        # the specfile name can be <anything>.spec
-
-        # FIXME
-        my $n = $self->{_subpackages_by_arch}->{src}->[0];
-
-        # Directory in which SRPM is unpacked
-        my $specfile_dir = $self->path( 'src', $n, 'payload' );
+        # If I understand rpm/lib/psm.c correctly, the specfile name
+        # can be <anything>.spec
+        my $specfile_dir = $srpm->dir . '/payload';
         -d $specfile_dir
             or die "$ME: Internal error: missing specfile dir: $specfile_dir";
 
@@ -156,6 +160,27 @@ sub specfile {
     };
 
     return $self->{specfile};
+}
+
+##########
+#  srpm  #  The source rpm
+##########
+sub srpm {
+    my $self = shift;
+
+    defined $self->{_srpm}
+        or croak "$ME: Internal error: no srpm found";
+    return $self->{_srpm};
+}
+
+#########
+#  nvr  #  Although this is a property of RPMs, all our RPMs must share it.
+#########
+sub nvr {
+    my $self = shift;
+
+    # Get it from the srpm, because other rpms might have a diff subpkg name
+    return $self->srpm->nvr;
 }
 
 ###################
@@ -552,12 +577,22 @@ sub gripe {
     # Validate input args
     _gripe_validate( $gripe, 'gripe' );
 
-    # Get caller's package name; this must be one of our plugins
-    my ( $package, undef, undef ) = caller;
+    # Get caller's package name; this must be one of our plugins, but
+    # we might have a level or two of indirection.
+    my $module;
+    {
+        my $level = 0;
+        while (! defined $module) {
+            my ( $package, undef ) = caller($level++);
+            if (! defined $package) {
+                croak "$ME: FATAL: did not find RPM::Grill::Plugin::<name> anywhere in call stack";
+            }
 
-    $package =~ m{^.*::Plugin::(.*)$}
-        or croak "$ME: Internal error: unexpected caller '$package'";
-    my $module = $1;
+            if ($package =~ m{^RPM::Grill::Plugin::(.*)$}) {
+                $module = $1;
+            }
+        }
+    }
 
     # FIXME: get the RPM package or subpackage name?
 
@@ -720,7 +755,7 @@ sub read_dir {
     my $dir = shift;
 
     opendir my $dir_fh, $dir
-        or die "$ME: FATAL: could not opendir $dir: $!\n";
+        or die "$ME: FATAL: could not opendir $dir: $!";
     my @ents;
     while ( my $ent = readdir $dir_fh ) {
 
