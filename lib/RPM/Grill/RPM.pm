@@ -151,6 +151,7 @@ sub conflicts { push @_, 'conflicts'; goto &capability; }
 sub files {
     my $self       = shift;
 
+    use RPM::Grill::RPM::Files;
     $self->{files} ||= RPM::Grill::RPM::Files::gather( $self );
 
     return wantarray ? @{ $self->{files} } : $self->{files};
