@@ -158,6 +158,15 @@ sub files {
 }
 
 
+use overload '""' => \&_as_string;
+
+sub _as_string {
+    my $self = shift;
+
+    my $nvr = $self->nvr;
+    return sprintf("%s.%s.rpm", $nvr, $self->arch);
+}
+
 1;
 
 
