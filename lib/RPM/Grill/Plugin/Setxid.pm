@@ -134,15 +134,11 @@ sub _read_whitelist {
     # FIXME: get cpe?  How the heck do we get cpe?
 
     #printf "got here: %s -- %s -- %s\n", $self->nvr;
-    my @nvr = $self->nvr;
-    my $nvr = join( '-', @nvr );
 
-    # FIXME: handle fc?
-    $nvr[2] =~ /el(\d)/
-        or die "$ME: Internal error: No 'el<n>' in nvr $nvr";
-    my $rhel = $1;
-
-    my $whitelist = "$Whitelist_Dir/RHEL$rhel";
+    # Whitelist is based on major, eg RHEL6, F15
+    # FIXME: should we be more specific, eg RHEL6.1?
+    # FIXME: should we use cpe? brew tags?
+    my $whitelist = $Whitelist_Dir . '/' . $self->major_release;
     open my $whitelist_fh, '<', $whitelist
         or do {
         warn "$ME: WARNING: Cannot read $whitelist: $!";
