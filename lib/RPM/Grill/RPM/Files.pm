@@ -117,6 +117,29 @@ sub readlink {
     return $self->{_readlink};
 }
 
+
+###########
+#  gripe  #
+###########
+sub gripe {
+    my $self  = shift;                  # in: RPM::Grill::RPM::Files obj
+    my $gripe = shift;                  # in: hashref with gripe info
+
+    croak "$ME: ->gripe() called without args"          if ! $gripe;
+    croak "$ME: ->gripe() called with too many args"    if @_;
+    croak "$ME: ->gripe() called with a non-hashref"    if ref($_[0]) ne 'HASH';
+
+    my %gripe = (
+        arch       => $self->arch,
+        subpackage => $self->subpackage,
+        context    => { path => $self->path },
+
+        %$gripe;
+    );
+
+    $self->rpm->grill->gripe( \%gripe );
+}
+
 ##############
 #  AUTOLOAD  #  For accessing internal hash elements
 ##############
