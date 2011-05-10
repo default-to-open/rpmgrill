@@ -184,6 +184,21 @@ sub nvr {
 }
 
 ###################
+#  major_release  #  Returns RHEL5, F14, etc
+###################
+sub major_release {
+    my $self = shift;
+
+    use feature qw(switch);             # needed for perl5.10, not for 5.12
+    given ( $self->nvr('release') ) {
+        return "RHEL$1"         when /\.el(\d+)/;
+        return "F$1"            when /\.fc?(\d+)/;
+
+        default { die "$ME: Cannot determine RHEL/Fedora release from '$_'" }
+    }
+}
+
+###################
 #  invoke_plugin  #  invokes a plugin
 ###################
 sub invoke_plugin {
