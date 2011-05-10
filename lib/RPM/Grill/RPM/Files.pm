@@ -86,6 +86,7 @@ LINE:
         $x{arch}       = $arch;
         $x{subpackage} = $subpackage;
         $x{rpm}        = $rpm;
+        $x{grill}      = $rpm->grill;
 
         # FIXME: check that {path} isn't a dup?
 
@@ -131,12 +132,33 @@ sub gripe {
     my %gripe = (
         arch       => $self->arch,
         subpackage => $self->subpackage,
-        context    => { path => $self->path },
+        context    => $self->context,
 
         %$gripe,
     );
 
     $self->rpm->grill->gripe( \%gripe );
+}
+
+#############
+#  context  #  helper for gripe
+#############
+sub context {
+    my $self = shift;
+
+    if (@_) {
+        return $self->{gripe_context} = shift;
+    }
+    else {
+        my %context;
+
+        if (my $context = $self->{gripe_context}) {
+            %context = %$context;
+        }
+        $context{path} = $self->path;
+
+        return \%context;
+    }
 }
 
 ##############
