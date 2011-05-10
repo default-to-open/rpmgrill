@@ -6,10 +6,10 @@
 #
 package RPM::Grill::RPM;
 
-use version; our $VERSION = qv(0.0.1);
-
 use strict;
 use warnings;
+
+use version; our $VERSION = qv( '0.0.1' );
 
 use Carp;
 use File::Basename      qw(dirname);

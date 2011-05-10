@@ -39,7 +39,7 @@ use version; our $VERSION = qv( '0.0.1' );
 our @ISA    = qw(Exporter);
 our @EXPORT = qw(dprintf);
 
-sub dprintf(@) {
+sub dprintf {
 
     # First time through: initialize %debug based on $RPMGRILL_DEBUG
     if ( !keys %debug ) {
