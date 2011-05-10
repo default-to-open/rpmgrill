@@ -473,7 +473,31 @@ sub AUTOLOAD {
 sub rpms {
     my $self = shift;
 
-    return @{ $self->{_rpms} };
+    my @rpms = @{ $self->{_rpms} };
+
+    # Called with args?
+    if (@_) {
+        croak "$ME: ".__PACKAGE__."->rpms(): Bad invocation" if @_ % 2;
+
+        my %keys = @_;
+        my @filter;
+        for my $field qw(arch subpackage) {
+            if (my $want = delete $keys{$field}) {
+                push @filter, "$field == '$want'";
+                @rpms = grep { $_->{$field} eq $want } @rpms;
+                if (! @rpms) {
+                    my $filter = join(' && ', @filter);
+                    carp "$ME: WARNING: No RPMs match $filter";
+                    return;
+                }
+            }
+        }
+        if (my @unknown = sort keys %keys) {
+            carp "$ME: WARNING: unknown rpm field(s) '@unknown'";
+        }
+    }
+
+    return @rpms;
 }
 
 ####################
