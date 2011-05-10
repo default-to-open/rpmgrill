@@ -37,6 +37,7 @@ has 'path',       is => 'ro', isa => 'RPMpath', required => 1;
 has 'dir',        is => 'ro', isa => 'Str', writer => '_set_dir';
 has 'arch',       is => 'ro', isa => 'Str', writer => '_set_arch';
 has 'subpackage', is => 'ro', isa => 'Str', writer => '_set_subpackage';
+has 'grill',      is => 'rw', isa => 'RPM::Grill';
 
 ###########
 #  BUILD  #  Invoked by Moose right after constructor. We set arch, subpackage
@@ -142,6 +143,18 @@ sub requires  { push @_, 'requires';  goto &capability; }
 sub provides  { push @_, 'provides';  goto &capability; }
 sub obsoletes { push @_, 'obsoletes'; goto &capability; }
 sub conflicts { push @_, 'conflicts'; goto &capability; }
+
+
+###########
+#  files  #  Returns a list of RPM::Grill::RPM::File objects, from manifest
+###########
+sub files {
+    my $self       = shift;
+
+    $self->{files} ||= RPM::Grill::RPM::Files::gather( $self );
+
+    return wantarray ? @{ $self->{files} } : $self->{files};
+}
 
 
 1;
