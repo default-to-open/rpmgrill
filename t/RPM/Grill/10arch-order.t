@@ -32,7 +32,10 @@ for my $t (@tests) {
     # The "reverse" is pointless; the goal is to catch it if somehow
     # the code were to start readdir()ing in mtime order.
     for my $arch (reverse @$t) {
-        mkpath "$tempdir/$i/$arch/mypkg", 0, 0755;
+        my $d = "$tempdir/$i/$arch/mypkg";
+        mkpath $d, 0, 0755;
+        open TMP, '>', "$d/rpm.rpm";
+        close TMP;
     }
 
     # Poor Man's constructor

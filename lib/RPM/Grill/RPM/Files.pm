@@ -51,34 +51,41 @@ END_LS_STRING_MODE
 # END   user-configurable section
 ###############################################################################
 
+############
+#  gather  #  Returns LoH
+############
 sub gather {
-    my $self       = shift;
-    my $arch       = shift;
-    my $subpackage = shift;
-    my @out;
+    my $rpm = shift;                    # in: RPM::Gather::RPM obj
+    my @out;                            # out: list of ::File objects
 
-    my $path = $self->path( $arch, $subpackage );
+    # Reusable fields
+    my $dir        = $rpm->dir;
+    my $arch       = $rpm->arch;
+    my $subpackage = $rpm->subpackage;
 
     # FIXME: read payload, nested
-    # FIXME: read RPM.per_file_metadata
 
-    my $metadata = "$path/RPM.per_file_metadata";
-    open my $metadata_fh, '<', $metadata
-        or die "$ME: Cannot read $metadata: $!\naborting";
+    #
+    # RPM.per_file_metadata contains a list of files and their attributes
+    #
+    my $metadata_file = "$dir/RPM.per_file_metadata";
+    open my $metadata_fh, '<', $metadata_file
+        or die "$ME: Cannot read $metadata_file: $!\naborting";
 LINE:
     while ( my $line = <$metadata_fh> ) {
         chomp $line;
         my @values = split( "\t", $line );
         if ( @values != @Per_File_Metadata ) {
-            warn "$ME: WARNING: $metadata:$.: Wrong # of fields in '$line'\n";
+            warn "$ME: WARNING: $metadata_file:$.: Wrong # of fields in '$line'\n";
             next LINE;
         }
 
         my %x
             = map { $Per_File_Metadata[$_] => $values[$_] } ( 0 .. $#values );
-        $x{_root}       = $path;
+        $x{_root}       = $dir;
         $x{_arch}       = $arch;
         $x{_subpackage} = $subpackage;
+        $x{_rpm}        = $rpm;
 
         # FIXME: check that {path} isn't a dup?
 
@@ -97,8 +104,8 @@ LINE:
 sub is_symlink { substr( $_[0]->{mode}, 0, 1 ) eq 'l' }    # eg lrwxrwxrwx
 sub is_dir     { substr( $_[0]->{mode}, 0, 1 ) eq 'd' }    # eg drwxr-xr-x
 sub is_reg     { substr( $_[0]->{mode}, 0, 1 ) eq '-' }    # eg -rwxr-xr-x
-sub is_suid { $_[0]->numeric_mode & S_ISUID }
-sub is_sgid { $_[0]->numeric_mode & S_ISGID }
+sub is_suid    { $_[0]->numeric_mode & S_ISUID }
+sub is_sgid    { $_[0]->numeric_mode & S_ISGID }
 
 sub readlink {
     my $self = shift;
