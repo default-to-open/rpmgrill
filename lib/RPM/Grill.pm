@@ -156,7 +156,8 @@ sub specfile {
             "$ME: Internal error: multiple specfiles in $specfile_dir: @specfile\n";
 
         require RPM::Grill::RPM::SpecFile;
-        RPM::Grill::RPM::SpecFile->new("$specfile_dir/$specfile[0]");
+        my $spec = RPM::Grill::RPM::SpecFile->new("$specfile_dir/$specfile[0]");
+        $spec->{grill} = $self;
     };
 
     return $self->{specfile};
