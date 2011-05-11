@@ -110,7 +110,7 @@ sub metadata {
     my $self       = shift;
 
     use    RPM::Grill::RPM::Metadata;
-    return RPM::Grill::RPM::Metadata->new( $self->path );
+    return RPM::Grill::RPM::Metadata->new( $self );
 }
 
 
