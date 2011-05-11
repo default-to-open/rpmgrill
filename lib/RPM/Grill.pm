@@ -453,11 +453,11 @@ PLUGIN:
 sub AUTOLOAD {
     my $self = shift;
 
-    ref($self)
-        or confess "$ME: Internal error: AUTOLOAD invoked on '$AUTOLOAD'";
-
     our $AUTOLOAD;
     ( my $field = lc($AUTOLOAD) ) =~ s/^.*:://;
+
+    ref($self)
+        or confess "$ME: Internal error: AUTOLOAD invoked on '$AUTOLOAD'";
 
     if ( $self->{$field} ) {
         my $val = $self->{$field};
