@@ -106,7 +106,7 @@ update.c:154: warning: dereferencing type-punned pointer will break strict-alias
 -------------------------------------------------------------------------------
 >> name = broken memset
 
-from  /mnt/redhat/brewroot/packages/krb5/1.8.2/3.el6_0.1/data/logs/i686/build.log
+from  packages/krb5/1.8.2/3.el6_0.1/data/logs/i686/build.log
 
 gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -I. -I. -I./.. -I../generic -I./../generic -I../mechglue -I./../mechglue -DKRB5_DEPRECATED=1 -I/usr/include/et -O2 -g -pi
 pe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i686 -mtune=atom -fasynchronous-unwind-tables -I/usr/include/et -fPIC -fno-strict-aliasing -fstack
@@ -142,7 +142,7 @@ gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -
 -------------------------------------------------------------------------------
 >> name = bz642228 (assuming signed overflow does not occur)
 
-from /mnt/redhat/brewroot/packages/xulrunner/1.9.2.12/1.el6_0/data/logs/i686/build.log
+from packages/xulrunner/1.9.2.12/1.el6_0/data/logs/i686/build.log
 
 c++ -o nsJohabToUnicode.o -c -I../../../dist/system_wrappers -include ../../../config/gcc_hidden.h -DMOZILLA_INTERNAL_API -D_IMPL_NS_COM -DEXPORT_XPT_API -DEXPORT_XPTC_API -D_IMPL_NS_COM_OBSOLETE -D_I
 MPL_NS_GFX -D_IMPL_NS_WIDGET -DIMPL_XREAPI -DIMPL_NS_NET -DIMPL_THEBES  -DOSTYPE=\"Linux2.6.18-194.17.1\" -DOSARCH=Linux -I./../util -I. -I. -I../../../dist/include -I../../../dist/include/nsprpub  -I
@@ -178,7 +178,7 @@ ranlib libucvko_s.a
 -------------------------------------------------------------------------------
 >> name = RFE 438709 (missing header for unified diff)
 
-from /mnt/redhat/brewroot/packages/cpufreq-utils/005/2.el5/data/logs/i386/build.log
+from packages/cpufreq-utils/005/2.el5/data/logs/i386/build.log
 
 
 + echo 'Patch #0 (disable-gsic.patch):'
@@ -240,7 +240,7 @@ if gcc -DHAVE_CONFIG_H -I. -I. -I./config     -I/usr/include/net-snmp -I/usr/inc
 -------------------------------------------------------------------------------
 >> name = make errors
 
-from /mnt/redhat/brewroot/packages/glibc/2.3.4/2.51/data/logs/i686/build.log
+from packages/glibc/2.3.4/2.51/data/logs/i686/build.log
 
 make[2]: Leaving directory `/builddir/build/BUILD/glibc-2.3.6/crypt'
 make -s -C linuxthreads tests
@@ -311,7 +311,7 @@ make: *** [check] Error 2
 -------------------------------------------------------------------------------
 >> name = aclocal errors
 
-from /mnt/redhat/brewroot/packages/rsyslog/3.22.1/3.el5_5.1/data/logs/i386/*
+from packages/rsyslog/3.22.1/3.el5_5.1/data/logs/i386/*
 
 Building target platforms: i386
 Building for target i386
