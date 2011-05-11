@@ -9,31 +9,36 @@ use Test::Differences;
 use Encode              qw(from_to);
 use File::Slurp         qw(read_dir read_file);
 
-# Tests 1-4 : load our modules.  If any of these fail, abort.
-use_ok 'RPM::Grill'                     or exit;
-use_ok 'RPM::Grill::RPM::SpecFile'      or exit;
-use_ok 'RPM::Grill::Plugin::RpmScripts' or exit;
-
 #
 # Pass 1: find tests
 #
-(my $test_subdir = $0) =~ s|\.t$|.d|
-    or die "Internal error: test name $0 doesn't end in .t";
+our @tests;
+BEGIN {
+    (my $test_subdir = $0) =~ s|\.t$|.d|
+        or die "Internal error: test name $0 doesn't end in .t";
 
-my @tests;
-for my $spec (sort grep { /\.spec$/ } read_dir($test_subdir)) {
-    my $t = { name => $spec, path => "$test_subdir/$spec" };
+    for my $spec (sort grep { /\.spec$/ } read_dir($test_subdir)) {
+        my $t = { name => $spec, path => "$test_subdir/$spec" };
 
-    # Read the .expect file
-    (my $expect = $spec) =~ s/\.spec$/.expect/;
+        # Read the .expect file
+        (my $expect = $spec) =~ s/\.spec$/.expect/;
 
-    if (-e "$test_subdir/$expect") {
-        $t->{expect} = eval read_file("$test_subdir/$expect");
-        die "FIXME: Error reading $test_subdir/$expect: $@"     if $@;
+        if (-e "$test_subdir/$expect") {
+            $t->{expect} = eval read_file("$test_subdir/$expect");
+            die "FIXME: Error reading $test_subdir/$expect: $@"     if $@;
+        }
+
+        push @tests, $t;
     }
 
-    push @tests, $t;
+    plan tests => 3 + @tests;
 }
+
+
+# Tests 1-3 : load our modules.  If any of these fail, abort.
+use_ok 'RPM::Grill'                     or exit;
+use_ok 'RPM::Grill::RPM::SpecFile'      or exit;
+use_ok 'RPM::Grill::Plugin::RpmScripts' or exit;
 
 #
 # Run tests
