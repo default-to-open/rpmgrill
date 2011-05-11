@@ -11,6 +11,7 @@ use warnings;
 use version; our $VERSION = qv('0.0.1');
 
 use Carp;
+use File::Basename      qw(basename);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -135,6 +136,54 @@ sub lines {
     return @{ $self->{lines} };
 }
 
+###############################################################################
+# BEGIN gripe and context
+
+sub grill { return $_[0]->{grill} };
+
+###########
+#  gripe  #
+###########
+sub gripe {
+    my $self  = shift;                  # in: RPM::Grill::RPM::SpecFile obj
+    my $gripe = shift;                  # in: hashref with gripe info
+
+    croak "$ME: ->gripe() called without args"        if ! $gripe;
+    croak "$ME: ->gripe() called with too many args"  if @_;
+    croak "$ME: ->gripe() called with a non-hashref"  if ref($gripe) ne 'HASH';
+
+    my %gripe = (
+        arch       => 'src',
+        context    => $self->context,
+
+        %$gripe,
+    );
+
+    $self->grill->gripe( \%gripe );
+}
+
+#############
+#  context  #  helper for gripe
+#############
+sub context {
+    my $self = shift;
+
+    if (@_) {
+        return $self->{gripe_context} = shift;
+    }
+    else {
+        my %context;
+
+        if (my $context = $self->{gripe_context}) {
+            %context = %$context;
+        }
+        $context{path} = basename($self->path);
+
+        return \%context;
+    }
+}
+
+# END   gripe and context
 ###############################################################################
 # BEGIN submodule
 
