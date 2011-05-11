@@ -1,0 +1,30 @@
+{
+  'RpmScripts' => [
+    {
+      'arch' => 'src',
+      'context' => {
+        'excerpt' => [
+          'useradd -c "X Font Server" -r -s $LOGINSHELL -u 43 -d /etc/X11/fs xfs'
+        ],
+        'sub' => 'postun Mesa-libGLU',
+        'path' => 'xorg-x11-6.8.2-1.EL.68.spec',
+        'lineno' => '2158'
+      },
+      'diag' => 'Invocation of <tt>useradd</tt> with unexpected login shell <var>$LOGINSHELL</var> (expected <tt>/sbin/nologin</tt>)',
+      'code' => 'UseraddBadShell'
+    },
+    {
+      'arch' => 'src',
+      'context' => {
+        'excerpt' => [
+          'useradd -c "X Font Server" -r -s $LOGINSHELL -u 43 -d /etc/X11/fs xfs'
+        ],
+        'sub' => 'pre xfs',
+        'path' => 'xorg-x11-6.8.2-1.EL.68.spec',
+        'lineno' => '2167'
+      },
+      'diag' => 'Invocation of <tt>useradd</tt> with unexpected login shell <var>$LOGINSHELL</var> (expected <tt>/sbin/nologin</tt>)',
+      'code' => 'UseraddBadShell'
+    }
+  ]
+};

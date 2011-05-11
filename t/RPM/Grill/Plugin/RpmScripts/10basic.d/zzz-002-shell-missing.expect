@@ -1,0 +1,30 @@
+{
+  'RpmScripts' => [
+    {
+      'arch' => 'src',
+      'context' => {
+        'excerpt' => [
+          'useradd -u 999 -d /home/sdfsdf sdfsdf'
+        ],
+        'sub' => 'preamble',
+        'path' => 'zzz-002-shell-missing.spec',
+        'lineno' => '1'
+      },
+      'diag' => 'Invocation of <tt>useradd</tt> without a login shell',
+      'code' => 'UseraddNoShell'
+    },
+    {
+      'arch' => 'src',
+      'context' => {
+        'excerpt' => [
+          'useradd -u 999 -d /home/sdfsdf sdfsdf'
+        ],
+        'sub' => 'preamble',
+        'path' => 'zzz-002-shell-missing.spec',
+        'lineno' => '1'
+      },
+      'diag' => 'Invocation of <tt>useradd</tt> with UID <var>999</var>, but there\'s no assigned UID for <var>sdfsdf</var> in /usr/share/doc/setup-2.8.28/uidgid',
+      'code' => 'UseraddUnknownUid'
+    }
+  ]
+};
