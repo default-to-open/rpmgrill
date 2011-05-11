@@ -20,6 +20,9 @@ use Getopt::Long                qw(:config gnu_getopt);
 use Text::ParseWords;
 use RPM::Grill::dprintf;
 
+# Program name of our caller
+( our $ME = $0 ) =~ s|.*/||;
+
 ###############################################################################
 # BEGIN user-configurable section
 
@@ -103,13 +106,43 @@ for my $cmd (sort keys %Command_Line_Options) {
     }
 }
 
-use Data::Dumper; print Dumper(\%Getopt_Options);
+#use Data::Dumper; print Dumper(\%Getopt_Options);
+
+# At script start time, read the uidgid file from the 'setup' package
+my $UidGid_File;
+my %UidGid;
+{
+    my @label;                 # NAME, UID, GID, etc
+
+    my $uidgid_glob = '/usr/share/doc/setup-*/uidgid';
+    my @uidgid_file = glob( $uidgid_glob )
+        or die "$ME: No match for '$uidgid_glob'";
+    open my $uidgid_fh, '<', $uidgid_file[0]
+        or die "$ME: Cannot read $uidgid_file[0]: $!\n";
+  LINE:
+    while (<$uidgid_fh>) {
+        next LINE               if /^\s*\#/;            # skip comments
+
+        chomp;
+        if (my @values = split ' ', $_) {
+            if (! @label) {
+                @label = @values;
+            }
+            else {
+                my $x = { map { $label[$_] => $values[$_] } (0 .. $#label) };
+                $UidGid{$values[0]} = $x;
+            }
+        }
+    }
+    close $uidgid_fh;
+
+    $UidGid_File = $uidgid_file[0];
+
+#    use Data::Dumper; print Dumper(\%UidGid);
+}
 
 # END   user-configurable section
 ###############################################################################
-
-# Program name of our caller
-( our $ME = $0 ) =~ s|.*/||;
 
 #
 # Calls $self->gripe() with problems
@@ -132,36 +165,49 @@ sub analyze {
     my @lines = $spec->lines;
 
   LINE:
-    for my $i (0 .. $#lines) {
+    for (my $i=0; $i < @lines; $i++) {
         my $line = $lines[$i];
 
         my $s       = $line->content;
         my $section = $line->section;
         my $lineno  = $line->lineno;
 
+        # Skip comments
+        next LINE               if $s =~ /^\s*#/;
+
         # changelog is the end, and contains no executable code
         last LINE               if $section eq 'changelog';
 
-        if ($s =~ /\b((user|group)add\b.*)/) {
-            my $cmd = $1;
+        # Concatenate continuation lines into one long line
+        $s .= $lines[++$i]->content       while $s =~ s{\s*\\$}{ };
 
-            # Concatenate continuation lines
-            $cmd .= $lines[++$i]->content       while $cmd =~ s{\s*\\$}{ };
+        # Split by actual command, eg 'useradd abc || useradd def'
+        my @cmds = split /\s+\|\|\s+/, $s;
 
-            # Remove redirection, eg '2>/dev/null'
-            $cmd =~ s{\s+\d*>\s*\S+}{ }g;
+        for my $x (@cmds) {
+            if ($x =~ /\b((user|group)add\b.*)/) {
+                my $cmd = $1;
 
-            # Remove trailing whitespace
-            $cmd =~ s/\s+$//;
+                # Remove redirection, eg '2>/dev/null'
+                $cmd =~ s{\s+\d*>\s*\S+}{ }g;
 
-            # useradd/groupadd only valid in %pre
-            warn "$ME: specfile:$lineno: script in '$section' section: $s\n"
-                if $section ne 'pre';
+                # Remove trailing whitespace
+                $cmd =~ s/\s+$//;
 
-            dprintf "%d : %s : %s\n", $line->lineno, $line->section, $cmd;
+                # useradd/groupadd only valid in %pre
+                # FIXME: not true!
+#                warn "$ME: specfile:$lineno: script in '$section' section: $s\n"
+#                    if $section ne 'pre';
 
-            $spec->context({ lineno => $lineno, excerpt => $cmd });
-            _check_generic_add( $spec, $cmd );
+                dprintf "%d : %s : %s\n", $line->lineno, $line->section, $cmd;
+
+                $spec->context({
+                    lineno  => $lineno,
+                    excerpt => $cmd,
+                    sub     => $section,
+                });
+                _check_generic_add( $spec, $cmd );
+            }
         }
     }
 }
@@ -186,7 +232,7 @@ sub _check_generic_add {
 
     my %options;
     GetOptions( \%options, @{$getopt_options});
-    use Data::Dumper; print Data::Dumper->Dump([ \%options ], [ '%opts' ]);
+#    use Data::Dumper; print Data::Dumper->Dump([ \%options ], [ '%opts' ]);
 #    use Data::Dumper; print Data::Dumper->Dump([ \@ARGV ], [ '@ARGV' ]);
 
     my $arg = shift(@ARGV)
@@ -206,9 +252,9 @@ sub _check_generic_add {
 
 
 sub _check_useradd {
-    my $spec    = shift;
-    my $options = shift;
-    my $userid  = shift;
+    my $spec     = shift;
+    my $options  = shift;
+    my $username = shift;
 
    # Home Directory : required
     if (my $homedir = $options->{'home-dir'}) {
@@ -242,20 +288,88 @@ sub _check_useradd {
     #
     # Userid
     #
+    my $expected_uid = $UidGid{$username}{UID};
+
     if (my $uid = $options->{uid}) {
+        if ($uid =~ /^\d+$/) {
+            # Numeric. Cross-check against FIXME
+            if (defined $expected_uid) {
+                if ($uid != $expected_uid) {
+                    $spec->gripe({
+                        code => 'UseraddWrongUid',
+                        diag => "Invocation of <tt>useradd</tt> with incorrect UID <var>$uid</var>; $UidGid_File defines the UID for $username as <b>$expected_uid</b>"
+                    });
+                }
+                else {
+                    dprintf "Woot. UID match for $username\n";
+                }
+            }
+            else {
+                $spec->gripe({
+                    code => 'UseraddUnknownUid',
+                    diag => "Invocation of <tt>useradd</tt> with UID <var>$uid</var>, but there's no assigned UID for <var>$username</var> in $UidGid_File",
+                });
+            }
+        }
+        else {
+            my $diag = "Invocation of <tt>useradd</tt> with non-numeric UID <var>$uid</var>";
+
+            if (defined $expected_uid) {
+                $diag .= "; please verify that this =<b>$expected_uid</b>, as defined in $UidGid_File";
+            }
+            else {
+                $diag .= "; this is probably OK, but I have no robust way of checking. Note that there is no UID defined for <var>$username</var> in $UidGid_File";
+            }
+
+            $spec->gripe({
+                code => 'UseraddCheckUid',
+                diag => $diag,
+            });
+        }
     }
     else {
+        my $diag = "Invocation of <tt>useradd</tt> without specifying a UID";
+        if (defined $expected_uid) {
+            $diag .= "; $UidGid_File defines the UID for $username as <b>$expected_uid</b>";
+        }
+        else {
+            $diag .= "; this may be OK, because $UidGid_File defines no UID for <var>$username</var>";
+        }
+
         $spec->gripe({
             code => 'UseraddNoUid',
-            diag => "Invocation of <tt>useradd</tt> without specifying a UID",
+            diag => $diag,
         });
     }
 }
 
 sub _check_groupadd {
-    my $spec    = shift;
-    my $options = shift;
-    my $groupid = shift;
+    my $spec      = shift;
+    my $options   = shift;
+    my $groupname = shift;
+
+    if (defined (my $expected_gid = $UidGid{$groupname}{GID})) {
+        if (defined (my $actual_gid = $options->{gid})) {
+            if ($actual_gid =~ /^\d+$/) {
+                if ($actual_gid != $expected_gid) {
+                    # Mismatch: invocation with wrong GID
+                    $spec->gripe({
+                        code => 'GroupaddWrongGid',
+                        diag => "Invocation of <tt>groupadd</tt> with incorrect GID <var>$actual_gid</var>; $UidGid_File defines the GID for $groupname as <b>$expected_gid</b>",
+                    });
+                }
+            }
+            else {
+                # Non-numeric GID
+                $spec->gripe({
+                    code => 'GroupaddCheckGid',
+                    diag => "Invocation of <tt>groupadd</tt> with non-numeric GID <var>$actual_gid</var>; please make sure that this =<b>$expected_gid</b>, as defined in $UidGid_File",
+                });
+            }
+        }
+        else {
+        }
+    }
 }
 
 1;
