@@ -47,7 +47,7 @@ ok( $spec_string_iso88591 =~ /\x{F1}/,
 ok( $spec_string_utf8 =~ /\x{C3}\x{B1}/,
     "spec string(UTF-8) contains chr(0xC3)chr(0xB1) [ntilde]");
 
-# Build dummy BrewLint objects out of those dummy specs
+# Build dummy Grill objects out of those dummy specs
 my $spec_good = RPM::Grill::RPM::SpecFile->new( $spec_string_utf8 );
 my $spec_bad  = RPM::Grill::RPM::SpecFile->new( $spec_string_iso88591 );
 
