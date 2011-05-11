@@ -158,6 +158,8 @@ sub specfile {
         require RPM::Grill::RPM::SpecFile;
         my $spec = RPM::Grill::RPM::SpecFile->new("$specfile_dir/$specfile[0]");
         $spec->{grill} = $self;
+
+        $spec;
     };
 
     return $self->{specfile};
@@ -450,6 +452,9 @@ PLUGIN:
 
 sub AUTOLOAD {
     my $self = shift;
+
+    ref($self)
+        or confess "$ME: Internal error: AUTOLOAD invoked on '$AUTOLOAD'";
 
     our $AUTOLOAD;
     ( my $field = lc($AUTOLOAD) ) =~ s/^.*:://;
