@@ -1,0 +1,278 @@
+#!/usr/bin/perl
+#
+# rpmgrill - script description here FIXME
+#
+# $Id$
+#
+package RPM::Grill::Checker;
+
+use strict;
+use warnings;
+
+(our $ME = $0) =~ s|.*/||;
+our $VERSION = "0.0";                   # Replaced by Makefile.PL
+
+# For debugging, show data structures using DumpTree($var)
+#use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
+
+###############################################################################
+# BEGIN user-customizable section
+
+#
+# FIXME: need something that will unpack an RPM set
+#
+# Our called script can assume:
+#
+#   params - N-V-R, etc
+#   environment
+#   cd'ed to WHERE
+
+# Set up safe, well-known environment
+$ENV{PATH}   = '/usr/bin:/bin';
+$ENV{CDPATH} = '';
+$ENV{IFS}    = '';
+
+# END   user-customizable section
+###############################################################################
+
+use RPM::Grill;
+use List::Util          qw(max);
+
+###############################################################################
+# BEGIN boilerplate args checking, usage messages
+
+sub usage {
+    print  <<"END_USAGE";
+Usage: $ME [OPTIONS] ARGS [...]
+
+blah blah blah
+
+OPTIONS:
+
+  --list-plugins    list available plugins
+  --disable=[LIST]  disable one or more plugins, e.g.: --disable=virus,buildlog
+
+  -v, --verbose  show verbose progress indicators
+  -n, --dry-run  make no actual changes
+
+  --help         display this message
+  --man          display program man page
+  --version      display program name and version
+END_USAGE
+
+    exit;
+}
+
+sub man {
+    # Read the POD contents.  If it hasn't been filled in yet, abort.
+    my $pod = do { local $/; <DATA>; };
+    if ($pod =~ /=head1 \s+ NAME \s+ FIXME/xm) {
+        warn "$ME: No man page available.  Please try $ME --help\n";
+        exit;
+    }
+
+    # Use Pod::Man to convert our __DATA__ section to *roff
+    eval { require Pod::Man }
+        or die "$ME: Cannot generate man page; Pod::Man unavailable: $@\n";
+    my $parser = Pod::Man->new(name => $ME, release => $VERSION, section => 1);
+
+    # If called without output redirection, man-ify.
+    my $out_fh;
+    if (-t *STDOUT) {
+        my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
+        open $out_fh, "| nroff -man | $pager";
+    }
+    else {
+        open $out_fh, '>&STDOUT';
+    }
+
+    # Read the POD contents, and have Pod::Man read from fake filehandle.
+    # This requires 5.8.0.
+    open my $pod_handle, '<', \$pod;
+    $parser->parse_from_filehandle($pod_handle, $out_fh);
+    exit;
+}
+
+
+# Command-line options.  Note that this operates directly on @ARGV !
+our $debug   = 0;
+our $force   = 0;
+our $verbose = 0;
+our $NOT     = '';              # print "blahing the blah$NOT\n" if $debug
+our $list_plugins;              # list plugins, and quit
+our @disable_plugin;            # plugins to disable
+sub handle_opts {
+    use Getopt::Long;
+    GetOptions(
+        'debug!'     => \$debug,
+        'dry-run|n!' => sub { $NOT = ' [NOT]' },
+        'force'      => \$force,
+        'verbose|v'  => \$verbose,
+
+        'list-plugins' => \$list_plugins,
+        'disable=s'  => \@disable_plugin,
+
+        help         => \&usage,
+        man          => \&man,
+        version      => sub { print "$ME version $VERSION\n"; exit 0 },
+    ) or die "Try `$ME --help' for help\n";
+
+    if ($list_plugins) {
+        my $maxlen = max map { s/^.*:://; length($_); } RPM::Grill->plugins;
+
+        print "Available $ME plugins, in the order in which they run:\n\n";
+        for my $plugin (RPM::Grill->plugins) {
+            (my $shortname = $plugin) =~ s/^.*:://;
+
+            printf "  %-*s %s\n", $maxlen, $shortname, $plugin->blurb();
+        }
+        exit;
+    }
+
+    # Validate the disable opt: each arg must be an existing plugin
+    if (@disable_plugin) {
+        # Handle comma-separated list as input, eg 'virus,patches'
+        my @tmp = split(',',join(',',@disable_plugin));
+
+        @disable_plugin = RPM::Grill->matching_plugins(@tmp);
+        # @disable_plugin now contains exact, canonical plugin names
+    }
+}
+
+# END   boilerplate args checking, usage messages
+###############################################################################
+
+############################## CODE BEGINS HERE ###############################
+
+# The term is "modulino".
+__PACKAGE__->main()                                     unless caller();
+
+# Main code.
+sub main {
+    # Note that we operate directly on @ARGV, not on function parameters.
+    # This is deliberate: it's because Getopt::Long only operates on @ARGV
+    # and there's no clean way to make it use @_.
+    handle_opts();                      # will set package globals
+
+    # Fetch command-line arguments.  Barf if too many.
+    my $base_dir = shift(@ARGV)
+        or die "$ME: missing BASEDIR argument; try $ME --help\n";
+    die "$ME: Too many arguments; try $ME --help\n"                 if @ARGV;
+
+    -d $base_dir
+        or die "$ME: Directory does not exist: $base_dir\n";
+    -d "$base_dir/src"
+        or die "$ME: Base directory $base_dir does not have a 'src' subdir\n";
+
+    # We now have the path to a directory containing unpacked RPMs.
+
+    # FIXME: parse, a la rpmdiff
+    # FIXME: invoke plugins
+
+    # FIXME: do code here
+    my @x = RPM::Grill->plugins();
+#    print DumpTree(\@x);
+
+    my $x = RPM::Grill->gather($base_dir);
+#    print DumpTree($x);
+
+    for my $plugin (@x) {
+        $x->invoke_plugin( $plugin )
+            unless grep { $plugin =~ /::$_$/ } @disable_plugin;
+    }
+
+    # Write xml FIXME: better filename
+    my $xml_outfile = "$base_dir.xml";
+    my $tmpfile = "$xml_outfile.tmp.$$";
+    unlink $tmpfile;
+    open XML_OUT, '>', $tmpfile
+        or die "$ME: Cannot create $tmpfile: $!\n";
+    print XML_OUT $x->as_xml;
+    close XML_OUT
+        or die "$ME: Cannot error writing $tmpfile: $!\n";
+    chmod 0444 => $tmpfile;
+    rename $tmpfile => $xml_outfile
+        or die "$ME: Cannot rename $tmpfile: $!\n";
+}
+
+
+1;
+
+__DATA__
+
+###############################################################################
+#
+# Documentation
+#
+
+=head1	NAME
+
+FIXME - description of what this script does
+
+=head1	SYNOPSIS
+
+FIXME [B<--foo>]  [B<--bar>]  [B<--verbose>] ARG1 [ARG2...] FIXME
+
+FIXME  B<--help>  |  B<--version> | B<--man>
+
+=head1	DESCRIPTION
+
+B<FIXME> grobbles the frobniz on alternate Tuesdays, except where
+prohibited by law.
+
+=head1	OPTIONS
+
+=over 4
+
+=item B<--foo>
+
+FIXME
+
+=item B<--verbose>
+
+Show progress messages.
+
+=item B<--help>
+
+Emit usage hints.
+
+=item B<--version>
+
+Display program version.
+
+=item B<--man>
+
+Display this man page.
+
+=back
+
+
+=head1	DIAGNOSTICS
+
+FIXME
+
+=head1	ENVIRONMENT
+
+FIXME
+
+=head1	FILES
+
+FIXME
+
+=head1	RESTRICTIONS
+
+FIXME
+
+=head1	SEE ALSO
+
+FIXME
+
+e.g. L<Foo::Bar|Foo::Bar>
+
+=head1	AUTHOR
+
+Your Name <ed@edsantiago.com>
+
+Please report bugs or suggestions to <ed@edsantiago.com>
+
+=cut
