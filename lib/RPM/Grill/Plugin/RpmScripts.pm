@@ -108,7 +108,9 @@ for my $cmd (sort keys %Command_Line_Options) {
 
 #use Data::Dumper; print Dumper(\%Getopt_Options);
 
-# At script start time, read the uidgid file from the 'setup' package
+#
+# At script start time, read the uidgid file from the 'setup' package.
+#
 my $UidGid_File;
 my %UidGid;
 {
@@ -119,18 +121,39 @@ my %UidGid;
         or die "$ME: No match for '$uidgid_glob'";
     open my $uidgid_fh, '<', $uidgid_file[0]
         or die "$ME: Cannot read $uidgid_file[0]: $!\n";
+
   LINE:
     while (<$uidgid_fh>) {
         next LINE               if /^\s*\#/;            # skip comments
 
+        # File format is:
+        #
+        #   NAME    UID     GID     HOME            SHELL   PACKAGES
+        #   root    0       0       /root           /bin/bash       setup
+        #   bin     1       1       /bin            /sbin/nologin   setup
+        #   ...
+        #
+        # ...where the first row contains the names of the fields, subsequent
+        # rows contain actual usernames/etc.
         chomp;
         if (my @values = split ' ', $_) {
             if (! @label) {
                 @label = @values;
             }
             else {
-                my $x = { map { $label[$_] => $values[$_] } (0 .. $#label) };
-                $UidGid{$values[0]} = $x;
+                my %x = map { $label[$_] => $values[$_] } (0 .. $#label);
+
+                # Special case: handle something like this:
+                #
+                #   vdsm    36      -       /       /bin/bash   kvm, vdsm
+                #   wine    -       66      -       -           wine
+                #
+                # ...which has a gid but no UID or vice-versa.
+                $x{UID} = undef         if $x{UID} eq '-';
+                $x{GID} = undef         if $x{GID} eq '-';
+
+                # Preserve, keyed on username
+                $UidGid{$values[0]} = \%x;
             }
         }
     }
@@ -159,7 +182,13 @@ sub analyze {
     # FIXME: read a file containing uid mappings
 
     #
-    # find the specfile
+    # Find the specfile. Iterate over its lines, looking for useradd
+    # or groupadd commands. (We try to handle '||' stuff, eg this
+    # from systemtap-1.3.4.el5.spec:
+    #
+    #    getent passwd stap-server >/dev/null ||
+    #      useradd [...] -u 155 -g stap-server stap-server || \
+    #      useradd [...]        -g stap-server stap-server
     #
     my $spec  = $self->specfile;
     my @lines = $spec->lines;
@@ -194,13 +223,9 @@ sub analyze {
                 # Remove trailing whitespace
                 $cmd =~ s/\s+$//;
 
-                # useradd/groupadd only valid in %pre
-                # FIXME: not true!
-#                warn "$ME: specfile:$lineno: script in '$section' section: $s\n"
-#                    if $section ne 'pre';
-
                 dprintf "%d : %s : %s\n", $line->lineno, $line->section, $cmd;
 
+                # Set up context (for gripes), and analyze the line
                 $spec->context({
                     lineno  => $lineno,
                     excerpt => $cmd,
@@ -213,28 +238,30 @@ sub analyze {
 }
 
 
+########################
+#  _check_generic_add  # Setup is the same for useradd/groupadd
+########################
 sub _check_generic_add {
-    my $spec = shift;
-    my $cmd  = shift;
+    my $spec = shift;                   # in: specfile obj
+    my $cmd  = shift;                   # in: command, as one string
 
+    # Split the string into tokens; Text::ParseWords will handle
+    # things like: useradd -c "This is a comment" foo
     my @words = quotewords('\s+', 0, $cmd);
 
-    # useradd or groupadd
+    # First word will be the command itself, useradd or groupadd
     my $add_command = shift @words;
     $add_command =~ s{^.*/}{};          # just the basename
 
+    # Parse the command-line options
     my $getopt_options = $Getopt_Options{$add_command}
         or die "$ME: Internal error: unknown add command '$add_command'";
-
-    # Parse the options
     local (@ARGV) = @words;
-#    use Data::Dumper; print Data::Dumper->Dump([ \@ARGV ], [ '@ARGV' ]);
-
     my %options;
     GetOptions( \%options, @{$getopt_options});
-#    use Data::Dumper; print Data::Dumper->Dump([ \%options ], [ '%opts' ]);
-#    use Data::Dumper; print Data::Dumper->Dump([ \@ARGV ], [ '@ARGV' ]);
 
+    # There must be exactly one argument remaining, and that's the
+    # name of the user or group to be added.
     my $arg = shift(@ARGV)
         or do {
             # FIXME: this deserves a gripe
@@ -243,24 +270,30 @@ sub _check_generic_add {
         };
     warn "$ME: WARNING: command '$cmd' left \@ARGV with '@ARGV'" if @ARGV;
 
+    # Invoke the specific checker for useradd or groupadd
     {
-        no strict 'refs';
+        no strict 'refs';       ## no critic 'ProhibitNoStrict'
         my $validator = "_check_${add_command}";
         $validator->( $spec, \%options, $arg );
     }
 }
 
-
+####################
+#  _check_useradd  #  Checker for 'useradd' command
+####################
 sub _check_useradd {
     my $spec     = shift;
     my $options  = shift;
     my $username = shift;
 
-   # Home Directory : required
+    #
+    # Home Directory : required
+    #
     if (my $homedir = $options->{'home-dir'}) {
-        # FIXME
+        # FIXME: is there anything to check here?
     }
     else {
+        # Home directory missing.
         $spec->gripe({
             code => 'UseraddNoHomedir',
             diag => "Invocation of <tt>useradd</tt> without a home dir",
@@ -279,6 +312,7 @@ sub _check_useradd {
         }
     }
     else {
+        # No login shell
         $spec->gripe({
             code => 'UseraddNoShell',
             diag => "Invocation of <tt>useradd</tt> without a login shell",
@@ -292,7 +326,7 @@ sub _check_useradd {
 
     if (my $uid = $options->{uid}) {
         if ($uid =~ /^\d+$/) {
-            # Numeric. Cross-check against FIXME
+            # Numeric. Cross-check against expectations
             if (defined $expected_uid) {
                 if ($uid != $expected_uid) {
                     $spec->gripe({
@@ -305,6 +339,8 @@ sub _check_useradd {
                 }
             }
             else {
+                # FIXME: this may be serious, because it could collide
+                # with a UID assigned later
                 $spec->gripe({
                     code => 'UseraddUnknownUid',
                     diag => "Invocation of <tt>useradd</tt> with UID <var>$uid</var>, but there's no assigned UID for <var>$username</var> in $UidGid_File",
@@ -312,6 +348,11 @@ sub _check_useradd {
             }
         }
         else {
+            # UID is not a number; eg '-u '%{some_macro}'.
+            # We can't reliably check. Maybe we could run rpm -q --specfile
+            # and somehow extract the macro value ... but that's fragile.
+            # Even worse: what if the macro is conditional? (rhel5/rhel6).
+            # So ask the user to deal with it.
             my $diag = "Invocation of <tt>useradd</tt> with non-numeric UID <var>$uid</var>";
 
             if (defined $expected_uid) {
@@ -328,6 +369,7 @@ sub _check_useradd {
         }
     }
     else {
+        # No UID given at all.
         my $diag = "Invocation of <tt>useradd</tt> without specifying a UID";
         if (defined $expected_uid) {
             $diag .= "; $UidGid_File defines the UID for $username as <b>$expected_uid</b>";
@@ -343,6 +385,9 @@ sub _check_useradd {
     }
 }
 
+#####################
+#  _check_groupadd  #  Checker for 'groupadd' command
+#####################
 sub _check_groupadd {
     my $spec      = shift;
     my $options   = shift;
