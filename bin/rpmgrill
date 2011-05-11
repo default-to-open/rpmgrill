@@ -170,14 +170,12 @@ sub main {
     # FIXME: invoke plugins
 
     # FIXME: do code here
-    my @x = RPM::Grill->plugins();
-#    print DumpTree(\@x);
+    my @all_plugins = RPM::Grill->plugins();
 
-    my $x = RPM::Grill->gather($base_dir);
-#    print DumpTree($x);
+    my $grill = RPM::Grill->new($base_dir);
 
-    for my $plugin (@x) {
-        $x->invoke_plugin( $plugin )
+    for my $plugin (@all_plugins) {
+        $grill->invoke_plugin( $plugin )
             unless grep { $plugin =~ /::$_$/ } @disable_plugin;
     }
 
@@ -187,7 +185,7 @@ sub main {
     unlink $tmpfile;
     open XML_OUT, '>', $tmpfile
         or die "$ME: Cannot create $tmpfile: $!\n";
-    print XML_OUT $x->as_xml;
+    print XML_OUT $grill->as_xml;
     close XML_OUT
         or die "$ME: Cannot error writing $tmpfile: $!\n";
     chmod 0444 => $tmpfile;
