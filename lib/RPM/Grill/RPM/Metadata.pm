@@ -51,11 +51,14 @@ sub new {
     my $proto = shift;
     my $class = ref($proto) || $proto;
 
+    my $self = bless {}, $class;
+
     my $rpminfo_dir;
     my $what = shift;           # in: something from which we get a path
     if (ref($what)) {
         if (ref($what) eq 'RPM::Grill::RPM') {
             $rpminfo_dir = $what->dir;
+            $self->{_parent_rpm} = $what;
         }
         else {
             croak "$ME: ".__PACKAGE__."->new(): ref isn't RPM::Grill::RPM";
@@ -73,7 +76,7 @@ sub new {
 
     my $rpminfo_file = "$rpminfo_dir/RPM.metadata";
 
-    my $self = {};
+    $self->{_rpminfo_path} = $rpminfo_file;
 
     # Read the RPM.metadata file for this arch + subpackage
     open my $rpminfo_fh, '<', $rpminfo_file
@@ -135,7 +138,7 @@ LINE:
     }
     close $rpminfo_fh;
 
-    return bless $self, $class;
+    return $self;
 }
 
 ############
@@ -224,6 +227,62 @@ sub AUTOLOAD {
 }
 
 sub DESTROY { }
+
+###############################################################################
+# BEGIN gripe and context
+
+sub rpm {
+    exists $_[0]->{_parent_rpm}
+        or confess "$ME: Internal error: no parent_rpm for metadata";
+
+    return $_[0]->{_parent_rpm};
+}
+
+###########
+#  gripe  #
+###########
+sub gripe {
+    my $self  = shift;                  # in: RPM::Grill::RPM::SpecFile obj
+    my $gripe = shift;                  # in: hashref with gripe info
+
+    croak "$ME: ->gripe() called without args"        if ! $gripe;
+    croak "$ME: ->gripe() called with too many args"  if @_;
+    croak "$ME: ->gripe() called with a non-hashref"  if ref($gripe) ne 'HASH';
+
+    my %gripe = (
+        arch       => $self->rpm->arch,
+        subpackage => $self->rpm->subpackage,
+        context    => $self->context,
+
+        %$gripe,
+    );
+
+    $self->rpm->grill->gripe( \%gripe );
+}
+
+#############
+#  context  #  helper for gripe
+#############
+sub context {
+    my $self = shift;
+
+    if (@_) {
+        return $self->{gripe_context} = shift;
+    }
+    else {
+        my %context;
+
+        if (my $context = $self->{gripe_context}) {
+            %context = %$context;
+        }
+        $context{path} = '[RPM metadata]',
+
+        return \%context;
+    }
+}
+
+# END   gripe and context
+###############################################################################
 
 1;
 
