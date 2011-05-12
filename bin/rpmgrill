@@ -191,6 +191,19 @@ sub main {
     chmod 0444 => $tmpfile;
     rename $tmpfile => $xml_outfile
         or die "$ME: Cannot rename $tmpfile: $!\n";
+
+    # Write YAML
+    my $yaml_outfile = "$base_dir.yaml";
+    $tmpfile = "$yaml_outfile.tmp.$$";
+    unlink $tmpfile;
+    open YAML_OUT, '>', $tmpfile
+        or die "$ME: Cannot create $tmpfile: $!\n";
+    print YAML_OUT $grill->as_yaml;
+    close YAML_OUT
+        or die "$ME: Cannot error writing $tmpfile: $!\n";
+    chmod 0444 => $tmpfile;
+    rename $tmpfile => $yaml_outfile
+        or die "$ME: Cannot rename $tmpfile: $!\n";
 }
 
 

@@ -19,6 +19,8 @@ use Module::Pluggable
 use List::Util        qw(max);
 use HTML::Entities    qw(encode_entities);
 use XML::Simple;
+use YAML;
+
 use RPM::Grill::dprintf;
 use RPM::Grill::RPM;
 
@@ -391,6 +393,57 @@ sub from_xml {
 
     #    use Data::Dumper; print Dumper($ref);
     return $self;
+}
+
+#############
+#  as_yaml  #  returns results, formatted as YAML
+#############
+sub as_yaml {
+    my $self = shift;
+
+    my @nvr = $self->nvr;
+
+    my $y = {
+        results => {
+            timestamp => $^T,
+            tool      => $ME,
+            version   => "$VERSION",
+        },
+        package => { },
+    };
+    YAML::Bless($y->{results})->keys( [ qw(timestamp tool version) ] );
+
+    #
+    $y->{package}{$_} = shift(@nvr)             for @NVR_Fields;
+    YAML::Bless($y->{package})->keys( \@NVR_Fields );
+
+    # FIXME: gripes
+    for my $plugin ( $self->plugins ) {
+        $plugin =~ m{^.*::Plugin::(.*)$}
+            or croak "$ME: Internal error: unexpected plugin '$plugin'";
+        my $module = $1;
+
+        my $test = {
+            name   => $module,
+            order  => $plugin->order,
+            status => $self->{results}->{$module}->{status} || 'NOTRUN',
+        };
+
+        YAML::Bless($test)->keys([ qw( name order status gripes ) ]);
+
+        if (my $gripes = $self->{gripes}->{$module}) {
+            # We have gripes.  Write them all, indented.
+            for my $g (@$gripes) {
+                push @{ $test->{gripes} }, $g;
+            }
+        }
+
+        push @{ $y->{tests} }, $test;
+    }
+
+    YAML::Bless($y)->keys( [ qw( results package tests ) ] );
+
+    return Dump($y);
 }
 
 # END   data-gathering code
