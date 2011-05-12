@@ -306,18 +306,18 @@ sub _check_host {
     #
     if ( !$found{int} ) {
         if ( !$found{ext} ) {
-            return ( 'NoSuchHost', "Host $host does not resolve." );
+            return ( 'NoSuchHost', "Host <var>$host</var> does not resolve." );
         }
         else {
             return ( 'WeirdHost',
-                "WEIRD. Host $host resolves externally, but not inside redhat.com."
+                "WEIRD. Host <var>$host</var> resolves externally, but not inside redhat.com."
             );
         }
     }
     else {
         if ( !$found{ext} ) {
             return ( 'HostnameLeak',
-                "Host $host appears to be internal-only." );
+                "Host <var>$host</var> appears to be internal-only." );
         }
     }
 

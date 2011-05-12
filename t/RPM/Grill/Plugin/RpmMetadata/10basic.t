@@ -137,7 +137,7 @@ administration tasks, statistics gathering, and log collection.
 -|  { arch       => 'src',
 -|    subpackage => 'vdsm22',
 -|    code       => 'HostnameLeak',
--|    diag       => 'Host git.engineering.redhat.com appears to be internal-only.',
+-|    diag       => 'Host <var>git.engineering.redhat.com</var> appears to be internal-only.',
 -|    context    => { path => '[RPM metadata]',
 -|                    excerpt => ['URL: http://git.engineering.redhat.com/?p=users/bazulay/vdsm.git'] },
 -|  }
@@ -161,7 +161,7 @@ Blah blah
 -|  { arch       => 'src',
 -|    subpackage => 'mypkg',
 -|    code       => 'NoSuchHost',
--|    diag       => 'Host sdfsdf.sdfsdf.sdfsdf.sdfsdf does not resolve.',
+-|    diag       => 'Host <var>sdfsdf.sdfsdf.sdfsdf.sdfsdf</var> does not resolve.',
 -|    context    => { path => '[RPM metadata]',
 -|                    excerpt => ['URL: http://sdfsdf.sdfsdf.sdfsdf.sdfsdf/sdfsdf'] },
 -|  }
