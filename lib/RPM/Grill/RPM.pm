@@ -131,6 +131,7 @@ sub capability {
         or die "$ME: Internal error: Cannot read $cap_file: $!";
     while (<$cap_fh>) {
         chomp;
+        s/\s+$//;                       # Remove trailing whitespace
         push @results, $_;
     }
     close $cap_fh;
