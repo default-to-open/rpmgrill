@@ -6,9 +6,9 @@
         'excerpt' => [
           'useradd -s /sbin/nologin -d /home/pegasus pegasus'
         ],
-        'sub' => 'preamble',
+        'sub' => 'pre',
         'path' => 'zzz-007-uid-missing-exists.spec',
-        'lineno' => '2'
+        'lineno' => '3'
       },
       'diag' => 'Invocation of <tt>useradd</tt> without specifying a UID; /usr/share/doc/setup-2.8.28/uidgid defines the UID for pegasus as <b>66</b>',
       'code' => 'UseraddNoUid'
