@@ -21,7 +21,7 @@ url = 'amqps://guest/guest@qpid.devel.redhat.com'
 conn = qpid.messaging.Connection.establish(url, sasl_mechanisms=mechanism)
 
 session = conn.session()
-queue_name = 'tmp.koji-events-client-brewlint'
+queue_name = 'tmp.koji-events-client-rpmgrill'
 receiver = session.receiver(queue_name + '; { create: receiver, ' +
                             '      node: { type: queue, durable: True, ' +
                             ' x-declare: { exclusive: True, auto-delete: False }, ' +
