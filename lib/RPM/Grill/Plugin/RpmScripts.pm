@@ -204,6 +204,9 @@ sub analyze {
         # Skip comments
         next LINE               if $s =~ /^\s*#/;
 
+        # Skip prereqs, eg PreReq: %{_sbindir}/groupadd, %{_sbindir}/useradd
+        next LINE               if $section eq 'preamble';
+
         # changelog is the end, and contains no executable code
         last LINE               if $section eq 'changelog';
 
