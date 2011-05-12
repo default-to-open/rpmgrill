@@ -34,7 +34,7 @@ sub doc { return <<"END_DOC" };
 FIXME FIXME FIXME
 END_DOC
 
-our $Log = '/tmp/brewlint-libs.log';
+our $Log = '/tmp/rpmgrill-libs.log';
 
 # END   user-configurable section
 ###############################################################################
