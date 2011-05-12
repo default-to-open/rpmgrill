@@ -1,0 +1,16 @@
+#!/bin/sh
+
+nvr="$1"
+
+/bin/rm -rf my-$nvr
+
+# Unpack. If this fails, bail out now
+brew-unpack $nvr my-$nvr || exit 1
+
+# Unpacked. Run the analysis.
+perl -Ilib ./bin/rpmgrill my-$nvr
+
+mv my-$nvr.xml results/$(date +'%Y-%m-%dT%H%M%S')-$nvr.xml
+
+# Clean up unpacked dir.
+/bin/rm -rf my-$nvr
