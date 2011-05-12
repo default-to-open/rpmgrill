@@ -10,7 +10,9 @@ brew-unpack $nvr my-$nvr || exit 1
 # Unpacked. Run the analysis.
 perl -Ilib ./bin/rpmgrill my-$nvr
 
-mv my-$nvr.xml results/$(date +'%Y-%m-%dT%H%M%S')-$nvr.xml
+timestamp=$(date +'%Y-%m-%dT%H%M%S')
+mv my-$nvr.xml  results/$timestamp-$nvr.xml
+mv my-$nvr.yaml results/$timestamp-$nvr.yaml
 
 # Clean up unpacked dir.
 /bin/rm -rf my-$nvr
