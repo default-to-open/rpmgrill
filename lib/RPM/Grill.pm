@@ -417,28 +417,33 @@ sub as_yaml {
     $y->{package}{$_} = shift(@nvr)             for @NVR_Fields;
     YAML::Bless($y->{package})->keys( \@NVR_Fields );
 
-    # FIXME: gripes
+    # Pass 1: determine the string length of the longest module
+    my $maxlen = max map { /.*::(.*)$/; length($1) } $self->plugins;
+
+    # Each plugin, in order
     for my $plugin ( $self->plugins ) {
         $plugin =~ m{^.*::Plugin::(.*)$}
             or croak "$ME: Internal error: unexpected plugin '$plugin'";
         my $module = $1;
 
-        my $test = {
-            name   => $module,
-            order  => $plugin->order,
-            status => $self->{results}->{$module}->{status} || 'NOTRUN',
-        };
+        # Will show up in YAML as '010 SpecFileEncoding : completed'
+        # (including the single quotes).
+        my $key = sprintf("%03d %-*s : %s", $plugin->order, $maxlen, $module,
+                          $self->{results}->{$module}->{status} || 'NOTRUN');
 
-        YAML::Bless($test)->keys([ qw( name order status gripes ) ]);
+        if (my $fail = $self->{results}->{$module}->{fail}) {
+            $key .= sprintf(" : \"%s\"", encode_entities($fail));
+        }
+
 
         if (my $gripes = $self->{gripes}->{$module}) {
             # We have gripes.  Write them all, indented.
-            for my $g (@$gripes) {
-                push @{ $test->{gripes} }, $g;
-            }
+            push @{ $y->{tests} }, { $key => $gripes };
         }
-
-        push @{ $y->{tests} }, $test;
+        else {
+            # No gripes. Just write a named array element, no subhash
+            push @{ $y->{tests} }, $key;
+        }
     }
 
     YAML::Bless($y)->keys( [ qw( results package tests ) ] );
