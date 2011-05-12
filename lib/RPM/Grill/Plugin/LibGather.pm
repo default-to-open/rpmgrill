@@ -113,8 +113,8 @@ sub _gather_libs {
                         VALUES ( ?,?,?,?,? )');
 
         for my $l (@libs) {
-            $sth->execute($package_id, $f->{_subpackage},
-                          $f->{_arch}, $l, $f->path);
+            $sth->execute($package_id, $f->subpackage,
+                          $f->arch, $l, $f->path);
         }
         $dbh->disconnect;
     }
