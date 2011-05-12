@@ -128,7 +128,7 @@ sub _gather_libs {
         open my $fh_log, '>>', $Log
             or die "$ME: Cannot append to $Log: $!\n";
         for my $l (@libs) {
-            print { $fh_log } join("\t", @nvr, $f->{_arch}, $f->{_subpackage},
+            print { $fh_log } join("\t", @nvr, $f->arch, $f->subpackage,
                                    $l, $f->path), "\n";
         }
         close $fh_log
