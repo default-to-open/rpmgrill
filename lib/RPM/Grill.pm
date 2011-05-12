@@ -192,13 +192,12 @@ sub nvr {
 sub major_release {
     my $self = shift;
 
-    use feature qw(switch);             # needed for perl5.10, not for 5.12
-    given ( $self->nvr('release') ) {
-        return "RHEL$1"         when /\.el(\d+)/;
-        return "F$1"            when /\.fc?(\d+)/;
+    # Sigh. RHEL6 perl (5.10?) doesn't seem to have given/when
+    my $release = $self->nvr( 'release' );
+    return "RHEL$1"     if $release =~ /\.el(\d+)/;
+    return "F$1"        if $release =~ /\.fc?(\d+)/;
 
-        default { die "$ME: Cannot determine RHEL/Fedora release from '$_'" }
-    }
+    die "$ME: Cannot determine RHEL/Fedora release from '$release'";
 }
 
 ###################
