@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use DBI;
+
+my $dbh = DBI->connect("DBI:mysql:linkage:localhost", 'linkage') or die;
+
+my $q_pkg = $dbh->prepare('SELECT package_id FROM packages
+                   WHERE package_name=?
+                     AND package_version=?
+                     AND package_release=?');
+
+my $i_pkg = $dbh->prepare('INSERT INTO packages
+                     (package_name, package_version, package_release)
+                VALUES (?,?,?)');
+
+my $sth = $dbh->prepare('INSERT INTO linkage_xref
+         (package_id, subpackage, arch, libname, filepath)
+  VALUES ( ?,?,?,?,? )');
+
+open IN, '<', '/tmp/brewlint-libs.log' or die;
+
+my %package_id;
+
+while (<IN>) {
+    chomp;
+    my @x = split "\t", $_;
+    @x == 7 or die "line $.: $_\n";
+
+    my ($n, $v, $r, $arch, $subpackage, $libname, $filepath) = @x;
+
+    if (! exists $package_id{"$n-$v-$r"}) {
+        $q_pkg->execute($n,$v,$r);
+        my $found;
+        while (my $x = $q_pkg->fetchrow_arrayref) {
+            if (defined $found) {
+                warn "Duplicate entry for $n-$v-$r: $found, $x->[0]\n";
+            }
+            $found = $x->[0];
+        }
+
+        if (! defined $found) {
+            my $x = $i_pkg->execute($n,$v,$r);
+            $found = $dbh->{mysql_insertid};
+        }
+
+        $package_id{"$n-$v-$r"} = $found;
+    }
+
+    $sth->execute($package_id{"$n-$v-$r"}, $subpackage, $arch,
+              $libname, $filepath)   or die;
+}
+close IN;

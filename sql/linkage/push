@@ -1,0 +1,4 @@
+#!/bin/sh
+
+rsync -av 001*sql sql-init dhcp47-41.lab.bos.redhat.com:src/brewlint/
+rsync -av ../../lib/BrewLint/Plugin/LibGather.pm dhcp47-41.lab.bos.redhat.com:src/brewlint/lib/BrewLint/Plugin/
