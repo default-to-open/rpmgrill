@@ -8,7 +8,7 @@ package RPM::Grill;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv(0.0.1);
+use version; our $VERSION = qv( '0.0.1' );
 
 use Carp;
 use Module::Pluggable
@@ -264,7 +264,7 @@ sub as_xml {
     # FIXME! include the name of the package we're testing!
     # FIXME! include arches
     $s .= sprintf( "<results timestamp=\"%d\" tool=\"%s\" version=\"%s\">\n",
-        $^T, $ME, "$VERSION" );
+        $^T, $ME, _version() );
 
     # Package N-V-R
     my @nvr = $self->nvr;
@@ -331,6 +331,28 @@ sub as_xml {
 
     return $s;
 }
+
+##############
+#  _version  #  Friendly version string
+##############
+sub _version {
+    # First choice: if we're an "official" install, get that version
+    # FIXME: how do we determine that?
+    if (0) {
+        return "FIXME";
+    }
+
+    my $git_desc = qx{git describe --tags 2>&1};
+    if ($? == 0) {
+        if ($git_desc =~ /^(\S+)$/) {
+            return $1;
+        }
+    }
+
+    warn "$ME: Warning: cannot determine package version\n";
+    return "$VERSION";
+}
+
 
 ##############
 #  from_xml  #  Parses xml string into a report struct
@@ -407,7 +429,7 @@ sub as_yaml {
         results => {
             timestamp => $^T,
             tool      => $ME,
-            version   => "$VERSION",
+            version   => _version(),
         },
         package => { },
     };
