@@ -140,7 +140,7 @@ try:
             #
             # FIXME: I don't see a way to hear about scratch builds.
             req = content['info']['request']
-            print timestamp()," >> ",req[1]['nvr']," : state= ",req[1]['state'],
+            print timestamp(),req[1]['nvr'],": state=",req[1]['state'],
             sys.stdout.flush()
             if req[1]['state'] == 1:
                 print "...",
