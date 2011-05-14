@@ -31,7 +31,7 @@ use RPM::Grill::RPM;
 # FIXME: make '*' mean 'required'?
 # FIXME: add severity
 # FIXME: add 'package'?  Or should that be automatic?
-our @Gripe_Fields         = qw(code arch subpackage context diag excerpt);
+our @Gripe_Fields         = qw(code arch subpackage context diag);
 our @Gripe_Context_Fields = qw(path lineno sub excerpt);
 
 # Convert that to a usable hash form
@@ -732,13 +732,6 @@ sub gripe {
     # Normalize excerpt string into an array.  This is partly for consistency,
     # but mostly so our output XML will be <excerpt>...</excerpt> instead of
     # <gripe excerpt="...">.  The latter does not preserve whitespace.
-    if ( defined( my $e = $actual_gripe{excerpt} ) ) {
-        if ( !ref($e) ) {
-            $actual_gripe{excerpt} = [$e];
-        }
-    }
-
-    # 'excerpt' can also be found inside a context element
     if ( exists $actual_gripe{context} ) {
         if ( defined( my $e = $actual_gripe{context}{excerpt} ) ) {
             if ( !ref($e) ) {

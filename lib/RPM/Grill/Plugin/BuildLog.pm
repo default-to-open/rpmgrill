@@ -185,6 +185,7 @@ ARCH:
                     my %context = (
                         path   => "$arch/build.log",
                         lineno => $lineno,
+                        excerpt => \@context,
                     );
                     $context{sub} = "(in $current_stage)" if $current_stage;
 
@@ -194,7 +195,6 @@ ARCH:
                             arch    => $arch,
                             diag    => $tuple->{diag} || 'Possible build error',
                             context => \%context,
-                            excerpt => \@context,
                         }
                     );
                 }

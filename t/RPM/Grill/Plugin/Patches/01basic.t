@@ -94,13 +94,11 @@ Patch1: foo2.patch
 -| { arch => 'src',
 -|   code       => 'BadPatchFuzz',
 -|   context => {
+-|      excerpt => [ '%define _default_patch_fuzz 2' ],
 -|      lineno => '2',
 -|      path => '<string>',
 -|    },
 -|    diag => 'Do not override _default_patch_fuzz. Please redo your patches instead.',
--|    excerpt => [
--|      '%define _default_patch_fuzz 2'
--|    ]
 -| }
 
 -------------------------------------------------------------------------------
@@ -121,13 +119,11 @@ Patch1: foo2.patch
 -| { arch => 'src',
 -|   code       => 'BadPatchFuzz',
 -|   context => {
+-|      excerpt => [ '%define _default_patch_fuzz 9' ],
 -|      lineno => '2',
 -|      path => '<string>',
 -|    },
 -|    diag => 'Do not override _default_patch_fuzz; *ESPECIALLY* not with anything >2. Please redo your patches instead.',
--|    excerpt => [
--|      '%define _default_patch_fuzz 9'
--|    ]
 -| }
 
 -------------------------------------------------------------------------------
@@ -147,11 +143,9 @@ Patch0: this-is-a-dup.patch
 -| { arch => 'src',
 -|   code       => 'DuplicatePatch',
 -|   context => {
+-|      excerpt => [ "Patch0: foo1.patch\nPatch0: this-is-a-dup.patch" ],
 -|      lineno => '7',
 -|      path => '<string>',
 -|    },
 -|    diag => 'Duplicate definition of Patch0',
--|    excerpt => [
--|      "Patch0: foo1.patch\nPatch0: this-is-a-dup.patch",
--|    ]
 -| }

@@ -79,9 +79,12 @@ sub analyze {
             $self->gripe(
                 {   code    => 'NonUtf8',
                     arch    => 'src',
-                    context => { path => $path, lineno => $lineno, },
                     diag    => 'non-UTF8 content',
-                    excerpt => $s2,
+                    context => {
+                        excerpt => $s2,
+                        path    => $path,
+                        lineno  => $lineno,
+                    },
 
                     # FIXME: try hint => "something appropriate to this char"?
                 }

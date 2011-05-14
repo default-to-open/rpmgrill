@@ -65,11 +65,11 @@ sub analyze {
                         {   code    => 'DuplicatePatch',
                             arch    => 'src',
                             context => {
-                                path   => basename( $self->specfile->path ),
-                                lineno => $line->lineno,
+                                excerpt => "$Patch_Defined{$n}\n$s",
+                                path    => basename( $self->specfile->path ),
+                                lineno  => $line->lineno,
                             },
                             diag    => "Duplicate definition of Patch$n",
-                            excerpt => "$Patch_Defined{$n}\n$s",
 
                         # FIXME: explain that this is OK if ifdef'ed
                         # FIXME: if there's a commented-out patch, offer hint?
@@ -106,11 +106,11 @@ sub analyze {
                     {   code    => 'BadPatchFuzz',
                         arch    => 'src',
                         context => {
-                            path   => basename( $self->specfile->path ),
-                            lineno => $line->lineno,
+                            excerpt => $s,
+                            path    => basename( $self->specfile->path ),
+                            lineno  => $line->lineno,
                         },
                         diag    => $msg,
-                        excerpt => $s,
                     }
                 );
             }

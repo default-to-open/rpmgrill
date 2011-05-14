@@ -2,5 +2,5 @@
   'SpecFileSanity' => [ {
   code => 'RpmParseDependency',
   diag => "Possible macro expansion failure running 'rpm -q --specfile qpid-cpp-mrg-0.10-5.el5.spec'",
-  excerpt => [ "sh: /usr/bin/ruby: No such file or directory (6 instances)" ],
+  context => { excerpt => [ "sh: /usr/bin/ruby: No such file or directory (6 instances)" ], path => "qpid-cpp-mrg-0.10-5.el5.spec" },
 }]}

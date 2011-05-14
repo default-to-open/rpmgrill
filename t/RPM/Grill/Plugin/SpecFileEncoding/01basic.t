@@ -65,7 +65,7 @@ ok  exists($obj_bad->{gripes}),  "Error detected in the ISO-8859-1 string";
 eq_or_diff $obj_bad->{gripes}, +{ SpecFileEncoding => [ {
     arch    => 'src',
     code    => 'NonUtf8',
-    context => { path    => '<string>', lineno  => '5' },
     diag    => 'non-UTF8 content',
-    excerpt => ["* Thu Jul  1 2010 This is a test: Mu<u>&ntilde;</u><u>&oacute;</u>z &lt;santiago\@redhat.com&gt; 1.0-1"],
+    context => { path    => '<string>', lineno  => '5',
+      excerpt => ["* Thu Jul  1 2010 This is a test: Mu<u>&ntilde;</u><u>&oacute;</u>z &lt;santiago\@redhat.com&gt; 1.0-1"], },
 } ] }, "Gripe message";

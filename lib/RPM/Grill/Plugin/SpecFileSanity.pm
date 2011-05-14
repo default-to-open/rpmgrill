@@ -113,7 +113,10 @@ sub analyze {
         $self->gripe(
             { code => 'RpmParseDependency',
               diag => "Possible macro expansion failure running '@rpm $specfile_basename'",
-              excerpt => $msg,
+              context => {
+                  excerpt => $msg,
+                  path    => $specfile_basename,
+              },
               # FIXME: hint => "maybe (pkg) is not installed"?
           }
         );
@@ -127,7 +130,10 @@ sub analyze {
     $self->gripe(
         {   code    => "RpmParse$what",
             diag    => "$what running '@rpm $specfile_basename'",
-            excerpt => $stderr,
+            context => {
+                excerpt => $stderr,
+                path    => $specfile_basename,
+            },
         }
     );
 }

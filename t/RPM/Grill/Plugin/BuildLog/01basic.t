@@ -95,11 +95,11 @@ update.c:154: warning: dereferencing type-punned pointer will break strict-alias
 -|  { arch    => 'noarch',
 -|    code    => 'TypePun',
 -|    diag    => 'gcc warnings',
--|    context => { lineno => 3, path => "noarch/build.log" },
+-|    context => { lineno => 3, path => "noarch/build.log",
 -|    excerpt => [
 -|         'update.c: In function `update\':',
 -|         'update.c:154: warning: dereferencing type-punned pointer will break strict-aliasing rules',
--|        ],
+-|        ], },
 -|  } ] }
 
 
@@ -126,7 +126,7 @@ gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -
 -|  { arch    => 'noarch',
 -|    code    => 'BrokenMemset',
 -|    diag    => 'Possible build error',
--|    context => { lineno => 13, path => "noarch/build.log" },
+-|    context => { lineno => 13, path => "noarch/build.log",
 -|    excerpt => [
 -|         '                 from ../../../include/k5-platform.h:46,',
 -|         '                 from k5sealv3.c:32:',
@@ -135,7 +135,7 @@ gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -
 -|         '/usr/include/bits/string3.h:83: warning: call to \'__warn_memset_zero_len\' declared with attribute warning: memset used with constant zero length parameter; this could be due to transposed parameters',
 -|         'gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -I. -I. -I./.. -I../generic -I./../generic -I../mechglue -I./../mechglue -DKRB5_DEPRECATED=1 -I/usr/include/et -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i686 -mtune=atom -fasynchronous-unwind-tables -I/usr/include/et -fPIC -fno-strict-aliasing -fstack-protector-all -Wall -Wcast-align -Wshadow -Wmissing-prototypes -Wno-format-zero-length -Woverflow -Wstrict-overflow -Wmissing-format-attribute -Wmissing-prototypes -Wreturn-type -Wmissing-braces -Wparentheses -Wswitch -Wunused-function -Wunused-label -Wunused-variable -Wunused-value -Wunknown-pragmas -Wsign-compare -Werror=declaration-after-statement -Werror=variadic-macros -pthread -c k5unseal.c -o k5unseal.so.o && mv -f k5unseal.so.o k5unseal.so',
 -|         'gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -I. -I. -I./.. -I../generic -I./../generic -I../mechglue -I./../mechglue -DKRB5_DEPRECATED=1 -I/usr/include/et -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i686 -mtune=atom -fasynchronous-unwind-tables -I/usr/include/et -fPIC -fno-strict-aliasing -fstack-protector-all -Wall -Wcast-align -Wshadow -Wmissing-prototypes -Wno-format-zero-length -Woverflow -Wstrict-overflow -Wmissing-format-attribute -Wmissing-prototypes -Wreturn-type -Wmissing-braces -Wparentheses -Wswitch -Wunused-function -Wunused-label -Wunused-variable -Wunused-value -Wunknown-pragmas -Wsign-compare -Werror=declaration-after-statement -Werror=variadic-macros -pthread -c k5unsealiov.c -o k5unsealiov.so.o && mv -f k5unsealiov.so.o k5unsealiov.so',
--|        ],
+-|        ], }
 -|  } ] }
 
 
@@ -169,10 +169,10 @@ ranlib libucvko_s.a
 -|  { arch    => 'noarch',
 -|    code    => 'IntegerOverflow',
 -|    diag    => 'Possible integer overflow (this may be a security problem)',
--|    context => { lineno => 18, path => "noarch/build.log" },
+-|    context => { lineno => 18, path => "noarch/build.log",
 -|    excerpt => [
 -|         'nsUnicodeToJamoTTF.cpp:876: warning: assuming signed overflow does not occur when assuming that (X + c) < X is always false'
--|        ],
+-|        ], },
 -|  } ] }
 
 -------------------------------------------------------------------------------
@@ -201,12 +201,12 @@ Executing(%build): /bin/sh -e /var/tmp/rpm-tmp.19153
 -|  { arch    => 'noarch',
 -|    code    => 'PatchApply',
 -|    diag    => 'Possible failure to apply a patch',
--|    context => { lineno => 13, path => "noarch/build.log" },
+-|    context => { lineno => 13, path => "noarch/build.log",
 -|    excerpt => [
 -|         '+ echo \'Patch #2 (cpufrequtils-aperf-makefile.patch):\'',
 -|         '+ patch -p1 -s',
 -|         'missing header for unified diff at line 3 of patch',
--|        ],
+-|        ], },
 -|  } ] }
 
 
@@ -230,10 +230,10 @@ if gcc -DHAVE_CONFIG_H -I. -I. -I./config     -I/usr/include/net-snmp -I/usr/inc
 -|  { arch    => 'noarch',
 -|    code    => 'BufferOverflow',
 -|    diag    => 'Possible build error',
--|    context => { lineno => 9, path => "noarch/build.log" },
+-|    context => { lineno => 9, path => "noarch/build.log",
 -|    excerpt => [
 -|         'poller.c:485: warning: call to __builtin___snprintf_chk will always overflow destination buffer'
--|        ],
+-|        ], },
 -|  } ] }
 
 
@@ -277,35 +277,35 @@ make: *** [check] Error 2
 -|  { arch    => 'noarch',
 -|    code    => 'MakeError',
 -|    diag    => 'Possible error from \'make\'',
--|    context => { lineno => 8, path => "noarch/build.log" },
+-|    context => { lineno => 8, path => "noarch/build.log",
 -|    excerpt => [
 -|         'make[2]: Entering directory `/builddir/build/BUILD/glibc-2.3.6/linuxthreads\'',
 -|         'Starting process a',
 -|         'Starting process b',
 -|         'make[2]: *** [/builddir/build/BUILD/glibc-2.3.6/build-i686-linux/linuxthreads/tst-clock1.out] Error 1',
--|        ],
+-|        ], },
 -|  },
 -|  { arch    => 'noarch',
 -|    code    => 'MakeError',
 -|    diag    => 'Possible error from \'make\'',
--|    context => { lineno => 13, path => "noarch/build.log" },
+-|    context => { lineno => 13, path => "noarch/build.log",
 -|    excerpt => [
 -|         'Starting process a',
 -|         'make[2]: Target `tests\' not remade because of errors.',
 -|         'make[2]: Leaving directory `/builddir/build/BUILD/glibc-2.3.6/linuxthreads\'',
 -|         'make[1]: *** [linuxthreads/tests] Error 2',
--|        ],
+-|        ], },
 -|  },
 -|  { arch    => 'noarch',
 -|    code    => 'MakeError',
 -|    diag    => 'Possible error from \'make\'',
--|    context => { lineno => 29, path => "noarch/build.log" },
+-|    context => { lineno => 29, path => "noarch/build.log",
 -|    excerpt => [
 -|         'make[1]: Target `check\' not remade because of errors.',
 -|         'make[1]: Leaving directory `/builddir/build/BUILD/glibc-2.3.6\'',
 -|         '+ sleep 10s',
 -|         'make: *** [check] Error 2',
--|        ],
+-|        ], },
 -|  } ] }
 
 -------------------------------------------------------------------------------
@@ -337,22 +337,22 @@ Executing(%build): /bin/sh -e /var/tmp/rpm-tmp.33278
 -|  { arch    => 'noarch',
 -|    code    => 'MiscBuildError',
 -|    diag    => 'Possible error in build',
--|    context => { lineno => 18, path => "noarch/build.log", sub => '(in %prep)' },
+-|    context => { lineno => 18, path => "noarch/build.log", sub => '(in %prep)',
 -|    excerpt => [
 -|         '+ aclocal',
 -|         'configure.ac:4: error: Autoconf version 2.61 or higher is required',
 -|         'configure.ac:4: the top level',
 -|         'autom4te: /usr/bin/m4 failed with exit status: 63',
--|        ],
+-|        ], },
 -|  },
 -|  { arch    => 'noarch',
 -|    code    => 'MiscBuildError',
 -|    diag    => 'Possible error in build',
--|    context => { lineno => 19, path => "noarch/build.log", sub => '(in %prep)' },
+-|    context => { lineno => 19, path => "noarch/build.log", sub => '(in %prep)',
 -|    excerpt => [
 -|         'configure.ac:4: error: Autoconf version 2.61 or higher is required',
 -|         'configure.ac:4: the top level',
 -|         'autom4te: /usr/bin/m4 failed with exit status: 63',
 -|         'aclocal: autom4te failed with exit status: 63',
--|        ],
+-|        ], },
 -|  } ] }

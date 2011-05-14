@@ -118,8 +118,7 @@ INFECTED_FILE:
             warn "$ME: Internal error: bad file path '$path'";
             $self->gripe(
                 {   code    => 'FIXME-internal',
-                    diag    => 'FIXME',
-                    excerpt => "Internal error, FIXME",
+                    diag    => 'Internal error, FIXME',
                 }
             );
             next INFECTED_FILE;
