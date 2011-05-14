@@ -52,7 +52,7 @@ sub analyze {
     for my $line ( $self->specfile->lines ) {
         my $s = $line->content;
 
-        if ( $line->section eq 'preamble' ) {
+        if ( $line->section eq '%preamble' ) {
 
             # Track all 'patch<n>: foo.patch' lines.
             if ( $s =~ /^\s*patch(\d*):\s+\S+\s*$/i ) {
@@ -83,7 +83,7 @@ sub analyze {
         }
 
         # In %prep section: check for applied patches
-        if ( $line->section eq 'prep' ) {
+        if ( $line->section eq '%prep' ) {
 
             # FIXME: also check for commented-out %patch lines
         }

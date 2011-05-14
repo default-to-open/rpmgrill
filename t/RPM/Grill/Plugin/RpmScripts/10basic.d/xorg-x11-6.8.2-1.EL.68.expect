@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -c "X Font Server" -r -s $LOGINSHELL -u 43 -d /etc/X11/fs xfs'
         ],
-        'sub' => 'postun Mesa-libGLU',
+        'sub' => '%postun Mesa-libGLU',
         'path' => 'xorg-x11-6.8.2-1.EL.68.spec',
         'lineno' => '2158'
       },
@@ -19,7 +19,7 @@
         'excerpt' => [
           'useradd -c "X Font Server" -r -s $LOGINSHELL -u 43 -d /etc/X11/fs xfs'
         ],
-        'sub' => 'pre xfs',
+        'sub' => '%pre xfs',
         'path' => 'xorg-x11-6.8.2-1.EL.68.spec',
         'lineno' => '2167'
       },

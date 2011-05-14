@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -s /sbin/nologin -d /home/pegasus -u %{rpm_macro} pegasus'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'zzz-005-uid-nonnumeric-exists.spec',
         'lineno' => '3'
       },

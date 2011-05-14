@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -s /sbin/nologin -d /home/pegasus pegasus'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'zzz-007-uid-missing-exists.spec',
         'lineno' => '3'
       },

@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Differences;
 
 use_ok 'RPM::Grill::RPM::SpecFile';
 
@@ -16,8 +17,8 @@ is ref($spec), 'RPM::Grill::RPM::SpecFile', 'ref($spec)';
 # List of sections in the spec file
 my @sections = $spec->sections;
 is scalar(@sections), 5, 'num. of sections in specfile';
-is_deeply \@sections,
-    [ qw(preamble description prep build changelog) ],
+eq_or_diff \@sections,
+    [ qw(%preamble %description %prep %build %changelog) ],
     'sections in specfile';
 
 # Compare what the module read, to what we read

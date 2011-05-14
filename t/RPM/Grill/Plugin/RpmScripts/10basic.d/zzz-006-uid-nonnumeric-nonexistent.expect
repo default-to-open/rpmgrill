@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -s /sbin/nologin -d /home/sdfsdf -u %{rpm_macro} sdfsdf'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'zzz-006-uid-nonnumeric-nonexistent.spec',
         'lineno' => '2'
       },

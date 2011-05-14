@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -r        -g sesame -d %{_localstatedir}/lib/sesame -s /sbin/nologin        -c "Owner of the sesame daemon" sesame'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'sesame-0.10-1.el6.spec',
         'lineno' => '55'
       },

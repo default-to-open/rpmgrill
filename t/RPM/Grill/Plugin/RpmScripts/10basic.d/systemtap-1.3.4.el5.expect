@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -c "Systemtap Compile Server" -g stap-server -d %{_localstatedir}/lib/stap-server -m -r -s /sbin/nologin stap-server'
         ],
-        'sub' => 'pre server',
+        'sub' => '%pre server',
         'path' => 'systemtap-1.3.4.el5.spec',
         'lineno' => '334'
       },

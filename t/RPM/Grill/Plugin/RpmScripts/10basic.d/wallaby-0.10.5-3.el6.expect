@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -r -g condor -d %{_localstatedir}/lib/wallaby -s /sbin/nologin     -c "Owner of Wallaby service" wallaby'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'wallaby-0.10.5-3.el6.spec',
         'lineno' => '117'
       },

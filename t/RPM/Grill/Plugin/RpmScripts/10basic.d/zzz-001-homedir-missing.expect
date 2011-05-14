@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -u 999 -s /sbin/nologin sdfsdf'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'zzz-001-homedir-missing.spec',
         'lineno' => '2'
       },
@@ -19,7 +19,7 @@
         'excerpt' => [
           'useradd -u 999 -s /sbin/nologin sdfsdf'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'zzz-001-homedir-missing.spec',
         'lineno' => '2'
       },

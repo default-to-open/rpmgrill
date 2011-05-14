@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -u 999 -d /home/sdfsdf sdfsdf'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'zzz-002-shell-missing.spec',
         'lineno' => '2'
       },
@@ -19,7 +19,7 @@
         'excerpt' => [
           'useradd -u 999 -d /home/sdfsdf sdfsdf'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'zzz-002-shell-missing.spec',
         'lineno' => '2'
       },

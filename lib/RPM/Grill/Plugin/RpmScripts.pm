@@ -205,10 +205,10 @@ sub analyze {
         next LINE               if $s =~ /^\s*#/;
 
         # Skip prereqs, eg PreReq: %{_sbindir}/groupadd, %{_sbindir}/useradd
-        next LINE               if $section eq 'preamble';
+        next LINE               if $section eq '%preamble';
 
         # changelog is the end, and contains no executable code
-        last LINE               if $section eq 'changelog';
+        last LINE               if $section eq '%changelog';
 
         # Concatenate continuation lines into one long line
         $s .= $lines[++$i]->content       while $s =~ s{\s*\\$}{ };

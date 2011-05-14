@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd --system -g abrt -u %{abrt_gid_uid} -d /etc/abrt -s /sbin/nologin abrt'
         ],
-        'sub' => 'pre',
+        'sub' => '%pre',
         'path' => 'abrt-1.1.16-3.el6.spec',
         'lineno' => '297'
       },

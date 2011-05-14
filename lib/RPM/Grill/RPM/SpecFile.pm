@@ -53,7 +53,7 @@ sub new {
     my $self = {
         path     => $path,
         lines    => [],
-        sections => ['preamble'],
+        sections => ['%preamble'],
     };
 
     my $fh;
@@ -77,7 +77,7 @@ sub new {
         # FIXME: check section
 
         if ( $line =~ m{^%($RPM_Sections)(\s+(\S+))?\s*$}i ) {
-            $section = lc $1;
+            $section = '%' . lc($1);
             if ($3) {
                 $section .= " " . $3;
             }
@@ -119,8 +119,8 @@ sub lines {
     if (@_) {
         my $filter = shift;
 
-        # We expect a section like 'prep', but allow our caller to say '%prep'
-        $filter =~ s/^%//;
+        # We expect a section like '%prep', but allow our caller to say 'prep'
+        $filter = '%' . $filter         unless $filter =~ /^%/;
 
         # FIXME: what if it's not a valid/known section?
         # FIXME: what if it's valid section, plus subpkg (%description foo) ?
