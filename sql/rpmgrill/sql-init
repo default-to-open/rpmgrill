@@ -1,0 +1,285 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use DBI;
+use File::Slurp         qw(read_dir);
+use XML::Simple;
+
+my $dbh = DBI->connect("DBI:mysql:rpmgrill:localhost", 'rpmgrill') or die;
+
+sub main {
+    for my $pkg qw(brewlint rpmgrill) {
+        my $dir = "/home/esm/src/$pkg/results";
+        my @results = sort grep { /^\d+.*\.xml$/ } read_dir($dir);
+
+        for my $xml_file (@results) {
+            my $xml = XMLin( "$dir/$xml_file", ForceArray => 1, KeyAttr => [] );
+
+            do_run($xml);
+        }
+    }
+}
+
+
+############
+#  do_run  #
+############
+my $sth_find_run = $dbh->prepare(<<'END_SQL');
+SELECT run_id FROM runs
+             WHERE package_name=?
+               AND package_version=?
+               AND package_release=?
+               AND analyzed_when=?
+END_SQL
+
+my $sth_insert_run = $dbh->prepare(<<'END_SQL');
+INSERT INTO runs
+     (package_name, package_version, package_release, analyzed_when, variant_id, analyzed_by, brew_id, status)
+ VALUES (?,?,?,FROM_UNIXTIME(?),?,?,?,?)
+END_SQL
+
+my $sth_insert_test_run = $dbh->prepare(<<'END_SQL');
+INSERT INTO tests_run
+     (run_id, plugin_id, test_order, test_status, fail_message)
+  VALUES (?,?,?,?,?)
+END_SQL
+
+my $sth_insert_results = $dbh->prepare(<<'END_SQL');
+INSERT INTO results
+    (tests_run_id, code_id, diagnostic, excerpt, context_path, context_lineno, context_subcontext)
+VALUES (?,?,?,?,?,?,?)
+END_SQL
+
+sub do_run {
+    my $xml = shift;
+
+#        use Data::Dumper; print Dumper($xml); exit;
+    my @nvr = @{$xml->{package}[0]}{'name','version','release'};
+
+    $sth_find_run->execute( @nvr, $xml->{timestamp} );
+    if (my $found = $sth_find_run->fetchrow_hashref) {
+#        use Data::Dumper; print Dumper($found); exit;
+        return;
+    }
+
+    # Not found. Insert.
+    my $variant = ($nvr[2] =~ /\bel(\d)/ ? "RHEL$1" : "Unknown");
+    $sth_insert_run->execute( @nvr, $xml->{timestamp},
+                              variant_id($variant),
+                              tool_id($xml->{tool},$xml->{version}),
+                              0, # FIXME: brew ID unavailable
+                              'completed');
+
+    my $run_id = $dbh->{mysql_insertid};
+
+    # Now start inserting tests
+    for my $t (@{ $xml->{test} }) {
+        $sth_insert_test_run->execute(
+            $run_id,
+            plugin_id( $t->{name} ),
+            $t->{order},
+            $t->{status},
+            $t->{fail},
+        );
+        my $tests_run_id = $dbh->{mysql_insertid};
+
+        if (my $gripes = $t->{gripe}) {
+            for my $g (@$gripes) {
+                my $excerpt = $g->{excerpt};
+                if (defined($excerpt)) {
+                    if (! ref($excerpt)) {
+                        # FIXME: wtf? I think this is for ancient results only
+                        $excerpt = [ $excerpt ];
+                    }
+                    $excerpt = join("\n", @$excerpt);
+                }
+
+                my $context_path;
+                my $context_lineno;
+                my $context_subcontext;
+                if (my $c = $g->{context}) {
+                    $context_path = $c->[0]{path};
+                    $context_lineno = $c->[0]{lineno};
+                    $context_subcontext = $c->[0]{sub};
+
+                    if (defined $c->[0]{excerpt}) {
+                        # FIXME: include nvr
+                        warn "WARNING: context-excerpt confusing: @nvr : $t->{name} / $g->{code}\n";
+                        if (defined $excerpt) {
+                            warn "  *** Doubly so when dup!\n";
+                        }
+                        $excerpt = $c->[0]{excerpt};
+                    }
+                }
+
+                # FIXME: $g->{excerpt}, $g->{context}
+
+                $sth_insert_results->execute(
+                    $tests_run_id,
+                    code_id($g->{code}),
+                    $g->{diag},
+                    $excerpt,
+                    $context_path,
+                    $context_lineno,
+                    $context_subcontext,
+                );
+            }
+        }
+    }
+}
+
+
+
+
+################
+#  variant_id  #
+################
+my $sth_find_variant = $dbh->prepare(<<'END_SQL') or die;
+SELECT variant_id FROM variants  WHERE variant_name=?
+END_SQL
+my $sth_insert_variant = $dbh->prepare(<<'END_SQL') or die;
+INSERT INTO variants (variant_name) VALUES (?)
+END_SQL
+sub variant_id {
+    my $variant_name = shift;
+    $sth_find_variant->execute($variant_name);
+    if (my $found = $sth_find_variant->fetchrow_arrayref) {
+        return $found->[0];
+    }
+
+    $sth_insert_variant->execute($variant_name);
+    return $dbh->{mysql_insertid};
+}
+
+#############
+#  tool_id  #
+#############
+my $sth_find_tool = $dbh->prepare(<<'END_SQL') or die;
+SELECT tool_id FROM tools  WHERE tool_name=? AND tool_version=?
+END_SQL
+my $sth_insert_tool = $dbh->prepare(<<'END_SQL') or die;
+INSERT INTO tools (tool_name,tool_version) VALUES (?,?)
+END_SQL
+sub tool_id {
+    my $tool_name    = shift;
+    my $tool_version = shift;
+
+    $sth_find_tool->execute($tool_name, $tool_version);
+    if (my $found = $sth_find_tool->fetchrow_arrayref) {
+        return $found->[0];
+    }
+
+    $sth_insert_tool->execute($tool_name, $tool_version);
+    return $dbh->{mysql_insertid};
+}
+
+################
+#  plugin_id  #
+################
+my $sth_find_plugin = $dbh->prepare(<<'END_SQL') or die;
+SELECT plugin_id FROM plugins  WHERE plugin_name=?
+END_SQL
+my $sth_insert_plugin = $dbh->prepare(<<'END_SQL') or die;
+INSERT INTO plugins (plugin_name) VALUES (?)
+END_SQL
+sub plugin_id {
+    my $plugin_name = shift;
+    $sth_find_plugin->execute($plugin_name);
+    if (my $found = $sth_find_plugin->fetchrow_arrayref) {
+        return $found->[0];
+    }
+
+    $sth_insert_plugin->execute($plugin_name);
+    return $dbh->{mysql_insertid};
+}
+
+################
+#  code_id  #
+################
+my $sth_find_code = $dbh->prepare(<<'END_SQL') or die;
+SELECT code_id FROM codes  WHERE code_name=?
+END_SQL
+my $sth_insert_code = $dbh->prepare(<<'END_SQL') or die;
+INSERT INTO codes (code_name) VALUES (?)
+END_SQL
+sub code_id {
+    my $code_name = shift;
+    $sth_find_code->execute($code_name);
+    if (my $found = $sth_find_code->fetchrow_arrayref) {
+        return $found->[0];
+    }
+
+    $sth_insert_code->execute($code_name);
+    return $dbh->{mysql_insertid};
+}
+
+
+
+
+main();
+
+__END__
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+my $q_pkg = $dbh->prepare('SELECT package_id FROM packages
+                   WHERE package_name=?
+                     AND package_version=?
+                     AND package_release=?');
+
+my $i_pkg = $dbh->prepare('INSERT INTO packages
+                     (package_name, package_version, package_release)
+                VALUES (?,?,?)');
+
+my $sth = $dbh->prepare('INSERT INTO linkage_xref
+         (package_id, subpackage, arch, libname, filepath)
+  VALUES ( ?,?,?,?,? )');
+
+open IN, '<', '/tmp/brewlint-libs.log' or die;
+
+my %package_id;
+
+while (<IN>) {
+    chomp;
+    my @x = split "\t", $_;
+    @x == 7 or die "line $.: $_\n";
+
+    my ($n, $v, $r, $arch, $subpackage, $libname, $filepath) = @x;
+
+    if (! exists $package_id{"$n-$v-$r"}) {
+        $q_pkg->execute($n,$v,$r);
+        my $found;
+        while (my $x = $q_pkg->fetchrow_arrayref) {
+            if (defined $found) {
+                warn "Duplicate entry for $n-$v-$r: $found, $x->[0]\n";
+            }
+            $found = $x->[0];
+        }
+
+        if (! defined $found) {
+            my $x = $i_pkg->execute($n,$v,$r);
+            $found = $dbh->{mysql_insertid};
+        }
+
+        $package_id{"$n-$v-$r"} = $found;
+    }
+
+    $sth->execute($package_id{"$n-$v-$r"}, $subpackage, $arch,
+              $libname, $filepath)   or die;
+}
+close IN;
