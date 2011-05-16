@@ -269,7 +269,7 @@ sub as_xml {
     # Package N-V-R
     my @nvr = $self->nvr;
     $s .= "  <package";
-    for my $field qw(name version release) {
+    for my $field (@NVR_Fields) {
         $s .= sprintf( ' %s="%s"', $field, shift(@nvr) );
     }
     $s .= "/>\n";
