@@ -10,7 +10,8 @@ use XML::Simple;
 my $dbh = DBI->connect("DBI:mysql:rpmgrill:localhost", 'rpmgrill') or die;
 
 sub main {
-    for my $pkg qw(brewlint rpmgrill) {
+#    for my $pkg qw(brewlint rpmgrill) {
+    for my $pkg qw(rpmgrill) {
         my $dir = "/home/esm/src/$pkg/results";
         my @results = sort grep { /^\d+.*\.xml$/ } read_dir($dir);
 
@@ -31,7 +32,7 @@ SELECT run_id FROM runs
              WHERE package_name=?
                AND package_version=?
                AND package_release=?
-               AND analyzed_when=?
+               AND analyzed_when=FROM_UNIXTIME(?)
 END_SQL
 
 my $sth_insert_run = $dbh->prepare(<<'END_SQL');
@@ -89,6 +90,7 @@ sub do_run {
             for my $g (@$gripes) {
                 my $excerpt = $g->{excerpt};
                 if (defined($excerpt)) {
+                    warn "WARNING: old-style excerpt: @nvr: $t->{name} / $g->{code}\n";
                     if (! ref($excerpt)) {
                         # FIXME: wtf? I think this is for ancient results only
                         $excerpt = [ $excerpt ];
@@ -106,10 +108,8 @@ sub do_run {
 
                     if (defined $c->[0]{excerpt}) {
                         # FIXME: include nvr
-                        warn "WARNING: context-excerpt confusing: @nvr : $t->{name} / $g->{code}\n";
-                        if (defined $excerpt) {
-                            warn "  *** Doubly so when dup!\n";
-                        }
+                        warn "WARNING: context-excerpt confusing: @nvr : $t->{name} / $g->{code}\n"
+                            if defined $excerpt;
                         $excerpt = $c->[0]{excerpt};
                     }
                 }
