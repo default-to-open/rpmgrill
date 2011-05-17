@@ -28,12 +28,13 @@ use IPC::Run qw(run timeout);
 sub order {5}
 
 # One-line description of this plugin
-sub blurb { return "runs 'rpm -q' against specfile, for sanity check" }
+sub blurb { return "checks for problems in spec file" }
 
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+* runs 'rpm -q' against specfile, for sanity check
+* looks for commented-out macros (which don't do what you think)
 END_DOC
 
 # END   user-configurable section
@@ -48,6 +49,15 @@ END_DOC
 sub analyze {
     my $self = shift;    # in: FIXME
 
+    _run_actual_rpm_command( $self );
+}
+
+
+#############################
+#  _run_actual_rpm_command  #
+#############################
+sub _run_actual_rpm_command {
+    my $self = shift;
     my $specfile_path     = $self->specfile->path;
     my $specfile_basename = basename($specfile_path);
 
