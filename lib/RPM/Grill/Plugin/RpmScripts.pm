@@ -334,7 +334,7 @@ sub _check_useradd {
                 if ($uid != $expected_uid) {
                     $spec->gripe({
                         code => 'UseraddWrongUid',
-                        diag => "Invocation of <tt>useradd</tt> with incorrect UID <var>$uid</var>; $UidGid_File defines the UID for $username as <b>$expected_uid</b>"
+                        diag => "Invocation of <tt>useradd</tt> with incorrect UID <var>$uid</var>; you should use <b>$expected_uid</b>, as defined in <tt>$UidGid_File</tt>"
                     });
                 }
                 else {
@@ -375,7 +375,7 @@ sub _check_useradd {
         # No UID given at all.
         my $diag = "Invocation of <tt>useradd</tt> without specifying a UID";
         if (defined $expected_uid) {
-            $diag .= "; $UidGid_File defines the UID for $username as <b>$expected_uid</b>";
+            $diag .= "; you should use <b>$expected_uid</b>, as defined in <tt>$UidGid_File</tt>";
         }
         else {
             $diag .= "; this may be OK, because $UidGid_File defines no UID for <var>$username</var>";
@@ -403,7 +403,7 @@ sub _check_groupadd {
                     # Mismatch: invocation with wrong GID
                     $spec->gripe({
                         code => 'GroupaddWrongGid',
-                        diag => "Invocation of <tt>groupadd</tt> with incorrect GID <var>$actual_gid</var>; $UidGid_File defines the GID for $groupname as <b>$expected_gid</b>",
+                        diag => "Invocation of <tt>groupadd</tt> with incorrect GID <var>$actual_gid</var>; you should use <b>$expected_gid</b>, as defined in <tt>$UidGid_File</tt>",
                     });
                 }
             }
