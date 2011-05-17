@@ -50,6 +50,8 @@ sub analyze {
     my $self = shift;    # in: FIXME
 
     _run_actual_rpm_command( $self );
+
+    _check_for_other_specfile_problems( $self );
 }
 
 
@@ -146,6 +148,41 @@ sub _run_actual_rpm_command {
             },
         }
     );
+}
+
+########################################
+#  _check_for_other_specfile_problems  #
+########################################
+sub _check_for_other_specfile_problems {
+    my $self = shift;
+
+    my $spec  = $self->specfile;
+    my @lines = $spec->lines;
+
+    my $specfile_basename = basename($spec->path);
+
+  LINE:
+    for (my $i=0; $i < @lines; $i++) {
+        my $line = $lines[$i];
+
+        my $s       = $line->content;
+        my $section = $line->section;
+        my $lineno  = $line->lineno;
+
+        # Look for macros in comments
+        # FIXME: also look in %changelog, in %if, ...
+        if ($s =~ /^\s*#.*[^%]%[^%]/o) {
+            $self->gripe(
+                {   code    => "MacroSurprise",
+                    diag    => "Did you know that RPM expands macros even inside comments?",
+                    context => {
+                        path    => $specfile_basename,
+                        lineno  => $lineno,
+                        excerpt => $s,
+                    },
+                });
+        }
+    }
 }
 
 1;

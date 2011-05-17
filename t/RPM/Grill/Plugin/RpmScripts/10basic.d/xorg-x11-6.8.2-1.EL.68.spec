@@ -178,7 +178,7 @@ ExclusiveOS: linux
 %define __fccache	umask 133; which fc-cache &> /dev/null && fc-cache
 
 # Disable rpm from stripping xorg-x11's modules, or they explode
-#if %{DebuggableBuild}
+#if %%{DebuggableBuild}
 %define __spec_install_post /usr/lib/rpm/redhat/brp-compress
 %define debug_package %{nil}
 #endif
@@ -274,7 +274,7 @@ Conflicts: XFree86-sdk < 4.2.99.3-20030115.0
 
 # Main source tarball for official releases created using the following:
 # cvs -d :pserver:anoncvs@cvs.freedesktop.org:/cvs/xorg export -r XORG-6_8_1 xc
-# tar zcf xorg-x11-%{version}.tar.gz
+# tar zcf xorg-x11-%%{version}.tar.gz
 Source:   %{name}-%{version}.%{zipext}
 
 Source1:  host.def

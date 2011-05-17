@@ -6,7 +6,7 @@
         'excerpt' => [
           'useradd -c "X Font Server" -r -s $LOGINSHELL -u 43 -d /etc/X11/fs xfs'
         ],
-        'sub' => '%postun Mesa-libGLU',
+        'sub' => '%triggerpostun xfs -- XFree86-xfs',
         'path' => 'xorg-x11-6.8.2-1.EL.68.spec',
         'lineno' => '2158'
       },

@@ -51,8 +51,8 @@
 # contains the file:
 #   /etc/rpm/macros.disttag
 # which has this content (which I've commented out here):
-# %rhel 5
-# %dist .el5
+# %%rhel 5
+# %%dist .el5
 # See https://engineering.redhat.com/rt3/Ticket/Display.html?id=12938
 %if 0%{?rhel}
 %define myrhel %{rhel}

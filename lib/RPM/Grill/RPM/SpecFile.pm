@@ -75,8 +75,9 @@ sub new {
         chomp $line;
 
         # FIXME: check section
-
-        if ( $line =~ m{^%($RPM_Sections)(\s+(\S+))?\s*$}i ) {
+        # FIXME: this can be complicated, eg:
+        #    %files -n %{pkg_name}-server  [qpid-cpp-mrg-0.10-7.el5]
+        if ( $line =~ m{^%($RPM_Sections)(\s+(.*))?\s*$}i ) {
             $section = '%' . lc($1);
             if ($3) {
                 $section .= " " . $3;

@@ -212,18 +212,18 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %_includedir/qpid/*.h
 %_includedir/qpid/amqp_0_10
 %_includedir/qpid/client
-#%_includedir/qpid/console
+#%%_includedir/qpid/console
 %_includedir/qpid/framing
 %_includedir/qpid/sys
 %_includedir/qpid/log
 %_includedir/qpid/management
 %_includedir/qpid/messaging
-#%_includedir/qpid/agent
+#%%_includedir/qpid/agent
 %_includedir/qpid/types
 %if %{rhel_4}
 %_includedir/qpid-boost
 %endif
-#%_includedir/qmf
+#%%_includedir/qmf
 %_libdir/libqpidcommon.so
 %_libdir/libqpidclient.so
 %_libdir/libqpidmessaging.so
@@ -783,7 +783,7 @@ rm -f %{buildroot}%{ruby_sitelib}/qmf.rb
 rm -rf %{buildroot}
 
 %check
-#pushd %{_builddir}/%{name}-%{version}/cpp
+#pushd %%{_builddir}/%%{name}-%%{version}/cpp
 # LANG=C needs to be in the environment to deal with a libtool issue
 # temporarily disabling make check due to libtool issues
 # needs to be re-enabled asap
@@ -792,7 +792,7 @@ rm -rf %{buildroot}
 
 %ifarch i386 i586 i686 x86_64
 #RHM
-#pushd %{_builddir}/store-%{version}
+#pushd %%{_builddir}/store-%%{version}
 #make check
 #popd
 #/RHM
