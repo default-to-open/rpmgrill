@@ -52,43 +52,19 @@ our $Log = '/tmp/rpmgrill-libs.log';
 sub analyze {
     my $self = shift;
 
-    # FIXME: use what you need; delete what you don't
+    # Add a package ID to mysql to indicate that we've analyzed this build.
+    my $dbh;
+    my $sth;
 
-    for my $rpm ( $self->rpms ) {
-        for my $f ( $rpm->files ) {
-            $self->_gather_libs( $f )
-        }
-    }
-}
-
-sub _gather_libs {
-    my $self = shift;
-    my $f    = shift;                   # in: file obj
-
-    my @libs;
-    my $cmd = "eu-readelf -d " . $f->extracted_path . " 2>/dev/null";
-    open my $fh_readelf, "-|", $cmd
-        or die "$ME: Cannot fork: $!\n";
-    while (my $line = <$fh_readelf>) {
-        # FIXME: check to make sure we're in the right section
-        # FIXME: what about .gnu.liblist in -A?
-        if ($line =~ /^\s*NEEDED\s+Shared library:\s+\[(\S+)\]/) {
-            push @libs, $1;
-        }
-    }
-    close $fh_readelf;  # No status check: file could be non-elf
-
-
-    # Whether or not we found any libs, add a package ID to mysql to
-    # indicate that we've analyzed this build.
-    my @nvr = $self->nvr;
-    if (my $dbh = DBI->connect("DBI:mysql:linkage:localhost", 'linkage')) {
+    if ($dbh = DBI->connect("DBI:mysql:linkage:localhost", 'linkage')) {
         # Look for existing package id
+        # FIXME: what about brew scratch builds?
         my $q_pkg = $dbh->prepare('SELECT package_id FROM packages
                            WHERE package_name=?
                              AND package_version=?
                              AND package_release=?');
 
+        my @nvr = $self->nvr;
         $q_pkg->execute(@nvr);
         my $package_id;
         while (my $x = $q_pkg->fetchrow_arrayref) {
@@ -107,24 +83,53 @@ sub _gather_libs {
             $package_id = $dbh->{mysql_insertid};
         }
 
-        # Now insert individual libs.
-        my $sth = $dbh->prepare('INSERT INTO linkage_xref
+        # Prepare an STH for our analyze code
+        $sth = $dbh->prepare("INSERT INTO linkage_xref
                         (package_id, subpackage, arch, libname, filepath)
-                        VALUES ( ?,?,?,?,? )');
-
-        for my $l (@libs) {
-            $sth->execute($package_id, $f->subpackage,
-                          $f->arch, $l, $f->path);
-        }
-        $dbh->disconnect;
+                        VALUES ( $package_id,?,?,?,? )");
     }
     else {
-        warn "$ME: Cannot connect to mysql; dumping just txt";
+        warn "$ME: Cannot connect to mysql; will dump just txt";
+    }
+
+    for my $rpm ( $self->rpms ) {
+        for my $f ( $rpm->files ) {
+            $self->_gather_libs( $f, $sth )
+        }
+    }
+
+    # If we're doing mysql, disconnect now
+    $dbh->disconnect                    if $dbh;
+}
+
+sub _gather_libs {
+    my $self = shift;
+    my $f    = shift;                   # in: file obj
+    my $sth  = shift;                   # in: MySQL insert thingy
+
+    my @libs;
+    my $cmd = "eu-readelf -d " . $f->extracted_path . " 2>/dev/null";
+    open my $fh_readelf, "-|", $cmd
+        or die "$ME: Cannot fork: $!\n";
+    while (my $line = <$fh_readelf>) {
+        # FIXME: check to make sure we're in the right section
+        # FIXME: what about .gnu.liblist in -A?
+        if ($line =~ /^\s*NEEDED\s+Shared library:\s+\[(\S+)\]/) {
+            push @libs, $1;
+        }
+    }
+    close $fh_readelf;  # No status check: file could be non-elf
+
+
+    if (defined $sth) {
+        $sth->execute($f->subpackage, $f->arch, $_, $f->path)       for @libs;
     }
 
     # Now dump to text file, but only if there's something to dump
     if (@libs) {
         # Log to txt file, because mysql is currently only in test mode
+        my @nvr = $self->nvr;
+
         open my $fh_log, '>>', $Log
             or die "$ME: Cannot append to $Log: $!\n";
         for my $l (@libs) {
