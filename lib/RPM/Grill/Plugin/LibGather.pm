@@ -66,7 +66,7 @@ sub _gather_libs {
     my $f    = shift;                   # in: file obj
 
     my @libs;
-    my $cmd = "eu-readelf -a " . $f->extracted_path . " 2>/dev/null";
+    my $cmd = "eu-readelf -d " . $f->extracted_path . " 2>/dev/null";
     open my $fh_readelf, "-|", $cmd
         or die "$ME: Cannot fork: $!\n";
     while (my $line = <$fh_readelf>) {
