@@ -23,7 +23,7 @@ def write_queue_file(req):
         tmpfile = fname + ".tmp"
         f = open(tmpfile, 'w')
         f.write( "# FIXME: explain this file\n" )
-        f.write( yaml.dump(req, default_flow_style=False) )
+        f.write( yaml.safe_dump(req, default_flow_style=False) )
         f.close()
         os.chmod(tmpfile, 0444)
         os.rename(tmpfile, fname)
