@@ -131,6 +131,9 @@ sub main {
     while (1) {
         # FIXME: check for a TERMINATE state file
 
+        # FIXME: this should be run by another process
+        system('./bin/brewbuild-queue');
+
         my $job = $dbh->selectrow_hashref(<<'END_SQL');
 SELECT * FROM runs
    WHERE status="queued"
@@ -167,7 +170,7 @@ sub process_job {
     my $work_dir = "my-$nvr";
     die "$ME: work dir already exists: $work_dir\n"     if -d $work_dir;
 
-    print $nvr,"..."                                    if $verbose;
+    print $nvr," ..."                                   if $verbose;
     # Unpack into working directory
     print "unpacking..."                                if $verbose;
 
