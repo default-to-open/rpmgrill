@@ -24,6 +24,7 @@ def write_queue_file(req):
         f.write( "# FIXME: explain this file\n" )
         f.write( yaml.dump(req) )
         f.close()
+        os.chmod(fname, 0444)
     except:
         print "unable to write queue file"
 
