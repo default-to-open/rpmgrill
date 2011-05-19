@@ -16,6 +16,7 @@ use warnings;
 #use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
 
 use DBI;
+use File::Path          qw(rmtree);
 use Time::Piece;
 use XML::Simple;
 use YAML;
@@ -218,6 +219,9 @@ END_README
         }
     }
 
+    # Clean up the working directory
+    rmtree($work_dir, 0, 0);
+
     defined $xml_file
         or die "$ME: Internal error: did not find .xml results file for $nvr";
 
@@ -228,6 +232,8 @@ END_README
     $dbh->do('UPDATE runs SET status="completed" WHERE run_id=?',
              undef,
              $job->{run_id});
+
+    print "done\n"                                      if $verbose;
 }
 
 
