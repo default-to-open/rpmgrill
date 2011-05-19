@@ -23,7 +23,8 @@ def write_queue_file(req):
         f = open(fname, 'w')
         f.write( yaml.dump(req) )
         f.close()
-
+    except:
+        print "unable to write queue file"
 
 logging.basicConfig()
 
