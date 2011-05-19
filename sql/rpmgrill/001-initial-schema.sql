@@ -116,7 +116,7 @@ CREATE TABLE results (
        context_path        VARCHAR(256),
        context_lineno      VARCHAR(256),
        context_subcontext  VARCHAR(256),
-       context_excerpt     TEXT,
+       context_excerpt     VARCHAR(2048),
 
        FOREIGN KEY            (tests_run_id)
          REFERENCES tests_run (tests_run_id)
