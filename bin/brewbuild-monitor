@@ -160,7 +160,7 @@ try:
             if req[1]['state'] == 1:
                 write_queue_file(req)
                 print "queued",
-            print "\n"
+            print ""
 #            if req[1][state] == 1:
 #                pprint.pprint(req)
         session.acknowledge(message)
