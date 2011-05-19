@@ -19,8 +19,9 @@ def timestamp():
 # into the rpmgrill database
 def write_queue_file(req):
     try:
-        fname = 'jobs/01-queued/' + req[1]['task_id'] + '-' + req[1]['nvr'] + '.yaml'
+        fname = 'jobs/01-queued/' + str(req[1]['task_id']) + '-' + req[1]['nvr'] + '.yaml'
         f = open(fname, 'w')
+        f.write( "# FIXME: explain this file\n" )
         f.write( yaml.dump(req) )
         f.close()
     except:
