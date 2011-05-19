@@ -20,11 +20,13 @@ def timestamp():
 def write_queue_file(req):
     try:
         fname = 'jobs/01-queued/' + str(req[1]['task_id']) + '-' + req[1]['nvr'] + '.yaml'
-        f = open(fname, 'w')
+        tmpfile = fname + ".tmp"
+        f = open(tmpfile, 'w')
         f.write( "# FIXME: explain this file\n" )
         f.write( yaml.dump(req) )
         f.close()
-        os.chmod(fname, 0444)
+        os.chmod(tmpfile, 0444)
+        os.rename(tmpfile, fname)
     except:
         print "unable to write queue file"
 
