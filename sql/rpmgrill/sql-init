@@ -49,7 +49,7 @@ END_SQL
 
 my $sth_insert_results = $dbh->prepare(<<'END_SQL');
 INSERT INTO results
-    (tests_run_id, code_id, diagnostic, excerpt, context_path, context_lineno, context_subcontext)
+    (tests_run_id, code_id, diagnostic, context_excerpt, context_path, context_lineno, context_subcontext)
 VALUES (?,?,?,?,?,?,?)
 END_SQL
 

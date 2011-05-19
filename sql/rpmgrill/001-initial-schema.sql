@@ -28,6 +28,18 @@ INSERT INTO variants (variant_id, variant_name) VALUES (6, 'RHEL6');
 INSERT INTO variants (variant_id, variant_name) VALUES (7, 'RHEL7');
 INSERT INTO variants (variant_id, variant_name) VALUES (8, 'RHEL8');
 
+/* FIXME! Duplication of brew! */
+CREATE TABLE brew_tags (
+       brew_tag_id   INT AUTO_INCREMENT PRIMARY KEY,
+       brew_tag_name VARCHAR(256)
+) TYPE InnoDB;
+
+/* FIXME: yet another userid table */
+CREATE TABLE users (
+       user_id       INT AUTO_INCREMENT PRIMARY KEY,
+       user_name     VARCHAR(16)
+) TYPE InnoDB;
+
 /*
 ** Each row here is an N-V-R; the analyzed_by and _when fields may be used
 ** to identify which version of brewtap ran the analysis and when. This
@@ -35,17 +47,19 @@ INSERT INTO variants (variant_id, variant_name) VALUES (8, 'RHEL8');
 */
 CREATE TABLE runs (
        run_id           INT AUTO_INCREMENT PRIMARY KEY,
-       analyzed_when    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-       analyzed_by      INT NOT NULL,
+       analyzed_by      INT,          /* will be null during 'pending' */
+       analyzed_when    DATETIME,
 
        package_name     VARCHAR(256) NOT NULL,
        package_version  VARCHAR(256) NOT NULL,
        package_release  VARCHAR(256) NOT NULL,
-       variant_id       INT NOT NULL,
-       brew_id          INT NOT NULL,           /* FIXME */
+/*       variant_id       INT NOT NULL,*/       /* FIXME */
+       brew_task_id     INT,                    /* FIXME: allow NULL? */
+       brew_tag_id      INT NOT NULL,
+       owner_id         INT NOT NULL,
 
        /* FIXME: Do we really need failed? */
-       status           ENUM('pending','running','completed','failed') NOT NULL,
+       status           ENUM('queued','running','completed','failed') NOT NULL,
 
        INDEX (package_name),
        INDEX (package_name, package_version, package_release),
@@ -54,8 +68,16 @@ CREATE TABLE runs (
          REFERENCES tools (tool_id)
          ON DELETE RESTRICT,
 
-       FOREIGN KEY           (variant_id)
-         REFERENCES variants (variant_id)
+/*       FOREIGN KEY           (variant_id)*/
+/*         REFERENCES variants (variant_id)*/
+/*         ON DELETE RESTRICT,*/
+
+       FOREIGN KEY            (brew_tag_id)
+         REFERENCES brew_tags (brew_tag_id)
+         ON DELETE RESTRICT,
+
+       FOREIGN KEY        (owner_id)
+         REFERENCES users (user_id)
          ON DELETE RESTRICT
 ) TYPE InnoDB;
 
@@ -90,11 +112,11 @@ CREATE TABLE results (
        tests_run_id  INT NOT NULL,
        code_id       INT,
 
-       diagnostic    VARCHAR(256) NOT NULL,     /* FIXME: maybe TEXT? */
-       excerpt       VARCHAR(256),              /* FIXME */
-       context_path     VARCHAR(256),
-       context_lineno   VARCHAR(256),
-       context_subcontext   VARCHAR(256),
+       diagnostic          VARCHAR(256) NOT NULL,     /* FIXME: maybe TEXT? */
+       context_path        VARCHAR(256),
+       context_lineno      VARCHAR(256),
+       context_subcontext  VARCHAR(256),
+       context_excerpt     TEXT,
 
        FOREIGN KEY            (tests_run_id)
          REFERENCES tests_run (tests_run_id)
