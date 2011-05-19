@@ -9,10 +9,21 @@ import os
 import optparse
 import pprint
 import logging
+import yaml
 
 def timestamp():
     import time
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+
+# 2011-05-19 write a queue file; another process will write that
+# into the rpmgrill database
+def write_queue_file(req):
+    try:
+        fname = 'jobs/01-queued/' + req[1]['task_id'] + '-' + req[1]['nvr'] + '.yaml'
+        f = open(fname, 'w')
+        f.write( yaml.dump(req) )
+        f.close()
+
 
 logging.basicConfig()
 
@@ -145,6 +156,7 @@ try:
             if req[1]['state'] == 1:
                 print "...",
                 sys.stdout.flush()
+                write_queue_file(req)
                 os.system("bin/run-analysis %s" % req[1]['nvr'])
                 print "done",
                 sys.stdout.flush()
