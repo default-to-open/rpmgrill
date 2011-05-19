@@ -1,0 +1,466 @@
+#!/usr/bin/perl
+#
+# rpmgrill-scheduler - look for queued jobs in rpmgrill DB
+#
+# $Id$
+#
+package RpmGrill::Scheduler;
+
+use strict;
+use warnings;
+
+(our $ME = $0) =~ s|.*/||;
+(our $VERSION = '$Revision: 0.0 $ ') =~ tr/[0-9].//cd;
+
+# For debugging, show data structures using DumpTree($var)
+#use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
+
+use DBI;
+use Time::Piece;
+use XML::Simple;
+use YAML;
+
+###############################################################################
+# BEGIN user-customizable section
+
+# FIXME: get DB credentials from config file
+
+# Autoflush stdout, useful when running with --verbose
+$| = 1;
+
+# END   user-customizable section
+###############################################################################
+
+###############################################################################
+# BEGIN boilerplate args checking, usage messages
+
+sub usage {
+    print  <<"END_USAGE";
+Usage: $ME [OPTIONS]
+
+$ME is the third step in the rpmgrill cycle
+
+FIXME
+
+OPTIONS:
+
+  -v, --verbose  show verbose progress indicators
+  -n, --dry-run  make no actual changes
+
+  --help         display this message
+  --man          display program man page
+  --version      display program name and version
+END_USAGE
+
+    exit;
+}
+
+sub man {
+    # Read the POD contents.  If it hasn't been filled in yet, abort.
+    my $pod = do { local $/; <DATA>; };
+    if ($pod =~ /=head1 \s+ NAME \s+ FIXME/xm) {
+        warn "$ME: No man page available.  Please try $ME --help\n";
+        exit;
+    }
+
+    # Use Pod::Man to convert our __DATA__ section to *roff
+    eval { require Pod::Man }
+        or die "$ME: Cannot generate man page; Pod::Man unavailable: $@\n";
+    my $parser = Pod::Man->new(name => $ME, release => $VERSION, section => 1);
+
+    # If called without output redirection, man-ify.
+    my $out_fh;
+    if (-t *STDOUT) {
+        my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
+        open $out_fh, "| nroff -man | $pager";
+    }
+    else {
+        open $out_fh, '>&STDOUT';
+    }
+
+    # Read the POD contents, and have Pod::Man read from fake filehandle.
+    # This requires 5.8.0.
+    open my $pod_handle, '<', \$pod;
+    $parser->parse_from_filehandle($pod_handle, $out_fh);
+    exit;
+}
+
+
+# Command-line options.  Note that this operates directly on @ARGV !
+our $debug   = 0;
+our $force   = 0;
+our $verbose = 0;
+our $NOT     = '';              # print "blahing the blah$NOT\n" if $debug
+sub handle_opts {
+    use Getopt::Long;
+    GetOptions(
+        'debug!'     => \$debug,
+        'dry-run|n!' => sub { $NOT = ' [NOT]' },
+        'force'      => \$force,
+        'verbose|v'  => \$verbose,
+
+        help         => \&usage,
+        man          => \&man,
+        version      => sub { print "$ME version $VERSION\n"; exit 0 },
+    ) or die "Try `$ME --help' for help\n";
+}
+
+# END   boilerplate args checking, usage messages
+###############################################################################
+
+############################## CODE BEGINS HERE ###############################
+
+# The term is "modulino".
+__PACKAGE__->main()                                     unless caller();
+
+# Main code.
+sub main {
+    # Note that we operate directly on @ARGV, not on function parameters.
+    # This is deliberate: it's because Getopt::Long only operates on @ARGV
+    # and there's no clean way to make it use @_.
+    handle_opts();                      # will set package globals
+
+    # No args
+    die "$ME: Too many arguments; try $ME --help\n"                 if @ARGV;
+
+    # FIXME: do this inside a loop, so we can reconnect as necessary
+    my $dbh = DBI->connect("DBI:mysql:rpmgrill:localhost", 'rpmgrill')
+        or die;
+
+    while (1) {
+        # FIXME: check for a TERMINATE state file
+
+        my $job = $dbh->selectrow_hashref(<<'END_SQL');
+SELECT * FROM runs
+   WHERE status="queued"
+   ORDER BY run_id ASC
+   LIMIT 1
+END_SQL
+
+        if ($job) {
+            process_job($dbh, $job);
+        }
+        else {
+            sleep 30;
+        }
+    }
+}
+
+
+
+sub process_job {
+    my $dbh = shift;                    # in: DBI thingy
+    my $job = shift;                    # in: hashref
+
+#    use Data::Dumper; print Dumper($job);
+
+    # FIXME: UPDATE status into "running"
+    $dbh->do('UPDATE runs SET status="running" WHERE run_id=?',
+             undef,
+             $job->{run_id});
+
+    # FIXME: brew-unpack; create state file; run rpmgrill
+    my @nvr_fields = qw(name version release);
+
+    my $nvr = join('-', map { $job->{"package_$_"} } @nvr_fields);
+    my $work_dir = "my-$nvr";
+    die "$ME: work dir already exists: $work_dir\n"     if -d $work_dir;
+
+    print $nvr,"..."                                    if $verbose;
+    # Unpack into working directory
+    print "unpacking..."                                if $verbose;
+
+    system('brew-unpack', $nvr, $work_dir) == 0
+        or die "$ME: brew-unpack $nvr failed\n";
+
+    # Unpacked. Write a custom README file in case we crash
+    my $readme = "$work_dir/README.$ME";
+    open my $readme_fh, '>', $readme
+        or die "$ME: Cannot create $readme: $!\n";
+    printf { $readme_fh } <<"END_README", localtime->datetime;
+
+This directory was created on: %s
+            at the request of: $ME
+          for rpmgrill run id: $job->{run_id}
+             for brew task id: $job->{brew_task_id}
+                      job PID: $$
+
+END_README
+    close $readme_fh;
+
+    # Unpacked. Run the analysis.
+    print "analyzing..."                                if $verbose;
+    system('perl', '-Ilib', './bin/rpmgrill', $work_dir);
+    if ($?) {
+        # FIXME: what else? Log any messages anywhere?
+        $dbh->do('UPDATE runs SET status="failed" WHERE run_id=?',
+                 undef,
+                 $job->{run_id});
+        return;
+    }
+
+    # FIXME: move results to results/<timestamp><taskid><nvr>.xml/yaml
+    my $xml_file;
+    for my $ext qw(xml yaml) {
+        my $results = "$work_dir.$ext";
+        if (-e $results) {
+            my $outfile = sprintf("results/%05d--%s.%s",
+                                  $job->{run_id},
+                                  $nvr,
+                                  $ext);
+            rename $results => $outfile
+                or die "$ME: Cannot mv $results to $outfile: $!\n";
+
+            $xml_file = $outfile        if $ext eq 'xml';
+        }
+        else {
+            warn "$ME: WARNING: Results file missing: $results\n";
+        }
+    }
+
+    defined $xml_file
+        or die "$ME: Internal error: did not find .xml results file for $nvr";
+
+    # FIXME: import results into DB
+    put_results_into_sql( $dbh, $job, $xml_file );
+
+    # FIXME: set status to 'completed'
+    $dbh->do('UPDATE runs SET status="completed" WHERE run_id=?',
+             undef,
+             $job->{run_id});
+}
+
+
+sub put_results_into_sql {
+    my $dbh = shift;                    # in: DBI thingy
+    my $job = shift;                    # in: hashref
+    my $xml_file = shift;
+
+    my $xml = XMLin( $xml_file, ForceArray => 1, KeyAttr => [] );
+
+    my $run_id = $job->{run_id};
+
+    # Start inserting tests
+    my $sth_insert_test_run = $dbh->prepare(<<'END_SQL');
+INSERT INTO tests_run
+     (run_id, plugin_id, test_order, test_status, fail_message)
+  VALUES (?,?,?,?,?)
+END_SQL
+
+    my $sth_insert_results = $dbh->prepare(<<'END_SQL');
+INSERT INTO results
+    (tests_run_id, code_id, diagnostic, context_excerpt, context_path, context_lineno, context_subcontext)
+VALUES (?,?,?,?,?,?,?)
+END_SQL
+
+    for my $t (@{ $xml->{test} }) {
+        $sth_insert_test_run->execute(
+            $run_id,
+            plugin_id( $dbh, $t->{name} ),
+            $t->{order},
+            $t->{status},
+            $t->{fail},
+        );
+        my $tests_run_id = $dbh->{mysql_insertid};
+
+        if (my $gripes = $t->{gripe}) {
+            for my $g (@$gripes) {
+                my $context_path;
+                my $context_lineno;
+                my $context_subcontext;
+                my $context_excerpt;
+                if (my $c = $g->{context}) {
+                    $context_path = $c->[0]{path};
+                    $context_lineno = $c->[0]{lineno};
+                    $context_subcontext = $c->[0]{sub};
+
+                    if (defined $c->[0]{excerpt}) {
+                        $context_excerpt = $c->[0]{excerpt};
+                    }
+                }
+
+                $sth_insert_results->execute(
+                    $tests_run_id,
+                    code_id( $dbh, $g->{code} ),
+                    $g->{diag},
+                    $context_excerpt,
+                    $context_path,
+                    $context_lineno,
+                    $context_subcontext,
+                );
+            }
+        }
+    }
+
+    # FIXME: insert into tools
+    my $tool_id = tool_id($dbh, $xml->{tool},$xml->{version});
+
+    $dbh->do('UPDATE runs SET analyzed_by=?,analyzed_when=FROM_UNIXTIME(?) WHERE run_id=?',
+             undef,
+             $tool_id,
+             $xml->{timestamp},
+             $job->{run_id});
+
+}
+
+#############
+#  tool_id  #
+#############
+sub tool_id {
+    my $dbh          = shift;
+    my $tool_name    = shift;
+    my $tool_version = shift;
+
+    my $sth_find_tool = $dbh->prepare(<<'END_SQL') or die;
+SELECT tool_id FROM tools  WHERE tool_name=? AND tool_version=?
+END_SQL
+    my $sth_insert_tool = $dbh->prepare(<<'END_SQL') or die;
+INSERT INTO tools (tool_name,tool_version) VALUES (?,?)
+END_SQL
+
+    $sth_find_tool->execute($tool_name, $tool_version);
+    if (my $found = $sth_find_tool->fetchrow_arrayref) {
+        return $found->[0];
+    }
+
+    $sth_insert_tool->execute($tool_name, $tool_version);
+    return $dbh->{mysql_insertid};
+}
+
+################
+#  plugin_id  #
+################
+sub plugin_id {
+    my $dbh         = shift;
+    my $plugin_name = shift;
+
+    my $sth_find_plugin = $dbh->prepare(<<'END_SQL') or die;
+SELECT plugin_id FROM plugins  WHERE plugin_name=?
+END_SQL
+
+    $sth_find_plugin->execute($plugin_name);
+    if (my $found = $sth_find_plugin->fetchrow_arrayref) {
+        return $found->[0];
+    }
+
+    my $sth_insert_plugin = $dbh->prepare(<<'END_SQL') or die;
+INSERT INTO plugins (plugin_name) VALUES (?)
+END_SQL
+
+    $sth_insert_plugin->execute($plugin_name);
+    return $dbh->{mysql_insertid};
+}
+
+################
+#  code_id  #
+################
+sub code_id {
+    my $dbh       = shift;
+    my $code_name = shift;
+
+    my $sth_find_code = $dbh->prepare(<<'END_SQL') or die;
+SELECT code_id FROM codes  WHERE code_name=?
+END_SQL
+    $sth_find_code->execute($code_name);
+    if (my $found = $sth_find_code->fetchrow_arrayref) {
+        return $found->[0];
+    }
+
+    my $sth_insert_code = $dbh->prepare(<<'END_SQL') or die;
+INSERT INTO codes (code_name) VALUES (?)
+END_SQL
+    $sth_insert_code->execute($code_name);
+    return $dbh->{mysql_insertid};
+}
+
+
+
+
+
+
+
+
+
+
+
+
+1;
+
+__DATA__
+
+###############################################################################
+#
+# Documentation
+#
+
+=head1	NAME
+
+FIXME - description of what this script does
+
+=head1	SYNOPSIS
+
+FIXME [B<--foo>]  [B<--bar>]  [B<--verbose>] ARG1 [ARG2...] FIXME
+
+FIXME  B<--help>  |  B<--version> | B<--man>
+
+=head1	DESCRIPTION
+
+B<FIXME> grobbles the frobniz on alternate Tuesdays, except where
+prohibited by law.
+
+=head1	OPTIONS
+
+=over 4
+
+=item B<--foo>
+
+FIXME
+
+=item B<--verbose>
+
+Show progress messages.
+
+=item B<--help>
+
+Emit usage hints.
+
+=item B<--version>
+
+Display program version.
+
+=item B<--man>
+
+Display this man page.
+
+=back
+
+
+=head1	DIAGNOSTICS
+
+FIXME
+
+=head1	ENVIRONMENT
+
+FIXME
+
+=head1	FILES
+
+FIXME
+
+=head1	RESTRICTIONS
+
+FIXME
+
+=head1	SEE ALSO
+
+FIXME
+
+e.g. L<Foo::Bar|Foo::Bar>
+
+=head1	AUTHOR
+
+Your Name <ed@edsantiago.com>
+
+Please report bugs or suggestions to <ed@edsantiago.com>
+
+=cut
