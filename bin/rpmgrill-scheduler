@@ -285,6 +285,9 @@ END_SQL
 
                     if (defined $c->[0]{excerpt}) {
                         $context_excerpt = $c->[0]{excerpt};
+                        if (ref($context_excerpt)) {
+                            $context_excerpt = join("\n", @$context_excerpt);
+                        }
                     }
                 }
 
