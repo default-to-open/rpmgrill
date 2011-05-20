@@ -1,9 +1,0 @@
-{
-  'SpecFileSanity' => [ {
-  code => 'RpmParseErrors',
-  diag => "Errors running 'rpm -q --specfile rpmdiff-1.4.50.spec'",
-  context => { excerpt => [ "error: types must match
-error: rpmdiff-1.4.50.spec:89: parseExpressionBoolean returns -1
-error: query of specfile rpmdiff-1.4.50.spec failed, can't parse
-"], path => "rpmdiff-1.4.50.spec", },
-}]}
