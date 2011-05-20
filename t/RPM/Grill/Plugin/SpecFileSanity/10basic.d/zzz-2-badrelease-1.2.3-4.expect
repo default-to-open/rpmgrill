@@ -1,0 +1,15 @@
+{
+  SpecFileSanity => [
+    {
+      code => 'ChangelogBadRelease',
+      context => {
+        excerpt => [
+          '* Fri May 20 2011 Eduardo Santiago <santiago@redhat.com> 1.2.3-5'
+        ],
+        lineno => '11',
+        path => 'zzz-2-badrelease-1.2.3-4.spec'
+      },
+      diag => 'First %changelog entry is for <var>1.2.3-5</var>, which doesn\'t quite match <var>1.2.3-<u>4.spec</u></var>'
+    }
+  ]
+}

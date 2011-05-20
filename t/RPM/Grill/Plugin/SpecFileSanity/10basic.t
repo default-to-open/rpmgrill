@@ -44,8 +44,25 @@ use_ok 'RPM::Grill'                           or exit;
 use_ok 'RPM::Grill::RPM::SpecFile'            or exit;
 use_ok 'RPM::Grill::Plugin::SpecFileSanity'   or exit;
 
+# FIXME: override ->nvr()
+package RPM::Grill;
+use subs qw(nvr);
+package main;
+
+# Run the tests
 for my $t (@tests) {
     my $name = $t->{name};
+
+    my ($n, $v, $r) = $name =~ /^(.*)-(.*)-(.*)$/
+        or die "Cannot determine N-V-R from $name";
+    # Hack: Redefine the nvr() method. Otherwise we need to create
+    # a fake srpm.
+    {
+        no warnings 'redefine';
+        *RPM::Grill::nvr = sub {
+            return ($n, $v, $r)
+        };
+    }
 
     my $spec_obj = RPM::Grill::RPM::SpecFile->new( $t->{path} );
     my $grill    = bless { specfile => $spec_obj },

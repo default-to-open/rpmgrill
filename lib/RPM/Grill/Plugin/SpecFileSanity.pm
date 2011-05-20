@@ -183,6 +183,71 @@ sub _check_for_other_specfile_problems {
                 });
         }
     }
+
+    #
+    # Check changelog. In particular, look for mismatch
+    # between the reported version and the actual NVR
+    #
+    if (my @changelog = $spec->lines('%changelog')) {
+        my $cl_first  = $changelog[1]->content; # [0] is %changelog
+        my $cl_lineno = $changelog[1]->lineno;
+
+        # Parse out the V-R, eg "* <date> <author> 1.2-4"
+        if ($cl_first =~ /^\*\s+.*\s(\S+)\s*$/) {
+            my $vr = $1;                # eg 1.2-4
+            my @nvr = $self->nvr;       # eg foo, 1.2, 4.el5
+
+            if ($vr =~ m{^(.*)-(.*)$}) {
+                my ($v, $r) = ($1, $2);
+                if ($v ne $nvr[1]) {
+                    $self->gripe({
+                        code => 'ChangelogBadVersion',
+                        diag => "First %changelog entry is for <var>$v</var>; expected <var>$nvr[1]</var>",
+                        context => {
+                            path    => $specfile_basename,
+                            lineno  => $cl_lineno,
+                            excerpt => $cl_first,
+                        },
+                    });
+                }
+                elsif ($nvr[2] !~ /^$r\b/) {
+                    $self->gripe({
+                        code => 'ChangelogBadRelease',
+                        diag => "First %changelog entry is for <var>$v-$r</var>, which doesn't quite match <var>$nvr[1]-<u>$nvr[2]</u></var>",
+                        context => {
+                            path    => $specfile_basename,
+                            lineno  => $cl_lineno,
+                            excerpt => $cl_first,
+                        },
+                    });
+
+                }
+            }
+            else {
+                # FIXME: %changelog only has version, no -release?
+            }
+        }
+        else {
+            # First changelog line does not match our expectation
+            $self->gripe({
+                code => 'ChangelogWeirdLine',
+                diag => 'Unexpected first line in <b>%changelog</b> section',
+                context => {
+                    path    => $specfile_basename,
+                    lineno  => $cl_lineno,
+                    excerpt => $cl_first,
+                },
+            });
+        }
+    }
+    else {
+        # No %changelog??
+        $self->gripe({
+            code => 'ChangelogMissing',
+            diag => 'No <b>%changelog</b> section in specfile',
+            context => { path => $specfile_basename },
+        });
+    }
 }
 
 1;
