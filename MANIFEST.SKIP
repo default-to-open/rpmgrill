@@ -11,3 +11,7 @@
 ~$
 \.bak$
 ^MANIFEST\.SKIP$
+^ignore\.txt$
+^rpmgrill-.*\.tar\.gz$
+^rpmgrill\.spec$
+^sql/
