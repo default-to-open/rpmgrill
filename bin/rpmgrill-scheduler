@@ -186,7 +186,7 @@ sub process_job {
 This directory was created on: %s
             at the request of: $ME
           for rpmgrill run id: $job->{run_id}
-             for brew task id: $job->{brew_task_id}
+            for brew build id: $job->{brew_build_id}
                       job PID: $$
 
 END_README
@@ -203,7 +203,7 @@ END_README
         return;
     }
 
-    # FIXME: move results to results/<timestamp><taskid><nvr>.xml/yaml
+    # FIXME: move results to results/<timestamp><buildid><nvr>.xml/yaml
     my $xml_file;
     for my $ext qw(xml yaml) {
         my $results = "$work_dir.$ext";

@@ -193,14 +193,14 @@ sub process_queue_file {
     #
     # Dup detection.
     #
-    my $brew_task_id = $info->[1]{task_id}
-        or die "$ME: No brew_task_id in $path\n";
-    my @dup = $dbh->selectrow_array('SELECT * FROM runs WHERE brew_task_id=?',
+    my $brew_build_id = $info->[1]{id}
+        or die "$ME: No brew 'id' in $path\n";
+    my @dup = $dbh->selectrow_array('SELECT * FROM runs WHERE brew_build_id=?',
                                   undef,
-                                  $brew_task_id);
+                                  $brew_build_id);
     if (@dup) {
         # FIXME: should we return failure, and/or move qfile into 'failed'?
-        die "$ME: will not insert duplicate of $brew_task_id [$path]\n";
+        die "$ME: will not insert duplicate of $brew_build_id [$path]\n";
     }
 
     #
@@ -235,8 +235,8 @@ sub process_queue_file {
 
     # Shove into SQL
     my $sth = $dbh->prepare( <<'END_SQL' );
-INSERT INTO runs (package_name, package_version, package_release, brew_task_id, brew_tag_id, owner_id, status)
-          VALUES (           ?,               ?,               ?,            ?,           ?,        ?, 'queued')
+INSERT INTO runs (package_name, package_version, package_release, brew_build_id, brew_tag_id, owner_id, status)
+          VALUES (           ?,               ?,               ?,             ?,           ?,        ?, 'queued')
 END_SQL
     # FIXME...
 
@@ -244,7 +244,7 @@ END_SQL
         $info->[1]{name},
         $info->[1]{version},
         $info->[1]{release},
-        $info->[1]{task_id},
+        $brew_build_id,
         $tag_id[0],
         $owner_id[0],
     );
