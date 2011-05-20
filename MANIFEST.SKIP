@@ -1,0 +1,13 @@
+^MYMETA.yml$
+^Build$
+^\.git/
+^_build/
+^blib/
+^jobs/
+^results/
+^my-
+.*\.tmp\.
+^tmp/
+~$
+\.bak$
+^MANIFEST\.SKIP$
