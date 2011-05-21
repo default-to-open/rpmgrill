@@ -43,6 +43,7 @@ has 'is_64bit',   is => 'ro', isa => 'Bool', writer => '_set_is_64bit';
 has 'multilib_peers',
     is     => 'ro',
     isa    => 'ArrayRef[RPM::Grill::RPM]',
+    auto_deref => 1,
     writer => '_set_multilib_peers';
 
 ###########

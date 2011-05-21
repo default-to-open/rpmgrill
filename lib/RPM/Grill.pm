@@ -160,7 +160,19 @@ sub new {
 
     # FIXME: cross-reference 32- and 64-bit peers
     for my $rpm (@{ $self->{_rpms} }) {
-        # FIXME
+        my $arch = $rpm->arch;
+        if (my $peer_arches = $Multilib_Peers{$arch}) {
+            my @peers;
+          PEER:
+            for my $peer (@{ $self->{_rpms} }) {
+                next PEER unless $peer->subpackage eq $rpm->subpackage;
+                next PEER unless grep { $peer->arch eq $_ } @$peer_arches;
+
+                push @peers, $peer;
+            }
+
+            $rpm->_set_multilib_peers( \@peers );
+        }
     }
 
     $self->{subpackages} = [ sort keys %all_subpackages ];
