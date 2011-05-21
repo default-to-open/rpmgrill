@@ -41,6 +41,33 @@ our %Is_Gripe_Context_Field = map { $_ => 1 } @Gripe_Context_Fields;
 # Name, Version, Release (NVR), in that order
 our @NVR_Fields = qw(name version release);
 
+# 32- and 64-bit architectures. Left-hand side of this table
+# lists 32-bit ones, right-hand side 64.
+our $Arch_Map = <<'END_ARCH_MAP';
+i386 i686 athlon  | x86_64 ia64
+ppc               | ppc64
+s390              | s390x
+END_ARCH_MAP
+
+our %Multilib_Peers;
+our %Is_64bit;
+for my $line (split "\n", $Arch_Map) {
+    $line =~ s/^\s+//;          # Remove leading...
+    $line =~ s/\s+$//;          # ...and trailing whitespace
+
+    # Split into left and right sides, on the '|'
+    my ($lhs, $rhs) = split( /\s+\|\s+/, $line);
+    my @arch32 = split ' ', $lhs        or die "Internal error: LHS = '$lhs'";
+    my @arch64 = split ' ', $rhs        or die "Internal error: RHS = '$rhs'";
+
+    $Is_64bit{$_} = 0                   for @arch32;
+    $Is_64bit{$_} = 1                   for @arch64;
+
+    $Multilib_Peers{$_} = [ @arch64 ]   for @arch32;
+    $Multilib_Peers{$_} = [ @arch32 ]   for @arch64;
+}
+
+
 # END   user-configurable section
 ###############################################################################
 
@@ -116,16 +143,25 @@ sub new {
             push @{ $self->{_rpms} }, $rpm;
 
             # Preserve the srpm
-            if ($rpm->arch eq 'src') {
+            my $arch = $rpm->arch;
+            if ($arch eq 'src') {
                 if (exists $self->{_srpm}) {
                     warn "$ME: WARNING! Multiple srpms!";
                 }
                 $self->{_srpm} = $rpm;
             }
+            elsif ($arch ne 'noarch') {
+                exists $Is_64bit{$arch}
+                    or warn "$ME: WARNING: Arch '$arch' not in my Is_64 table";
+                $rpm->_set_is_64bit( $Is_64bit{$arch} );
+            }
         }
     }
 
     # FIXME: cross-reference 32- and 64-bit peers
+    for my $rpm (@{ $self->{_rpms} }) {
+        # FIXME
+    }
 
     $self->{subpackages} = [ sort keys %all_subpackages ];
 

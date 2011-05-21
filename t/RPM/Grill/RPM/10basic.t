@@ -7,18 +7,6 @@ use Test::More;
 
 use_ok 'RPM::Grill::RPM';
 
-# 32-bit arches
-for my $arch qw(i386 i686 athlon ppc s390) {
-    my $rpm = bless { arch => $arch }, 'RPM::Grill::RPM';
-    is $rpm->is_64bit, undef, "is_64bit( $arch )";
-}
-
-# 64-bit arches
-for my $arch qw(x86_64 ia64 ppc64 s390x) {
-    my $rpm = bless { arch => $arch }, 'RPM::Grill::RPM';
-    is $rpm->is_64bit, 1, "is_64bit( $arch )";
-}
-
 my $rpm = bless {
     nvr => {
         name => 'mypkg',

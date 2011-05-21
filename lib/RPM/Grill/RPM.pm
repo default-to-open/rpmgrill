@@ -22,29 +22,6 @@ use Moose::Util::TypeConstraints;
 # Name, Version, Release (NVR), in that order
 our @NVR_Fields = qw(name version release);
 
-# FIXME
-our $Arch_Map = <<'END_ARCH_MAP';
-i386 i686 athlon  | x86_64 ia64
-ppc               | ppc64
-s390              | s390x
-END_ARCH_MAP
-
-our %Arch_Foo;
-our %Is_64bit;
-for my $line (split "\n", $Arch_Map) {
-    $line =~ s/^\s+//;          # Remove leading...
-    $line =~ s/\s+$//;          # ...and trailing whitespace
-
-    # Split into left and right sides, on the '|'
-    my ($lhs, $rhs) = split( /\s+\|\s+/, $line);
-    my @arch32 = split ' ', $lhs        or die "Internal error: LHS = '$lhs'";
-    my @arch64 = split ' ', $rhs        or die "Internal error: RHS = '$rhs'";
-
-    $Arch_Foo{$_} = [ @arch64 ]         for @arch32;
-    $Arch_Foo{$_} = [ @arch32 ]         for @arch64;
-    $Is_64bit{$_} = 1                   for @arch64;
-}
-
 # END   user-configurable section
 ###############################################################################
 
@@ -61,6 +38,12 @@ has 'dir',        is => 'ro', isa => 'Str', writer => '_set_dir';
 has 'arch',       is => 'ro', isa => 'Str', writer => '_set_arch';
 has 'subpackage', is => 'ro', isa => 'Str', writer => '_set_subpackage';
 has 'grill',      is => 'rw', isa => 'RPM::Grill';
+has 'is_64bit',   is => 'ro', isa => 'Bool', writer => '_set_is_64bit';
+
+has 'multilib_peers',
+    is     => 'ro',
+    isa    => 'ArrayRef[RPM::Grill::RPM]',
+    writer => '_set_multilib_peers';
 
 ###########
 #  BUILD  #  Invoked by Moose right after constructor. We set arch, subpackage
@@ -179,17 +162,6 @@ sub files {
     $self->{files} ||= RPM::Grill::RPM::Files::gather( $self );
 
     return wantarray ? @{ $self->{files} } : $self->{files};
-}
-
-##############
-#  is_64bit  #
-##############
-sub is_64bit {
-    my $self = shift;
-
-    my $arch = $self->arch;
-
-    return $Is_64bit{$arch};
 }
 
 use overload '""' => \&_as_string;
