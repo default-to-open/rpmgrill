@@ -136,7 +136,7 @@ sub main {
 
         my $job = $dbh->selectrow_hashref(<<'END_SQL');
 SELECT * FROM runs
-   WHERE status="queued"
+   WHERE state="queued"
    ORDER BY run_id ASC
    LIMIT 1
 END_SQL
@@ -158,8 +158,8 @@ sub process_job {
 
 #    use Data::Dumper; print Dumper($job);
 
-    # FIXME: UPDATE status into "running"
-    $dbh->do('UPDATE runs SET status="running" WHERE run_id=?',
+    # FIXME: UPDATE state into "running"
+    $dbh->do('UPDATE runs SET state="running" WHERE run_id=?',
              undef,
              $job->{run_id});
 
@@ -197,7 +197,7 @@ END_README
     system('perl', '-Ilib', './bin/rpmgrill', $work_dir);
     if ($?) {
         # FIXME: what else? Log any messages anywhere?
-        $dbh->do('UPDATE runs SET status="failed" WHERE run_id=?',
+        $dbh->do('UPDATE runs SET state="failed" WHERE run_id=?',
                  undef,
                  $job->{run_id});
         return;
@@ -231,8 +231,8 @@ END_README
     # FIXME: import results into DB
     put_results_into_sql( $dbh, $job, $xml_file );
 
-    # FIXME: set status to 'completed'
-    $dbh->do('UPDATE runs SET status="completed" WHERE run_id=?',
+    # FIXME: set state to 'completed'
+    $dbh->do('UPDATE runs SET state="completed" WHERE run_id=?',
              undef,
              $job->{run_id});
 

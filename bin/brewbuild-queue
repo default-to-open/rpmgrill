@@ -235,7 +235,7 @@ sub process_queue_file {
 
     # Shove into SQL
     my $sth = $dbh->prepare( <<'END_SQL' );
-INSERT INTO runs (package_name, package_version, package_release, brew_build_id, brew_tag_id, owner_id, status)
+INSERT INTO runs (package_name, package_version, package_release, brew_build_id, brew_tag_id, owner_id, state)
           VALUES (           ?,               ?,               ?,             ?,           ?,        ?, 'queued')
 END_SQL
     # FIXME...
