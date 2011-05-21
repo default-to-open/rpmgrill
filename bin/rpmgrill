@@ -78,12 +78,12 @@ sub man {
 
     # If called without output redirection, man-ify.
     my $out_fh;
-    if (-t *STDOUT) {
+    if (-t *STDOUT) {           ## no critic
         my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
-        open $out_fh, "| nroff -man | $pager";
+        open $out_fh, "| nroff -man | $pager";  ## no critic
     }
     else {
-        open $out_fh, '>&STDOUT';
+        open $out_fh, '>&', \*STDOUT;
     }
 
     # Read the POD contents, and have Pod::Man read from fake filehandle.
@@ -118,7 +118,11 @@ sub handle_opts {
     ) or die "Try `$ME --help' for help\n";
 
     if ($list_plugins) {
-        my $maxlen = max map { s/^.*:://; length($_); } RPM::Grill->plugins;
+        my $maxlen = max map {
+            my $tmp = $_;
+            $tmp =~ s/^.*:://;
+            length($tmp);
+        } RPM::Grill->plugins;
 
         print "Available $ME plugins, in the order in which they run:\n\n";
         for my $plugin (RPM::Grill->plugins) {
@@ -183,10 +187,10 @@ sub main {
     my $xml_outfile = "$base_dir.xml";
     my $tmpfile = "$xml_outfile.tmp.$$";
     unlink $tmpfile;
-    open XML_OUT, '>', $tmpfile
+    open my $fh_out, '>', $tmpfile
         or die "$ME: Cannot create $tmpfile: $!\n";
-    print XML_OUT $grill->as_xml;
-    close XML_OUT
+    print { $fh_out } $grill->as_xml;
+    close $fh_out
         or die "$ME: Cannot error writing $tmpfile: $!\n";
     chmod 0444 => $tmpfile;
     rename $tmpfile => $xml_outfile
@@ -196,10 +200,10 @@ sub main {
     my $yaml_outfile = "$base_dir.yaml";
     $tmpfile = "$yaml_outfile.tmp.$$";
     unlink $tmpfile;
-    open YAML_OUT, '>', $tmpfile
+    open $fh_out, '>', $tmpfile
         or die "$ME: Cannot create $tmpfile: $!\n";
-    print YAML_OUT $grill->as_yaml;
-    close YAML_OUT
+    print $fh_out $grill->as_yaml;
+    close $fh_out
         or die "$ME: Cannot error writing $tmpfile: $!\n";
     chmod 0444 => $tmpfile;
     rename $tmpfile => $yaml_outfile

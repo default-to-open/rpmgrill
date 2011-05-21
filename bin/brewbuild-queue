@@ -82,12 +82,12 @@ sub man {
 
     # If called without output redirection, man-ify.
     my $out_fh;
-    if (-t *STDOUT) {
+    if (-t *STDOUT) {           ## no critic
         my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
-        open $out_fh, "| nroff -man | $pager";
+        open $out_fh, "| nroff -man | $pager";  ## no critic
     }
     else {
-        open $out_fh, '>&STDOUT';
+        open $out_fh, '>&', \*STDOUT;
     }
 
     # Read the POD contents, and have Pod::Man read from fake filehandle.
