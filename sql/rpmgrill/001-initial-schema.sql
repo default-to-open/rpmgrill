@@ -54,7 +54,7 @@ CREATE TABLE runs (
        package_version  VARCHAR(256) NOT NULL,
        package_release  VARCHAR(256) NOT NULL,
 /*       variant_id       INT NOT NULL,*/       /* FIXME */
-       brew_task_id     INT,                    /* FIXME: allow NULL? */
+       brew_build_id    INT,                    /* FIXME: allow NULL? */
        brew_tag_id      INT NOT NULL,
        owner_id         INT NOT NULL,
 
