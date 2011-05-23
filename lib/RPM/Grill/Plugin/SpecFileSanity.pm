@@ -174,7 +174,7 @@ sub _check_for_other_specfile_problems {
         if ($s =~ /^\s*#.*[^%]%[^%]/o) {
             $self->gripe(
                 {   code    => "MacroSurprise",
-                    diag    => "Did you know that RPM expands macros even inside comments?",
+                    diag    => "RPM macros in comments; possible unexpected behavior",
                     context => {
                         path    => $specfile_basename,
                         lineno  => $lineno,
