@@ -35,7 +35,7 @@ while (my $line = <DATA>) {
 
     # Leading '>>' : metadata indicating test setup
     #                       1   1    2   2   3   3     4     4 5     5 6  6 7     7
-    elsif ($line =~ m{^>>\s+(-\S+)\s+(\w+)\s+(\w+)\s+/?([^/]+)/([^/]+)/(.*)/([^/]+)$}) {
+    elsif ($line =~ m{^>>\s+(-\S+)\s+(\w+)\s+(\w+)\s+/?([^/]+)/([^/]+)/(.*)/([^/\s]+)\s+(.*)$}) {
         push @{ $tests[-1]->{files} }, {
             mode        => $1,
             user        => $2,
@@ -48,6 +48,7 @@ while (my $line = <DATA>) {
             path        => "$4/$5/payload/$6/$7",
             fulldirname => "$4/$5/payload/$6",
             rootpath    => "/$6/$7",
+            color       => $8,
 
             text        => '',
         };
@@ -115,7 +116,7 @@ for my $i (0 .. $#tests) {
                        'root',
                        'root',
                         "0",
-                       "(none)",
+                       $f->{color},
                        $f->{rootpath},
                     ), "\n";
         close OUT or die;
@@ -145,41 +146,57 @@ __END__
 -------------no-difference--------------------------------
 
 
->> -rwxr-xr-x  root  root  /i386/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /i386/mypkg/usr/bin/foo      (none)
 aaaa
 
->> -rwxr-xr-x  root  root  /x86_64/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /x86_64/mypkg/usr/bin/foo    (none)
 aaaa
 
->> -rwxr-xr-x  root  root  /s390/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /s390/mypkg/usr/bin/foo      (none)
 aaaa
 
->> -rwxr-xr-x  root  root  /s390x/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /s390x/mypkg/usr/bin/foo     (none)
 aaaa
 
->> -rwxr-xr-x  root  root  /ppc/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /ppc/mypkg/usr/bin/foo       (none)
 aaaa
 
->> -rwxr-xr-x  root  root  /ppc64/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /ppc64/mypkg/usr/bin/foo     (none)
 aaaa
 
 
 -------------diff-one-arch--------------------------------
 
 
->> -rwxr-xr-x  root  root  /i386/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /i386/mypkg/usr/bin/myscript      (none)
 aaaa
 
->> -rwxr-xr-x  root  root  /x86_64/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /x86_64/mypkg/usr/bin/myscript    (none)
 bbbb
 
->> -rwxr-xr-x  root  root  /s390/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /s390/mypkg/usr/bin/myscript      (none)
 aaaa
 
->> -rwxr-xr-x  root  root  /s390x/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root  /s390x/mypkg/usr/bin/myscript     (none)
 aaaa
 
 -|  { arch       => 'x86_64',
 -|    code       => 'MultilibMismatch',
--|    diag       => 'Files differ: {i386,x86_64}/usr/bin/foo',
+-|    diag       => 'Files differ: {i386,x86_64}/usr/bin/myscript',
 -|  }
+
+
+-------------binary-diff-ok------------------------------
+
+
+>> -rwxr-xr-x  root  root  /i386/mypkg/usr/bin/mybin      1
+aaaa
+
+>> -rwxr-xr-x  root  root  /x86_64/mypkg/usr/bin/mybin    2
+bbbb
+
+>> -rwxr-xr-x  root  root  /s390/mypkg/usr/bin/mybin      1
+aaaa
+
+>> -rwxr-xr-x  root  root  /s390x/mypkg/usr/bin/mybin     2
+aaaa

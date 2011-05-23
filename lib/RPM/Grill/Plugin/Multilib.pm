@@ -48,32 +48,57 @@ sub analyze {
     my $self = shift;
 
     for my $rpm64 (grep { $_->is_64bit } $self->rpms ) {
-        my $arch64  = $rpm64->arch;
         my @files64 = $rpm64->files;
 
         for my $rpm32 ($rpm64->multilib_peers) {
-            my $arch32  = $rpm32->arch;
             my @files32 = $rpm32->files;
 
             # FIXME: compare files
             # FIXME: in which directories?
-          FILE64:
             for my $file64 (@files64) {
-                my @match = grep { $_->path eq $file64->path } @files32
-                    or next FILE64;
-                my $path = $file64->path;
-
-                if ($match[0]->md5sum ne $file64->md5sum) {
-                    $self->gripe({
-                        code => 'MultilibMismatch',
-                        diag => "Files differ: {$arch32,$arch64}$path",
-                        arch => $arch64,
-                    });
+                if (my @match = grep { $_->path eq $file64->path } @files32) {
+                    $self->_compare( $file64, $_ )          for @match;
                 }
             }
         }
     }
 }
+
+
+sub _compare {
+    my $self   = shift;
+    my $file64 = shift;
+    my $file32 = shift;
+
+    return if $file32->md5sum eq $file64->md5sum;
+
+    # md5sums differ. This means the files are different.
+    # If both files have a different "rpm color", that's OK.
+    my $color64 = $file64->color;
+    my $color32 = $file32->color;
+
+    if ($color64 =~ /^\d+$/) {
+        if ($color32 =~ /^\d+$/) {
+            if (($color64 & $color32) == 0) {
+                return;
+            }
+        }
+    }
+
+    # Files have the same (or no) rpm color. Gripe.
+    my $path = $file64->path;
+
+    my $arch64 = $file64->arch;
+    my $arch32 = $file32->arch;
+
+    $self->gripe({
+        code => 'MultilibMismatch',
+        diag => "Files differ: {$arch32,$arch64}$path",
+        arch => $arch64,
+    });
+}
+
+
 
 1;
 
