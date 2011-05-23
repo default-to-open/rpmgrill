@@ -54,6 +54,12 @@ for my $t (@tests) {
 
     my $actual_gripes = $grill->{gripes};
 
+    # Host system may have different version of 'setup' package
+    if ($actual_gripes) {
+        $actual_gripes =~ s{/setup-[\d.]+/}{/setup-[v]/}g;
+        $t->{expect}   =~ s{/setup-[\d.]+/}{/setup-[v]/}g;
+    }
+
     # For debugging
     if ($actual_gripes && !$t->{expect}) {
         use Data::Dumper;$Data::Dumper::Indent = 1; print Dumper($actual_gripes); exit;
