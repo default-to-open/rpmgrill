@@ -245,7 +245,11 @@ sub put_results_into_sql {
     my $job = shift;                    # in: hashref
     my $xml_file = shift;
 
-    my $xml = XMLin( $xml_file, ForceArray => 1, KeyAttr => [] );
+    my $xml = XMLin( $xml_file,
+                     ForceArray => 1,
+                     KeyAttr => [],
+                     SuppressEmpty => '',
+                 );
 
     my $run_id = $job->{run_id};
 
