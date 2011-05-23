@@ -47,25 +47,31 @@ END_DOC
 sub analyze {
     my $self = shift;
 
-    # FIXME: use what you need; delete what you don't
+    for my $rpm64 (grep { $_->is_64bit } $self->rpms ) {
+        my $arch64  = $rpm64->arch;
+        my @files64 = $rpm64->files;
 
-    #
-    # Loop over each arch and subpackage
-    #
-    for my $arch ( $self->non_src_arches ) {
-        for my $subpkg ( $self->subpackages($arch) ) {
+        for my $rpm32 ($rpm64->multilib_peers) {
+            my $arch32  = $rpm32->arch;
+            my @files32 = $rpm32->files;
 
-            # ...
+            # FIXME: compare files
+            # FIXME: in which directories?
+          FILE64:
+            for my $file64 (@files64) {
+                my @match = grep { $_->path eq $file64->path } @files32
+                    or next FILE64;
+                my $path = $file64->path;
+
+                if ($match[0]->md5sum ne $file64->md5sum) {
+                    $self->gripe({
+                        code => 'MultilibMismatch',
+                        diag => "Files differ: {$arch32,$arch64}$path",
+                        arch => $arch64,
+                    });
+                }
+            }
         }
-    }
-
-    #
-    # Do something with the specfile
-    #
-    for my $line ( $self->specfile->lines ) {
-        my $s = $line->content;
-
-        # ...
     }
 }
 
