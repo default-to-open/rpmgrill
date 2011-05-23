@@ -56,8 +56,11 @@ for my $t (@tests) {
 
     # Host system may have different version of 'setup' package
     if ($actual_gripes) {
-        $actual_gripes =~ s{/setup-[\d.]+/}{/setup-[v]/}g;
-        $t->{expect}   =~ s{/setup-[\d.]+/}{/setup-[v]/}g;
+        for my $href ($actual_gripes, $t->{expect}) {
+            for my $gripe (@{ $href->{RpmScripts} }) {
+                $gripe->{diag} =~ s{/setup-[\d.]+/}{/setup-[v]/}g;
+            }
+        }
     }
 
     # For debugging
