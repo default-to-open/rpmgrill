@@ -1,0 +1,12 @@
+{
+  SpecFileSanity => [
+    {
+      code => 'ChangelogEmpty',
+      context => {
+        lineno => '10',
+        path => 'zzz-3-empty-1.2.3-4.spec'
+      },
+      diag => 'Empty %changelog section in spec file',
+    }
+  ]
+}

@@ -189,8 +189,26 @@ sub _check_for_other_specfile_problems {
     # between the reported version and the actual NVR
     #
     if (my @changelog = $spec->lines('%changelog')) {
-        my $cl_first  = $changelog[1]->content; # [0] is %changelog
-        my $cl_lineno = $changelog[1]->lineno;
+        my $cl_lineno = $changelog[0]->lineno;
+
+        # Get the first non-blank line
+        shift @changelog;               # (first one is '%changelog')
+        while (@changelog && ! $changelog[0]->content) {
+            shift @changelog;
+        }
+        if (! @changelog) {
+            $self->gripe({
+                code    => 'ChangelogEmpty',
+                diag    => 'Empty %changelog section in spec file',
+                context => {
+                    path   => $specfile_basename,
+                    lineno => $cl_lineno,
+                },
+            });
+            return;
+        }
+
+        my $cl_first  = $changelog[0]->content; # [0] is %changelog
 
         # Parse out the V-R, eg "* <date> <author> 1.2-4"
         if ($cl_first =~ /^\*\s+.*\s(\S+)\s*$/) {
