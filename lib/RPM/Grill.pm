@@ -136,7 +136,7 @@ sub new {
 
         # Initialize RPMs
         for my $subp (@subp) {
-            my $rpm = RPM::Grill::RPM->new( path => "$dir/$arch/$subp/rpm.rpm" );
+            my $rpm = RPM::Grill::RPM->new( "$dir/$arch/$subp/rpm.rpm" );
 
             $rpm->grill( $self );
 
@@ -153,7 +153,7 @@ sub new {
             elsif ($arch ne 'noarch') {
                 exists $Is_64bit{$arch}
                     or warn "$ME: WARNING: Arch '$arch' not in my Is_64 table";
-                $rpm->_set_is_64bit( $Is_64bit{$arch} );
+                $rpm->is_64bit( $Is_64bit{$arch} );
             }
         }
     }
@@ -171,7 +171,7 @@ sub new {
                 push @peers, $peer;
             }
 
-            $rpm->_set_multilib_peers( \@peers );
+            $rpm->multilib_peers( \@peers );
         }
     }
 

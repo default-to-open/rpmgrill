@@ -13,8 +13,6 @@ use version; our $VERSION = qv( '0.0.1' );
 
 use Carp;
 use File::Basename      qw(dirname);
-use Moose;
-use Moose::Util::TypeConstraints;
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -28,46 +26,85 @@ our @NVR_Fields = qw(name version release);
 # Program name of our caller
 (our $ME = $0) =~ s|.*/||;
 
-subtype 'RPMpath'
-    => as Str
-    => where { -e }
-    => message { "path $_ does not exist" };
+#########
+#  new  #  Constructor.
+#########
+sub new() {
+    my $proto = shift;
+    my $class = ref($proto) || $proto;
 
-has 'path',       is => 'ro', isa => 'RPMpath', required => 1;
-has 'dir',        is => 'ro', isa => 'Str', writer => '_set_dir';
-has 'arch',       is => 'ro', isa => 'Str', writer => '_set_arch';
-has 'subpackage', is => 'ro', isa => 'Str', writer => '_set_subpackage';
-has 'grill',      is => 'rw', isa => 'RPM::Grill';
-has 'is_64bit',   is => 'ro', isa => 'Bool', writer => '_set_is_64bit';
+    my $path = shift			# in: mandatory arg
+	or croak "Usage: ".__PACKAGE__."->new( PATH-TO-RPM )";
 
-has 'multilib_peers',
-    is     => 'ro',
-    isa    => 'ArrayRef[RPM::Grill::RPM]',
-    auto_deref => 1,
-    writer => '_set_multilib_peers';
-
-###########
-#  BUILD  #  Invoked by Moose right after constructor. We set arch, subpackage
-###########
-sub BUILD {
-    my $self = shift;
-
-    my $path = $self->path;
-
-    # Grumble. This should be done by subtype, but I can't figure out
-    # how to give distinct error messages.
     $path =~ /\.rpm$/
-        or croak "$ME: path '$path' does not end in .rpm";
+        or croak "$ME: Input arg must have a .rpm extension ($path)";
+
+    -e $path
+        or croak "$ME: RPM path does not exist: $path";
 
     my ($arch, $subpackage) = $path =~ m{/ ([^/]+) / ([^/]+) / [^/]+\.rpm$}x
         or croak "$ME: path '$path' does not include /<arch>/<subpkg>/";
 
-    $self->_set_arch($arch);
-    $self->_set_subpackage($subpackage);
+    my $self = {
+        path       => $path,
+        arch       => $arch,
+        subpackage => $subpackage,
+        dir        => dirname($path),
+    };
 
-    $self->_set_dir( dirname($path) );
+    return bless $self, $class;
+}
 
-#    use Data::Dumper; print Dumper($self);
+
+###########
+#  grill  #  Used for referring to our parent RPM::Grill object
+###########
+sub grill {
+    my $self  = shift;
+
+    if (@_) {
+        my $grill = shift;
+        ref($grill)
+            or croak "$ME: ->grill() invoked with non-ref";
+        ref($grill) eq 'RPM::Grill'
+            or croak "$ME: ->grill(): arg is not a RPM::Grill ref";
+        $self->{grill} = $grill;
+    }
+
+    return $self->{grill};
+}
+
+sub arch       { return $_[0]->{arch}       }
+sub subpackage { return $_[0]->{subpackage} }
+sub dir        { return $_[0]->{dir}        }
+sub path       { return $_[0]->{path}       }
+
+sub is_64bit {
+    my $self  = shift;
+
+    if (@_) {
+        $self->{is_64bit} = shift;
+    }
+
+    return $self->{is_64bit};
+}
+
+
+sub multilib_peers {
+    my $self  = shift;
+
+    if (@_) {
+        my $peers = shift;
+        ref($peers)
+            or croak "$ME: ->multilib_peers() invoked with non-ref";
+        ref($peers) eq 'ARRAY'
+            or croak "$ME: ->multilib_peers(): arg is not ARRAY ref";
+        grep { ref($_) ne 'RPM::Grill::RPM' } @$peers
+            and croak "$ME: ->multilib_peers(): non-RPM ref in array";
+        $self->{multilib_peers} = $peers;
+    }
+
+    return wantarray ? @{$self->{multilib_peers}} : $self->{multilib_peers};
 }
 
 #########
