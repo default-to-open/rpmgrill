@@ -275,7 +275,10 @@ sub invoke_plugin {
     bless $self, $plugin;
 
     # FIXME invoke under eval
+    my $t0 = time;
     eval { $self->analyze() };
+    my $t1 = time;
+    $self->{results}->{$module}->{run_time} = $t1 - $t0;
 
     # FIXME if $@, set status to fail
     if ($@) {
@@ -336,13 +339,19 @@ sub as_xml {
         $plugin =~ m{^.*::Plugin::(.*)$}
             or croak "$ME: Internal error: unexpected plugin '$plugin'";
         my $module = $1;
+        my $results = $self->{results}->{$module};
 
+        # plugin name, execution order, test status
         $s .= sprintf("  <test name=\"%-*s order=\"%02d\" status=\"%s\"",
                       $maxlen+1, $module . '"', $plugin->order(),
-                      $self->{results}->{$module}->{status} || 'NOTRUN');
+                      $results->{status} || 'NOTRUN');
+
+        # test time, in seconds
+        $s .= sprintf(" run_time=\"%d\"", $results->{run_time})
+            if defined $results->{run_time};
 
         # Failure in the test itself (e.g. a croak trapped by eval)
-        if (my $fail = $self->{results}->{$module}->{fail}) {
+        if (my $fail = $results->{fail}) {
             $s .= sprintf(" fail=\"%s\"", encode_entities($fail));
         }
 
@@ -496,10 +505,14 @@ sub as_yaml {
             or croak "$ME: Internal error: unexpected plugin '$plugin'";
         my $module = $1;
 
-        # Will show up in YAML as '010 SpecFileEncoding : completed'
+        # Will show up in YAML as '010 SpecFileEncoding : completed (10s)'
         # (including the single quotes).
         my $key = sprintf("%03d %-*s : %s", $plugin->order, $maxlen, $module,
                           $self->{results}->{$module}->{status} || 'NOTRUN');
+
+        if (defined (my $run_time = $self->{results}->{$module}->{run_time})) {
+            $key .= sprintf(" (%ds)", $run_time);
+        }
 
         if (my $fail = $self->{results}->{$module}->{fail}) {
             $key .= sprintf(" : \"%s\"", encode_entities($fail));
