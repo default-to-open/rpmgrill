@@ -16,6 +16,7 @@ use warnings;
 #use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
 
 use DBI;
+use IPC::Run            qw(run timeout);
 use File::Path          qw(rmtree);
 use Time::Piece;
 use XML::Simple;
@@ -174,8 +175,20 @@ sub process_job {
     # Unpack into working directory
     print "unpacking..."                                if $verbose;
 
-    system('brew-unpack', $nvr, $work_dir) == 0
-        or die "$ME: brew-unpack $nvr failed\n";
+    my @cmd = ('brew-unpack', $nvr, $work_dir);
+    my ( $stdout, $stderr );
+    run \@cmd, \undef, \$stdout, \$stderr, timeout(3600);    # 1 hour!
+    my $exit_status = $?;
+    print $stdout               if $stdout;
+    print $stderr               if $stderr;
+    if ($exit_status != 0) {
+        # FIXME: email this to maintainer?
+        # FIXME: add a 'why this failed' column to database?
+        $dbh->do('UPDATE runs SET state="failed" WHERE run_id=?',
+                 undef,
+                 $job->{run_id});
+        return;
+    }
 
     # Unpacked. Write a custom README file in case we crash
     my $readme = "$work_dir/README.$ME";
