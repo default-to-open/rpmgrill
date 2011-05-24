@@ -92,7 +92,10 @@ LINE:
 
         # Full path to the extracted file.
         # FIXME: handle iso/img/other nested-extracted files
-        $x{extracted_path} = $x{_root} . '/payload' . $x{path};
+        $x{extracted_path} = $x{_root}
+                                . '/payload'
+                                . ($x{path} =~ m{^/} ? '' : '/')
+                                . $x{path};
 
         # FIXME: check that {path} exists?  stat()?
         push @out, bless \%x, __PACKAGE__;
