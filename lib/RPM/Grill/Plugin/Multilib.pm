@@ -47,7 +47,12 @@ END_DOC
 sub analyze {
     my $self = shift;
 
+  RPM64:
     for my $rpm64 (grep { $_->is_64bit } $self->rpms ) {
+        # Never check -debuginfo or kernel-headers packages
+        next RPM64      if $rpm64->subpackage =~ /-debuginfo/
+                        || $rpm64->subpackage =~ /^kernel-(.*-)?headers/;
+
         my @files64 = $rpm64->files;
 
         for my $rpm32 ($rpm64->multilib_peers) {
