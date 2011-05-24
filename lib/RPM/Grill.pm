@@ -510,15 +510,17 @@ sub as_yaml {
         my $key = sprintf("%03d %-*s : %s", $plugin->order, $maxlen, $module,
                           $self->{results}->{$module}->{status} || 'NOTRUN');
 
+        # the " (10s)" part (10-second run time)
         if (defined (my $run_time = $self->{results}->{$module}->{run_time})) {
             $key .= sprintf(" (%ds)", $run_time);
         }
 
+        # If the test code failed (eval itself, not a gripe), show the reason.
         if (my $fail = $self->{results}->{$module}->{fail}) {
             $key .= sprintf(" : \"%s\"", encode_entities($fail));
         }
 
-
+        # Gripes (messages from the test itself)
         if (my $gripes = $self->{gripes}->{$module}) {
             # We have gripes.  Write them all, indented.
             push @{ $y->{tests} }, { $key => $gripes };
