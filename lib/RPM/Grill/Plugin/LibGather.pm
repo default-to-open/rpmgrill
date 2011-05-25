@@ -19,6 +19,7 @@ our $VERSION = "0.01";
 
 use Carp;
 use DBI;
+use File::LibMagic              qw(:easy);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -107,8 +108,18 @@ sub _gather_libs {
     my $f    = shift;                   # in: file obj
     my $sth  = shift;                   # in: MySQL insert thingy
 
+    # eu-readelf hangs, apparently forever, on certain clamav files:
+    #   payload/usr/share/doc/clamav-0.97/test/.split/split.clam.exe.bz2aa
+    my $file_path = $f->extracted_path;
+    my $file_type = MagicFile( $file_path )
+        or do {
+            warn "$ME: Cannot determine file type (Magic) of $file_path\n";
+            return;
+        };
+    return unless $file_type =~ /\bELF\b/;
+
     my @libs;
-    my $cmd = "eu-readelf -d " . $f->extracted_path . " 2>/dev/null";
+    my $cmd = "eu-readelf -d $file_path 2>/dev/null";
     open my $fh_readelf, "-|", $cmd
         or die "$ME: Cannot fork: $!\n";
     while (my $line = <$fh_readelf>) {
