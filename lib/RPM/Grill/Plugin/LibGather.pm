@@ -35,7 +35,7 @@ sub doc { return <<"END_DOC" };
 FIXME FIXME FIXME
 END_DOC
 
-our $Log = '/tmp/rpmgrill-libs.log';
+our $Log = 'rpmgrill.pw-linkage.txt';
 
 # END   user-configurable section
 ###############################################################################
@@ -93,20 +93,29 @@ sub analyze {
         warn "$ME: Cannot connect to mysql; will dump just txt";
     }
 
+    # Create a text log too. Always create it, as a signal that we've run.
+    open my $fh_log, '>>', $Log
+        or die "$ME: Cannot append to $Log: $!\n";
+
     for my $rpm ( $self->rpms ) {
         for my $f ( $rpm->files ) {
-            $self->_gather_libs( $f, $sth )
+            $self->_gather_libs( $f, $sth, $fh_log )
         }
     }
 
     # If we're doing mysql, disconnect now
     $dbh->disconnect                    if $dbh;
+
+    # We always have a log file
+    close $fh_log
+        or die "$ME: Error writing to $Log: $!\n";
 }
 
 sub _gather_libs {
-    my $self = shift;
-    my $f    = shift;                   # in: file obj
-    my $sth  = shift;                   # in: MySQL insert thingy
+    my $self   = shift;
+    my $f      = shift;                 # in: file obj
+    my $sth    = shift;                 # in: MySQL insert thingy
+    my $fh_log = shift;                 # in: filehandle to log file
 
     # eu-readelf hangs, apparently forever, on certain clamav files:
     #   payload/usr/share/doc/clamav-0.97/test/.split/split.clam.exe.bz2aa
@@ -136,19 +145,14 @@ sub _gather_libs {
         $sth->execute($f->subpackage, $f->arch, $_, $f->path)       for @libs;
     }
 
-    # Now dump to text file, but only if there's something to dump
+    # Now dump to text file.
     if (@libs) {
-        # Log to txt file, because mysql is currently only in test mode
         my @nvr = $self->nvr;
 
-        open my $fh_log, '>>', $Log
-            or die "$ME: Cannot append to $Log: $!\n";
         for my $l (@libs) {
             print { $fh_log } join("\t", @nvr, $f->arch, $f->subpackage,
                                    $l, $f->path), "\n";
         }
-        close $fh_log
-            or die "$ME: Error writing to $Log: $!\n";
     }
 }
 
