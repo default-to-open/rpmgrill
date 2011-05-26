@@ -210,6 +210,13 @@ sub _check_for_other_specfile_problems {
 
         my $cl_first  = $changelog[0]->content; # [0] is %changelog
 
+        # Gripe context
+        my $context = {
+            path   => $specfile_basename,
+            lineno => $cl_lineno,
+            excerpt => $cl_first,
+        };
+
         # Parse out the V-R, eg "* <date> <author> 1.2-4"
         if ($cl_first =~ /^\*\s+.*\s(\S+)\s*$/) {
             my $vr = $1;                # eg 1.2-4
@@ -223,11 +230,7 @@ sub _check_for_other_specfile_problems {
                         $self->gripe({
                             code => 'ChangelogWrongEpoch',
                             diag => "Wrong epoch <var>$epoch_cl</var> in first %changelog entry; expected <var>$epoch_spec</var>",
-                            context => {
-                                path => $specfile_basename,
-                                lineno => $cl_lineno,
-                                excerpt => $cl_first,
-                            },
+                            context => $context,
                         });
                     }
                 }
@@ -235,11 +238,7 @@ sub _check_for_other_specfile_problems {
                     $self->gripe({
                             code => 'ChangelogUnexpectedEpoch',
                             diag => "First %changelog entry specifies epoch <var>$epoch_cl</var>, but specfile defines no Epoch",
-                            context => {
-                                path => $specfile_basename,
-                                lineno => $cl_lineno,
-                                excerpt => $cl_first,
-                            },
+                            context => $context,
                         });
                 }
             }
@@ -251,22 +250,14 @@ sub _check_for_other_specfile_problems {
                     $self->gripe({
                         code => 'ChangelogBadVersion',
                         diag => "First %changelog entry is for <var>$v</var>; expected <var>$nvr[1]</var>",
-                        context => {
-                            path    => $specfile_basename,
-                            lineno  => $cl_lineno,
-                            excerpt => $cl_first,
-                        },
+                        context => $context,
                     });
                 }
                 elsif ($nvr[2] !~ /^$r\b/) {
                     $self->gripe({
                         code => 'ChangelogBadRelease',
                         diag => "First %changelog entry is for <var>$v-$r</var>, which doesn't quite match <var>$nvr[1]-<u>$nvr[2]</u></var>",
-                        context => {
-                            path    => $specfile_basename,
-                            lineno  => $cl_lineno,
-                            excerpt => $cl_first,
-                        },
+                        context => $context,
                     });
 
                 }
@@ -280,11 +271,7 @@ sub _check_for_other_specfile_problems {
             $self->gripe({
                 code => 'ChangelogWeirdLine',
                 diag => 'Unexpected first line in <b>%changelog</b> section',
-                context => {
-                    path    => $specfile_basename,
-                    lineno  => $cl_lineno,
-                    excerpt => $cl_first,
-                },
+                context => $context,
             });
         }
     }
