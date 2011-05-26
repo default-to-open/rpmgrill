@@ -15,6 +15,7 @@ use warnings;
 # For debugging, show data structures using DumpTree($var)
 #use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
 
+use Cwd                 qw(abs_path);
 use DBI;
 use IPC::Run            qw(run timeout);
 use File::Path          qw(rmtree);
@@ -207,7 +208,7 @@ END_README
 
     # Unpacked. Run the analysis.
     print "analyzing..."                                if $verbose;
-    system('perl', '-Ilib', './bin/rpmgrill', $work_dir);
+    system('perl', '-I'.abs_path('lib'), './bin/rpmgrill', $work_dir);
     if ($?) {
         # FIXME: what else? Log any messages anywhere?
         $dbh->do('UPDATE runs SET state="failed" WHERE run_id=?',
@@ -219,7 +220,7 @@ END_README
     # FIXME: move results to results/<timestamp><buildid><nvr>.xml/yaml
     my $xml_file;
     for my $ext qw(xml yaml) {
-        my $results = "$work_dir.$ext";
+        my $results = "$work_dir/rpmgrill.$ext";
         if (-e $results) {
             my $outfile = sprintf("results/%05d--%s.%s",
                                   $job->{run_id},

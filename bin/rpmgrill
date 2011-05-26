@@ -168,23 +168,30 @@ sub main {
     -d "$base_dir/src"
         or die "$ME: Base directory $base_dir does not have a 'src' subdir\n";
 
-    # We now have the path to a directory containing unpacked RPMs.
-
-    # FIXME: parse, a la rpmdiff
-    # FIXME: invoke plugins
-
-    # FIXME: do code here
+    # Find all plugins. Do this before cd'ing, in case we have relative
+    # paths in our @INC.
     my @all_plugins = RPM::Grill->plugins();
 
-    my $grill = RPM::Grill->new($base_dir);
+    # We now have the path to a directory containing unpacked RPMs.
+    # cd into it, so our output files (intentional as well as un)
+    # will be in one uncluttered place. (unintentional files may
+    # be the result of running 'rpm -qi --specfile').
+    chdir $base_dir
+        or die "$ME: Cannot cd $base_dir: $!\n";
 
+    #
+    # This is what does all the work!
+    #
+    my $grill = RPM::Grill->new('.');
     for my $plugin (@all_plugins) {
         $grill->invoke_plugin( $plugin )
             unless grep { $plugin =~ /::$_$/ } @disable_plugin;
     }
 
-    # Write xml FIXME: better filename
-    my $xml_outfile = "$base_dir.xml";
+    #
+    # Done. Write XML and YAML output files for our caller.
+    #
+    my $xml_outfile = "$ME.xml";
     my $tmpfile = "$xml_outfile.tmp.$$";
     unlink $tmpfile;
     open my $fh_out, '>', $tmpfile
@@ -197,7 +204,7 @@ sub main {
         or die "$ME: Cannot rename $tmpfile: $!\n";
 
     # Write YAML
-    my $yaml_outfile = "$base_dir.yaml";
+    my $yaml_outfile = "$ME.yaml";
     $tmpfile = "$yaml_outfile.tmp.$$";
     unlink $tmpfile;
     open $fh_out, '>', $tmpfile
