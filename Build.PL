@@ -13,6 +13,7 @@ my $builder = Module::Build->new(
         'DBI'               => 0,
         'Encode'           => 0,
         'File::Basename'   => 0,
+        'File::LibMagic'   => 0,
         'File::Slurp'      => 0,
         'HTML::Entities'   => 0,
         'IPC::Run'         => 0,
