@@ -3,10 +3,10 @@ use warnings;
 use Module::Build;
 
 my $builder = Module::Build->new(
-    module_name     => 'rpmgrill',
-    dist_version    => '0.01',
-    license         => 'perl',
-    dist_author     => 'Eduardo Santiago <santiago@redhat.com>',
+    module_name       => 'rpmgrill',
+    dist_version_from => 'bin/rpmgrill',
+    license           => 'perl',
+    dist_author       => 'Eduardo Santiago <santiago@redhat.com>',
     requires => {
         'CGI'              => 0,
         'Clone'             => 0,

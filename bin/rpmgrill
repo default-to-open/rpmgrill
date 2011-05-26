@@ -10,7 +10,7 @@ use strict;
 use warnings;
 
 (our $ME = $0) =~ s|.*/||;
-our $VERSION = "0.0";                   # Replaced by Makefile.PL
+our $VERSION = "0.01";
 
 # For debugging, show data structures using DumpTree($var)
 #use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
