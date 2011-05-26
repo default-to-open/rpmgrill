@@ -215,6 +215,36 @@ sub _check_for_other_specfile_problems {
             my $vr = $1;                # eg 1.2-4
             my @nvr = $self->nvr;       # eg foo, 1.2, 4.el5
 
+            # FIXME FIXME FIXME: handle epoch
+            if ($vr =~ s/^(\d+)://) {
+                my $epoch_cl = $1;              # epoch in changelog
+                if (defined (my $epoch_spec = $spec->epoch)) {
+                    if ($epoch_cl != $epoch_spec) {
+                        $self->gripe({
+                            code => 'ChangelogWrongEpoch',
+                            diag => "Wrong epoch <var>$epoch_cl</var> in first %changelog entry; expected <var>$epoch_spec</var>",
+                            context => {
+                                path => $specfile_basename,
+                                lineno => $cl_lineno,
+                                excerpt => $cl_first,
+                            },
+                        });
+                    }
+                }
+                else {                          # no epoch in specfile
+                    $self->gripe({
+                            code => 'ChangelogUnexpectedEpoch',
+                            diag => "First %changelog entry specifies epoch <var>$epoch_cl</var>, but specfile defines no Epoch",
+                            context => {
+                                path => $specfile_basename,
+                                lineno => $cl_lineno,
+                                excerpt => $cl_first,
+                            },
+                        });
+                }
+            }
+
+            # FIXME: explain
             if ($vr =~ m{^(.*)-(.*)$}) {
                 my ($v, $r) = ($1, $2);
                 if ($v ne $nvr[1]) {

@@ -137,6 +137,25 @@ sub lines {
     return @{ $self->{lines} };
 }
 
+
+###########
+#  epoch  #  Value of 'Epoch: NN', or undef
+###########
+sub epoch {
+    my $self = shift;
+
+    my @match;
+    for my $line ( $self->lines('%preamble') ) {
+        if ($line->content =~ /^Epoch:\s*(\d+)$/) {
+            push @match, $1;
+        }
+    }
+
+    warn "$ME: WARNING: Specfile has multiple Epoch lines\n" if @match > 1;
+
+    return $match[0];
+}
+
 ###############################################################################
 # BEGIN gripe and context
 
