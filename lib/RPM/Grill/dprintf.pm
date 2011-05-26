@@ -33,7 +33,7 @@ our %debug;
 # Program name of our caller
 ( our $ME = $0 ) =~ s|.*/||;
 
-use version; our $VERSION = qv( '0.0.1' );
+our $VERSION = "0.01";
 
 # For non-OO exporting of code, symbols
 our @ISA    = qw(Exporter);

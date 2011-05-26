@@ -9,7 +9,7 @@ package RPM::Grill::RPM;
 use strict;
 use warnings;
 
-use version; our $VERSION = qv( '0.0.1' );
+our $VERSION = "0.01";
 
 use Carp;
 use File::Basename      qw(dirname);
