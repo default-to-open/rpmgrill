@@ -393,21 +393,18 @@ sub as_xml {
 #  _version  #  Friendly version string
 ##############
 sub _version {
-    # First choice: if we're an "official" install, get that version
-    # FIXME: how do we determine that?
-    if (0) {
-        return "FIXME";
-    }
+    # use main version string as our baseline
+    my $version = $VERSION;
 
+    # If we're in a git dir, include a git version
     my $git_desc = qx{git describe --tags 2>&1};
     if ($? == 0) {
         if ($git_desc =~ /^(\S+)$/) {
-            return $1;
+            $version .= "-$1";
         }
     }
 
-    warn "$ME: Warning: cannot determine package version\n";
-    return "$VERSION";
+    return $version;
 }
 
 
