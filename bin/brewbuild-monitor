@@ -160,6 +160,7 @@ try:
             if req[1]['state'] == 1:
                 write_queue_file(req)
                 print "queued",
+                os.system('./bin/brewbuild-queue')  # put into DB
             print ""
 #            if req[1][state] == 1:
 #                pprint.pprint(req)
