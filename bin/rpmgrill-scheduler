@@ -219,7 +219,7 @@ END_README
 
     # FIXME: move results to results/<timestamp><buildid><nvr>.xml/yaml
     my $xml_file;
-    for my $ext qw(xml yaml) {
+    for my $ext qw(xml yaml pw-linkage.txt) {
         my $results = "$work_dir/rpmgrill.$ext";
         if (-e $results) {
             my $outfile = sprintf("results/%05d--%s.%s",
