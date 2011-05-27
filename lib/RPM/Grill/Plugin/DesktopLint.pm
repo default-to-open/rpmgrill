@@ -56,7 +56,7 @@ sub analyze {
     #
     for my $rpm ( $self->rpms ) {
         for my $f ( $rpm->files ) {
-            if ( $f->is_reg && $f->{path} =~ /\.(desktop|directory)$/ ) {
+            if ( $f->is_reg && $f->{path} =~ m{[^/]\.(desktop|directory)$} ) {
                 # Note that $f has _arch and _subpackage already
                 _desktop_file_validate($f);
                 _check_desktop_file($f);
