@@ -4,8 +4,8 @@ Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
 License:        Red Hat internal.  Do not redistribute.
-URL:            http://git.engineering.redhat.com/?p=users/esantiag/rpmgrill.git;a=summary
-Source0:        rpmgrill-%{version}.tar.gz
+URL:            http://git.engineering.redhat.com/?p=users/esantiag/%{name}.git;a=summary
+Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl
@@ -48,7 +48,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 %{_mandir}/man1/*
 %{_mandir}/man3/*
-
+%config /etc/brewtap.conf
 
 %changelog
 * Tue Dec 21 2010 Eduardo Santiago <santiago@redhat.com> - 0.01-1
