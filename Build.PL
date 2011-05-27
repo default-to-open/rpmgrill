@@ -10,7 +10,6 @@ my $builder = Module::Build->new(
     requires => {
         'CGI'              => 0,
         'Clone'             => 0,
-        'DBI'               => 0,
         'Encode'           => 0,
         'File::Basename'   => 0,
         'File::LibMagic'   => 0,
