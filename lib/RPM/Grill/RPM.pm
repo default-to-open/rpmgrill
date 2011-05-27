@@ -29,7 +29,7 @@ our @NVR_Fields = qw(name version release);
 #########
 #  new  #  Constructor.
 #########
-sub new() {
+sub new {
     my $proto = shift;
     my $class = ref($proto) || $proto;
 
