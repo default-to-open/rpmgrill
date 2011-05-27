@@ -146,13 +146,8 @@ sub _gather_libs {
     }
 
     # Now dump to text file.
-    if (@libs) {
-        my @nvr = $self->nvr;
-
-        for my $l (@libs) {
-            print { $fh_log } join("\t", @nvr, $f->arch, $f->subpackage,
-                                   $l, $f->path), "\n";
-        }
+    for my $l (@libs) {
+        print { $fh_log } join("\t",$f->arch,$f->subpackage,$l,$f->path),"\n";
     }
 }
 
