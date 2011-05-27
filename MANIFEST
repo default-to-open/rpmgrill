@@ -1,7 +1,4 @@
-bin/brewbuild-monitor
-bin/brewbuild-queue
 bin/rpmgrill
-bin/rpmgrill-scheduler
 bin/run-analysis
 bin/wrangler-get-linkages
 Build.PL
@@ -27,6 +24,7 @@ lib/RPM/Grill/RPM.pm
 lib/RPM/Grill/RPM/Files.pm
 lib/RPM/Grill/RPM/Metadata.pm
 lib/RPM/Grill/RPM/SpecFile.pm
+Makefile
 MANIFEST
 META.yml
 README
