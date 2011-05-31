@@ -8,6 +8,8 @@ SPECFILE = $(NAME).spec
 VERSION = $(shell rpm -q --specfile $(SPECFILE) --queryformat '%{VERSION}')
 RELEASE = $(shell rpm -q --specfile $(SPECFILE) --queryformat '%{RELEASE}')
 
+# Magic brew thingy for building
+DIST = el6eso
 
 $(NAME)-$(VERSION).tar.bz2:
 	@rm -rf $(NAME)-0.0 $(NAME)-$(VERSION)
@@ -19,10 +21,10 @@ $(NAME)-$(VERSION).tar.bz2:
 	rm -rf $(NAME)-$(VERSION)
 
 
-$(NAME)-$(VERSION)-$(RELEASE).src.rpm: $(NAME)-$(VERSION).tar.bz2
-	rpmbuild -bs --nodeps --define "_sourcedir ." --define "_srcrpmdir ." --define 'dist .el6eso' $(SPECFILE)
+$(NAME)-$(VERSION)-$(RELEASE).$(DIST).src.rpm: $(NAME)-$(VERSION).tar.bz2
+	rpmbuild -bs --nodeps --define "_sourcedir ." --define "_srcrpmdir ." --define "dist .$(DIST)" $(SPECFILE)
 
 
 # Shortcut names for the above
 tarball:	$(NAME)-$(VERSION).tar.bz2
-srpm:		$(NAME)-$(VERSION).src.rpm
+srpm:		$(NAME)-$(VERSION)-$(RELEASE).$(DIST).src.rpm
