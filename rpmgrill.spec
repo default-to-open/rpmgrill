@@ -47,7 +47,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 %{_mandir}/man1/*
 %{_mandir}/man3/*
-%config /etc/brewtap.conf
 
 %changelog
 * Tue Dec 21 2010 Eduardo Santiago <santiago@redhat.com> - 0.01-1
