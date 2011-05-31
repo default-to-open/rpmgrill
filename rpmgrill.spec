@@ -5,13 +5,12 @@ Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
 License:        Red Hat internal.  Do not redistribute.
 URL:            http://git.engineering.redhat.com/?p=users/esantiag/%{name}.git;a=summary
-Source0:        %{name}-%{version}.tar.gz
+Source0:        %{name}-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl
 BuildRequires:  perl-Module-Build
 BuildRequires:  perl-Test-Simple
-Requires:       perl-DBI
 
 %description
 rpmgrill runs a series of tests against a set of RPMs, reporting problems
