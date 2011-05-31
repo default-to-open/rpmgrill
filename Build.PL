@@ -4,7 +4,8 @@ use Module::Build;
 
 my $builder = Module::Build->new(
     module_name       => 'rpmgrill',
-    dist_version_from => 'bin/rpmgrill',
+    dist_version      => '0.0',
+    dist_abstract     => 'Suite of sanity tests for RPM builds',
     license           => 'perl',
     dist_author       => 'Eduardo Santiago <santiago@redhat.com>',
     requires => {
