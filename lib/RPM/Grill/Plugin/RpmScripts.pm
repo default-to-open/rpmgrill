@@ -208,6 +208,7 @@ sub analyze {
         last LINE               if $section eq '%changelog';
 
         # Skip prereqs, eg PreReq: %{_sbindir}/groupadd, %{_sbindir}/useradd
+        next LINE               if     $section eq '%preamble';
         next LINE               unless $section =~ /^%(pre|post|trigg)/;
 
         # Concatenate continuation lines into one long line
