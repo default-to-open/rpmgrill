@@ -18,7 +18,6 @@ use warnings;
 our $VERSION = "0.01";
 
 use Carp;
-use DBI;
 use File::LibMagic              qw(:easy);
 
 ###############################################################################
@@ -53,60 +52,17 @@ our $Log = 'rpmgrill.pw-linkage.txt';
 sub analyze {
     my $self = shift;
 
-    # Add a package ID to mysql to indicate that we've analyzed this build.
-    my $dbh;
-    my $sth;
-
-    if ($dbh = DBI->connect("DBI:mysql:linkage:localhost", 'linkage')) {
-        # Look for existing package id
-        # FIXME: what about brew scratch builds?
-        my $q_pkg = $dbh->prepare('SELECT package_id FROM packages
-                           WHERE package_name=?
-                             AND package_version=?
-                             AND package_release=?');
-
-        my @nvr = $self->nvr;
-        $q_pkg->execute(@nvr);
-        my $package_id;
-        while (my $x = $q_pkg->fetchrow_arrayref) {
-            if (defined $package_id) {
-                warn "Duplicate entry for @nvr: $package_id, $x->[0]\n";
-            }
-            $package_id = $x->[0];
-        }
-
-        # Not found. Insert.
-        if (! defined $package_id) {
-            my $i_pkg = $dbh->prepare('INSERT INTO packages
-                     (package_name, package_version, package_release, analyzed_by)
-                     VALUES (?,?,?,?)');
-            $i_pkg->execute(@nvr,  __PACKAGE__ . " " . $VERSION);
-            $package_id = $dbh->{mysql_insertid};
-        }
-
-        # Prepare an STH for our analyze code
-        $sth = $dbh->prepare("INSERT INTO linkage_xref
-                        (package_id, subpackage, arch, libname, filepath)
-                        VALUES ( $package_id,?,?,?,? )");
-    }
-    else {
-        warn "$ME: Cannot connect to mysql; will dump just txt";
-    }
-
-    # Create a text log too. Always create it, as a signal that we've run.
+    # Create a text log. Always create it, as a signal that we've run.
     open my $fh_log, '>>', $Log
         or die "$ME: Cannot append to $Log: $!\n";
 
     for my $rpm ( $self->rpms ) {
         for my $f ( $rpm->files ) {
-            $self->_gather_libs( $f, $sth, $fh_log )
+            $self->_gather_libs( $f, $fh_log )
         }
     }
 
-    # If we're doing mysql, disconnect now
-    $dbh->disconnect                    if $dbh;
-
-    # We always have a log file
+    # Done with the log file.
     close $fh_log
         or die "$ME: Error writing to $Log: $!\n";
 }
@@ -114,7 +70,6 @@ sub analyze {
 sub _gather_libs {
     my $self   = shift;
     my $f      = shift;                 # in: file obj
-    my $sth    = shift;                 # in: MySQL insert thingy
     my $fh_log = shift;                 # in: filehandle to log file
 
     # eu-readelf hangs, apparently forever, on certain clamav files:
@@ -140,12 +95,7 @@ sub _gather_libs {
     }
     close $fh_readelf;  # No status check: file could be non-elf
 
-
-    if (defined $sth) {
-        $sth->execute($f->subpackage, $f->arch, $_, $f->path)       for @libs;
-    }
-
-    # Now dump to text file.
+    # Dump results to text file.
     for my $l (@libs) {
         print { $fh_log } join("\t",$f->arch,$f->subpackage,$l,$f->path),"\n";
     }
