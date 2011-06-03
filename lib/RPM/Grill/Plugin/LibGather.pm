@@ -18,7 +18,6 @@ use warnings;
 our $VERSION = "0.01";
 
 use Carp;
-use File::LibMagic              qw(:easy);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -74,15 +73,10 @@ sub _gather_libs {
 
     # eu-readelf hangs, apparently forever, on certain clamav files:
     #   payload/usr/share/doc/clamav-0.97/test/.split/split.clam.exe.bz2aa
-    my $file_path = $f->extracted_path;
-    my $file_type = MagicFile( $file_path )
-        or do {
-            warn "$ME: Cannot determine file type (Magic) of $file_path\n";
-            return;
-        };
-    return unless $file_type =~ /\bELF\b/;
+    return unless $f->is_elf;
 
     my @libs;
+    my $file_path = $f->extracted_path;
     my $cmd = "eu-readelf -d $file_path 2>/dev/null";
     open my $fh_readelf, "-|", $cmd
         or die "$ME: Cannot fork: $!\n";
