@@ -11,7 +11,8 @@ use warnings;
 our $VERSION = "0.01";
 
 use Carp;
-use Fcntl qw(:mode);
+use Fcntl                       qw(:mode);
+use File::LibMagic              qw(:easy);
 
 ( our $ME = $0 ) =~ s|^.*/||;
 
@@ -110,6 +111,31 @@ sub is_dir     { substr( $_[0]->{mode}, 0, 1 ) eq 'd' }    # eg drwxr-xr-x
 sub is_reg     { substr( $_[0]->{mode}, 0, 1 ) eq '-' }    # eg -rwxr-xr-x
 sub is_suid    { $_[0]->numeric_mode & S_ISUID }
 sub is_sgid    { $_[0]->numeric_mode & S_ISGID }
+
+############
+#  is_elf  #  Determines file type; returns true if /ELF/
+############
+sub is_elf {
+    my $self = shift;
+
+    return $self->file_type =~ /\bELF\b/;
+}
+
+###############
+#  file_type  # ...as determined by libmagic
+###############
+sub file_type {
+    my $self = shift;
+
+    $self->{_file_type} ||= do {
+        my $file_path = $self->extracted_path;
+        my $file_type = MagicFile( $file_path )
+            or warn "$ME: Cannot determine file type (Magic) of $file_path\n";
+        $file_type;
+    };
+
+    return $self->{_file_type};
+}
 
 sub readlink {
     my $self = shift;
