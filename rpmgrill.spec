@@ -12,6 +12,10 @@ Requires:       perl
 BuildRequires:  perl-Module-Build
 BuildRequires:  perl-Test-Simple
 
+# For the antivirus plugin
+Requires: clamav
+Requires: clamav-data
+
 %description
 rpmgrill runs a series of tests against a set of RPMs, reporting problems
 that may require a developer's attention.  For instance: unapplied patches,
