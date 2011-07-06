@@ -4,13 +4,13 @@
       'arch' => 'src',
       'context' => {
         'excerpt' => [
-          'useradd --system -g abrt -u %{abrt_gid_uid} -d /etc/abrt -s /sbin/nologin abrt'
+          'useradd --system -g abrtX -u %{abrt_gid_uid} -d /etc/abrt -s /sbin/nologin abrtX'
         ],
         'sub' => '%pre',
         'path' => 'abrt-1.1.16-3.el6.spec',
         'lineno' => '297'
       },
-      'diag' => 'Invocation of <tt>useradd</tt> with non-numeric UID <var>%{abrt_gid_uid}</var>; this is probably OK, but I have no robust way of checking. Note that there is no UID defined for <var>abrt</var> in /usr/share/doc/setup-2.8.28/uidgid',
+      'diag' => 'Invocation of <tt>useradd</tt> with non-numeric UID <var>%{abrt_gid_uid}</var>; this is probably OK, but I have no robust way of checking. Note that there is no UID defined for <var>abrtX</var> in /usr/share/doc/setup-2.8.28/uidgid',
       'code' => 'UseraddCheckUid'
     }
   ]
