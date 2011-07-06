@@ -19,6 +19,9 @@ Requires: clamav-data
 # For checking desktop/icon files
 Requires: /usr/bin/desktop-file-validate
 
+# Optional module, allows RpmMetadata plugin to check https URLs
+Requires: perl-IO-Socket-SSL
+
 %description
 rpmgrill runs a series of tests against a set of RPMs, reporting problems
 that may require a developer's attention.  For instance: unapplied patches,
@@ -58,6 +61,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 - add a Requires for desktop-file-validate
 - RpmMetadata plugin: fix for WrongVersion test [eg v7-1.4-6.el5]
+- specfile: require perl IO::Socket::SSL, for testing https URLs
 
 * Fri Jun  3 2011 Eduardo Santiago <santiago@redhat.com> - 0.02-1
 - First attempt at a brew build
