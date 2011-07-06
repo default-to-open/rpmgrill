@@ -12,7 +12,28 @@ use File::Path                  qw(mkpath rmtree);
 use File::Temp                  qw(tempdir);
 use File::Basename              qw(basename);
 
-plan tests => 2 + 4;
+# The N-V-R that we expect
+my %nvr = (
+    name    => 'mypkg',
+    version => '1.2',
+    release => '3.el4',
+);
+
+# ...and the ones we write
+my $tests = <<'END_TESTS';
+mypkg      1.2     3.el4
+wrongpkg   1.2     3.el4  Name
+mypkg      1.2.3   3.el4  Version
+mypkg      1.2     3.el5  Release
+mypkg      1.2.3   3.el5  Version Release
+END_TESTS
+my @tests;
+
+for my $line (split "\n", $tests) {
+    push @tests, [ split " ", $line ];
+}
+
+plan tests => 2 + @tests;
 
 # Pass 2: do the tests
 my $tempdir = tempdir("t-RpmMetadata.XXXXXX", CLEANUP => !$ENV{DEBUG});
@@ -21,17 +42,13 @@ my $tempdir = tempdir("t-RpmMetadata.XXXXXX", CLEANUP => !$ENV{DEBUG});
 use_ok 'RPM::Grill'                       or exit;
 use_ok 'RPM::Grill::Plugin::RpmMetadata'  or exit;
 
-my %nvr = (
-    name    => 'mypkg',
-    version => '1.2',
-    release => '3.el4',
-);
+for my $t (@tests) {
+    check_metadata( @$t );
+}
 
-check_metadata( qw( mypkg      1.2     3.el4           ));
-check_metadata( qw( wrongpkg   1.2     3.el4  Name     ));
-check_metadata( qw( mypkg      1.2.3   3.el4  Version  ));
-check_metadata( qw( mypkg      1.2     3.el5  Release  ));
-
+####################
+#  check_metadata  #  Writes metadata file with possibly bad values, runs test
+####################
 sub check_metadata {
     use feature "state";
     state $i = 0;
