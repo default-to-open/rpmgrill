@@ -57,6 +57,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 - add a Requires for desktop-file-validate
+- RpmMetadata plugin: fix for WrongVersion test [eg v7-1.4-6.el5]
 
 * Fri Jun  3 2011 Eduardo Santiago <santiago@redhat.com> - 0.02-1
 - First attempt at a brew build
