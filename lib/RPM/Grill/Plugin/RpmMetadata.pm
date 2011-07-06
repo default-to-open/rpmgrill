@@ -89,10 +89,9 @@ sub analyze {
             my $actual = $metadata->get($field) // '[empty]';
             my $expect = $nvr{$field};
             $actual eq $expect
-                or $rpm->gripe(
-                    {   arch       => $arch,
-                        subpackage => $subpkg,
-                        code       => "MetadataWrong$field",
+                or $metadata->gripe(
+                    {
+                        code       => "Wrong$field",
                         diag       => "$field: expected $expect, got $actual",
                     }
                 );
