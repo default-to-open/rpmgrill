@@ -68,6 +68,7 @@ for my $t (@tests) {
         use Data::Dumper;$Data::Dumper::Indent = 1; print Dumper($actual_gripes); exit;
     }
 
+    unified_diff;
     eq_or_diff $actual_gripes, $t->{expect}, $t->{name};
 }
 
