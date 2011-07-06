@@ -16,6 +16,9 @@ BuildRequires:  perl-Test-Simple
 Requires: clamav
 Requires: clamav-data
 
+# For checking desktop/icon files
+Requires: /usr/bin/desktop-file-validate
+
 %description
 rpmgrill runs a series of tests against a set of RPMs, reporting problems
 that may require a developer's attention.  For instance: unapplied patches,
@@ -53,6 +56,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+- add a Requires for desktop-file-validate
+
 * Fri Jun  3 2011 Eduardo Santiago <santiago@redhat.com> - 0.02-1
 - First attempt at a brew build
 
