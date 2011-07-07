@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.02
+Version:        0.03
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -59,6 +59,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+* Thu Jul  7 2011 Eduardo Santiago <santiago@redhat.com> - 0.03-1
 - add a Requires for desktop-file-validate
 - RpmMetadata plugin: fix for WrongVersion test [eg v7-1.4-6.el5]
 - specfile: require perl IO::Socket::SSL, for testing https URLs
