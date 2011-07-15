@@ -19,6 +19,9 @@ Requires: clamav-data
 # For checking desktop/icon files
 Requires: /usr/bin/desktop-file-validate
 
+# For LibGather, Rpath : need eu-readelf
+Requires: elfutils
+
 # Optional module, allows RpmMetadata plugin to check https URLs
 Requires: perl-IO-Socket-SSL
 
@@ -59,6 +62,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+- add a Requires for elfutils
+
 * Thu Jul  7 2011 Eduardo Santiago <santiago@redhat.com> - 0.03-1
 - add a Requires for desktop-file-validate
 - RpmMetadata plugin: fix for WrongVersion test [eg v7-1.4-6.el5]
