@@ -49,6 +49,11 @@ w:0002
 x:0001 t:01001 T:01000
 END_LS_STRING_MODE
 
+
+# See <rpm/rpmfi.h>. This indicates that a file may be listed in
+# the specfile but not actually shipped in the rpm.
+use constant RPMFILE_GHOST      => (1 << 6);
+
 # END   user-configurable section
 ###############################################################################
 
@@ -98,7 +103,17 @@ LINE:
                                 . ($x{path} =~ m{^/} ? '' : '/')
                                 . $x{path};
 
-        # FIXME: check that {path} exists?  stat()?
+        # Check that extracted file is present. We don't like to see
+        # files listed in the specfile but not actually shipped.
+        unless (-e $x{extracted_path} || -l $x{extracted_path}) {
+            # (unless it's flagged as %ghost. Then it's OK.)
+            if ($x{flags} & RPMFILE_GHOST) {
+                next LINE;              # it's OK
+            }
+            warn "$ME: File listed in spec, but not actually shipped: $x{extracted_path}\n";
+            # FIXME: continue anyway? Or should we next?
+        }
+
         push @out, bless \%x, __PACKAGE__;
     }
     close $metadata_fh;
