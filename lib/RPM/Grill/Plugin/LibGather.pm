@@ -71,23 +71,8 @@ sub _gather_libs {
     my $f      = shift;                 # in: file obj
     my $fh_log = shift;                 # in: filehandle to log file
 
-    # eu-readelf hangs, apparently forever, on certain clamav files:
-    #   payload/usr/share/doc/clamav-0.97/test/.split/split.clam.exe.bz2aa
-    return unless $f->is_elf;
-
-    my @libs;
-    my $file_path = $f->extracted_path;
-    my $cmd = "eu-readelf -d $file_path 2>/dev/null";
-    open my $fh_readelf, "-|", $cmd
-        or die "$ME: Cannot fork: $!\n";
-    while (my $line = <$fh_readelf>) {
-        # FIXME: check to make sure we're in the right section
-        # FIXME: what about .gnu.liblist in -A?
-        if ($line =~ /^\s*NEEDED\s+Shared library:\s+\[(\S+)\]/) {
-            push @libs, $1;
-        }
-    }
-    close $fh_readelf;  # No status check: file could be non-elf
+    my @libs = $f->elf_shared_libs
+        or return;
 
     # Dump results to text file.
     for my $l (@libs) {
