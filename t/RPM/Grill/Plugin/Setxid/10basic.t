@@ -8,7 +8,7 @@ use warnings;
 use Test::More;
 use Test::Differences;
 
-use File::Path                  qw(rmtree);
+use File::Path                  qw(mkpath rmtree);
 use File::Temp                  qw(tempdir);
 use File::Basename              qw(basename);
 
@@ -179,6 +179,15 @@ for my $i (0 .. $#tests) {
                     ), "\n";
     close FILELIST
         or die "error writing $filelist: $!";
+
+    # Touch the file, to create it. Otherwise RPM::Grill::RPM::Files
+    # will complain about nonexistent file (in specfile, not in pkg).
+    {
+        my ($dir, $fname) = ($t->{path} =~ m{^(.*)/(.*)}) or die;
+        mkpath          "$temp_subdir/$Arch/$Pkg/payload/$dir", 0, 0755;
+        open  OUT, '>', "$temp_subdir/$Arch/$Pkg/payload/$dir/$fname";
+        close OUT;
+    }
 
     # prepare the expected set of gripes
     my $gripes;
