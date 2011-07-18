@@ -16,6 +16,7 @@ use warnings;
 our $VERSION = "0.01";
 
 use Carp;
+use File::Basename      qw(dirname);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -31,6 +32,22 @@ sub doc {
     return <<"END_DOC" }
 FIXME FIXME FIXME
 END_DOC
+
+# Paths that are OK
+my $acceptable_paths = <<'END_ACCEPTABLE_PATHS';
+/lib
+/lib64
+/usr/lib
+/usr/lib64
+/usr/libexec
+/usr/src/kernels             # bz447625
+END_ACCEPTABLE_PATHS
+
+our @Acceptable_Paths;
+for my $line (split "\n", $acceptable_paths) {
+    $line =~ s/\s+\#.*$//;              # Trim comments
+    push @Acceptable_Paths, $line;
+}
 
 # END   user-configurable section
 ###############################################################################
@@ -63,10 +80,46 @@ sub _check_rpath {
     my $f     = shift;                 # in: file obj
     my $rpath = shift;
 
-    my $file_path = $f->extracted_path;
+    my $file_path = $f->path;
 
-    # FIXME: now what?
-    print $file_path, "  ", $rpath, "\n";
+    for my $element (split ':', $rpath) {
+        if (my $why = rpath_element_is_suspect( $file_path, $element )) {
+            # FIXME: gripe
+            print $file_path, "  ", $element, " ", $why, "\n";
+        }
+    }
+}
+
+
+##############################
+#  rpath_element_is_suspect  #  Returns a reason string, or undef if all's OK
+##############################
+sub rpath_element_is_suspect {
+    my $file_path = shift;              # in: root-level path, eg /usr/bin/foo
+    my $element   = shift;              # in: one RPATH element
+
+    if ($element =~ m{^\$ORIGIN(/.*)?}) {
+        my $rest = $1 || '';
+        $element = dirname($file_path) . $rest;
+
+        # FIXME: handle .. traversal. How?
+        while ($element =~ s{/[^/]+/\.\./}{/}g) {
+            # ...
+        }
+    }
+
+    # check for crap like '/usr/lib/foo/../../../tmp'. I can't imagine
+    # any realistic scenario in which this could happen ... but it
+    # doesn't cost to check.
+    if ($element =~ m{/\.\./}) {
+        return "'..' in path element";
+    }
+
+    # Check if OK path element
+    my $re = join('|', @Acceptable_Paths);
+    return if $element =~ m{^($re)/};
+
+    return "FIXME";     # unknown path element
 }
 
 1;
