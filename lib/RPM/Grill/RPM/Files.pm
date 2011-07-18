@@ -142,11 +142,23 @@ sub is_elf {
 sub file_type {
     my $self = shift;
 
+    # FIXME: what if extracted_path doesn't exist??
+
     $self->{_file_type} ||= do {
         my $file_path = $self->extracted_path;
-        my $file_type = MagicFile( $file_path )
-            or warn "$ME: Cannot determine file type (Magic) of $file_path\n";
-        $file_type;
+        my $file_type = eval { MagicFile( $file_path ) };
+        my $err;
+        if ($@) {
+            $err = $@;
+        }
+        elsif (! $file_type) {
+            $err = "(unknown error)";
+        }
+
+        warn "$ME: Cannot determine file type (Magic) of $file_path: $err\n"
+            if $err;
+
+        $file_type || '[unknown]';
     };
 
     return $self->{_file_type};
@@ -228,6 +240,74 @@ sub AUTOLOAD {
     croak "$ME: Unknown field " . __PACKAGE__ . "->$field()";
 }
 
+###############################################################################
+# BEGIN code and helpers for running eu-readelf
+
+#####################
+#  _run_eu_readelf  #  (private): run eu-readelf -d, extract useful info
+#####################
+sub _run_eu_readelf {
+    my $self = shift;
+
+    # Only need to run once
+    return if exists $self->{_eu_readelf};
+
+    $self->{_eu_readelf} = { };
+
+    # eu-readelf hangs, apparently forever, on certain clamav files:
+    #   payload/usr/share/doc/clamav-0.97/test/.split/split.clam.exe.bz2aa
+    return unless $self->is_elf;
+
+    my $file_path = $self->extracted_path;
+    my $cmd = "eu-readelf -d $file_path 2>/dev/null";
+    open my $fh_readelf, "-|", $cmd
+        or die "$ME: Cannot fork: $!\n";
+    while (my $line = <$fh_readelf>) {
+        # FIXME: check to make sure we're in the right section
+        # FIXME: what about .gnu.liblist in -A?
+        if ($line =~ /^\s*NEEDED\s+Shared library:\s+\[(\S+)\]/) {
+            push @{ $self->{_eu_readelf}{libs} }, $1;
+        }
+        elsif ($line =~ /^\s*RPATH\s.*\s\[(.*)\]/) {
+            warn "$ME: WARNING: multiple rpaths for $file_path: $self->{_eu_readelf}{rpath}, $1"
+                if $self->{_eu_readelf}{rpath};
+            $self->{_eu_readelf}{rpath} = $1;
+        }
+
+    }
+    close $fh_readelf
+        or die "$ME: Command failed: $cmd\n";
+
+    return;
+}
+
+#####################
+#  elf_shared_libs  #  Returns a list of shared libs; see above
+#####################
+sub elf_shared_libs {
+    my $self = shift;
+
+    $self->_run_eu_readelf();
+
+    if (my $libs = $self->{_eu_readelf}{libs}) {
+        return @$libs;
+    }
+
+    return;
+}
+
+###############
+#  elf_rpath  #  Returns a simple RPATH string, eg '/opt/foo:$ORIGIN'
+###############
+sub elf_rpath {
+    my $self = shift;
+
+    $self->_run_eu_readelf();
+
+    return $self->{_eu_readelf}{rpath};
+}
+
+# END   code and helpers for running eu-readelf
 ###############################################################################
 # BEGIN Code and helpers for converting string (ls) mode to octal
 
