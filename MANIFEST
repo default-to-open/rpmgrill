@@ -13,6 +13,7 @@ lib/RPM/Grill/Plugin/LibGather.pm
 lib/RPM/Grill/Plugin/Manifest.pm
 lib/RPM/Grill/Plugin/Multilib.pm
 lib/RPM/Grill/Plugin/Patches.pm
+lib/RPM/Grill/Plugin/Rpath.pm
 lib/RPM/Grill/Plugin/RpmMetadata.pm
 lib/RPM/Grill/Plugin/RpmRequires.pm
 lib/RPM/Grill/Plugin/RpmScripts.pm
@@ -26,6 +27,7 @@ lib/RPM/Grill/RPM/Metadata.pm
 lib/RPM/Grill/RPM/SpecFile.pm
 Makefile
 MANIFEST
+META.json
 META.yml
 README
 t/00.load.t
@@ -42,6 +44,7 @@ t/RPM/Grill/Plugin/DesktopLint/10basic.t
 t/RPM/Grill/Plugin/Multilib/10basic.t
 t/RPM/Grill/Plugin/Patches/01basic.t
 t/RPM/Grill/Plugin/RpmMetadata/10basic.t
+t/RPM/Grill/Plugin/RpmMetadata/20wrongbasics.t
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/abrt-1.1.16-3.el6.expect
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/abrt-1.1.16-3.el6.spec
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/luci-0.22.2-14.el6_0.2.spec
