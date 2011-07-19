@@ -1,4 +1,6 @@
+^\.gitignore
 ^MYMETA.yml$
+^MYMETA.json$
 ^Build$
 ^\.git/
 ^_build/
@@ -13,5 +15,7 @@
 ^MANIFEST\.SKIP$
 ^ignore\.txt$
 ^rpmgrill-.*\.tar\.gz$
+^rpmgrill-.*\.tar\.bz2$
 ^rpmgrill\.spec$
+^rpmgrill-.*\.rpm$
 ^sql/
