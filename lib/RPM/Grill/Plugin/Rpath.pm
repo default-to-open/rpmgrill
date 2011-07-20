@@ -7,6 +7,8 @@
 # Real-world packages that trigger errors in this module:
 # See t/RPM::Grill/Plugin/90real-world.t
 #
+# This module created in response to
+#   https://errata.devel.redhat.com/rpmdiff/show/52153?result_id=821293
 package RPM::Grill::Plugin::Rpath;
 
 use base qw(RPM::Grill);
@@ -82,19 +84,40 @@ sub _check_rpath {
 
     my $file_path = $f->path;
 
-    for my $element (split ':', $rpath) {
-        if (my $why = rpath_element_is_suspect( $file_path, $element )) {
+    # Test components individually.
+    my @rpath = split ':', $rpath;
+
+    # FIXME
+    my $element = (@rpath == 1 ? '' : ' element');
+
+    for my $i (0 .. $#rpath) {
+        if (my $why = _rpath_element_is_suspect( $file_path, $rpath[$i] )) {
+            my $excerpt = $rpath;
+            if (@rpath > 1) {
+                $excerpt = join(':',
+                                @rpath[0..$i-1],
+                                "<u>$rpath[$i]</u>",
+                                @rpath[$i+1..$#rpath]);
+            }
+
             # FIXME: gripe
-            print $file_path, "  ", $element, " ", $why, "\n";
+            $f->gripe({
+                code => 'BadRpath',
+                diag => "Suspicious-looking RPATH$element: $why",
+                context => { path    => $file_path,
+                             excerpt => $excerpt },
+            });
         }
     }
+
+    return;
 }
 
 
 ##############################
 #  rpath_element_is_suspect  #  Returns a reason string, or undef if all's OK
 ##############################
-sub rpath_element_is_suspect {
+sub _rpath_element_is_suspect {
     my $file_path = shift;              # in: root-level path, eg /usr/bin/foo
     my $element   = shift;              # in: one RPATH element
 
@@ -119,7 +142,7 @@ sub rpath_element_is_suspect {
     my $re = join('|', @Acceptable_Paths);
     return if $element =~ m{^($re)/};
 
-    return "FIXME";     # unknown path element
+    return "not in desired path";     # unknown path element
 }
 
 1;
