@@ -117,6 +117,8 @@ sub _check_rpath {
         }
     }
 
+    # FIXME: low pri: check for writable directories?
+
     return;
 }
 
