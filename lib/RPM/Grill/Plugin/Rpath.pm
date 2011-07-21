@@ -119,14 +119,14 @@ sub _check_rpath {
 ##############################
 sub _rpath_element_is_suspect {
     my $file_path = shift;              # in: root-level path, eg /usr/bin/foo
-    my $element   = shift;              # in: one RPATH element
+    my $rpath     = shift;              # in: one RPATH element
 
-    if ($element =~ m{^\$ORIGIN(/.*)?}) {
+    if ($rpath =~ m{^\$ORIGIN(/.*)?}) {
         my $rest = $1 || '';
-        $element = dirname($file_path) . $rest;
+        $rpath = dirname($file_path) . $rest;
 
         # FIXME: handle .. traversal. How?
-        while ($element =~ s{/[^/]+/\.\./}{/}g) {
+        while ($rpath =~ s{/[^/]+/\.\./}{/}g) {
             # ...
         }
     }
@@ -134,18 +134,18 @@ sub _rpath_element_is_suspect {
     # check for crap like '/usr/lib/foo/../../../tmp'. I can't imagine
     # any realistic scenario in which this could happen ... but it
     # doesn't cost to check.
-    if ($element =~ m{/\.\./}) {
-        return "'..' in path element";
+    if ($rpath =~ m{/\.\./}) {
+        return "'..' in rpath element";
     }
 
     # Check if OK path element
     my $re = join('|', @Acceptable_Paths);
-    return if $element =~ m{^($re)/};
+    return if $rpath =~ m{^($re)/};
 
     # Not in desired path. Try to generate a helpful msg
     my @ok;
-    for my $path_element (split '/', $element) {
-        push @ok, $path_element;
+    for my $rpath_element (split '/', $rpath) {
+        push @ok, $rpath_element;
         my $ok = join('/', @ok);
         if (! grep { m{^$ok} } @Acceptable_Paths) {
             return "$ok is not a known trusted path";
