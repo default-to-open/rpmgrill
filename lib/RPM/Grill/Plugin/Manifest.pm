@@ -21,8 +21,12 @@ use Carp;
 # BEGIN user-configurable section
 
 # FIXME FIXME FIXME: this is intended to catch something like
-#     https://errata.devel.redhat.com/rpmdiff/show/48150?result_id=6957
-# ...in which mailman ships /usr/lib/mailman/Mailman but doesn't own it
+#     https://errata.devel.redhat.com/rpmdiff/show/48150?result_id=695776
+# ...in which mailman ships /usr/lib/mailman/Mailman but doesn't own it,
+# i.e. this is in the specfile:
+#        /usr/lib/mailman
+#        /usr/lib/mailman/Mailman/Archiver
+#                         ^^^^^^^---- not in specfile
 
 # Order in which this plugin runs.  Set to a unique number [0 .. 99]
 sub order {999}    # FIXME
