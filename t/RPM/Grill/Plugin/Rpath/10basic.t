@@ -10,7 +10,15 @@ use Test::Differences;
 use_ok 'RPM::Grill'                  or exit;
 use_ok 'RPM::Grill::Plugin::Rpath'   or exit;
 
-# BEGIN test list
+#
+# Test list. Format is:
+#
+#      <path>   <RPATH>   <expected message>
+#
+# Each RPATH is one single element (other scripts will test '/foo:/bar').
+# If the combination is OK, use '-' for 'no error'.
+#
+# You'll need a pretty wide window. Sorry. Tradeoff.
 my $tests = <<'END_TESTS';
 # These should be OK
 /usr/share/java-1.6.0-ibm/demo/jvmti/gctest/lib/libgctest.so     /lib                -

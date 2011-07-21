@@ -77,6 +77,9 @@ sub analyze {
 }
 
 
+##################
+#  _check_rpath  #  Check a complete rpath (i.e. multiple:elements)
+##################
 sub _check_rpath {
     my $self  = shift;
     my $f     = shift;                 # in: file obj
@@ -84,14 +87,18 @@ sub _check_rpath {
 
     my $file_path = $f->path;
 
-    # Test components individually.
+    # Test components individually. We delegate that to a helper function.
     my @rpath = split ':', $rpath;
 
-    # FIXME
+    # For readability in diagnostic messages
     my $element = (@rpath == 1 ? '' : ' element');
 
+    # Invoke helper on each rpath element. Report problems, if any.
     for my $i (0 .. $#rpath) {
         if (my $why = _rpath_element_is_suspect( $file_path, $rpath[$i] )) {
+            # Problem found; report it.
+            # For readability, on multi-element RPATHs, highlight
+            # the offending one.
             my $excerpt = $rpath;
             if (@rpath > 1) {
                 $excerpt = join(':',
