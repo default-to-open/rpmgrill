@@ -142,6 +142,16 @@ sub _rpath_element_is_suspect {
     my $re = join('|', @Acceptable_Paths);
     return if $element =~ m{^($re)/};
 
+    # Not in desired path. Try to generate a helpful msg
+    my @ok;
+    for my $path_element (split '/', $element) {
+        push @ok, $path_element;
+        my $ok = join('/', @ok);
+        if (! grep { m{^$ok} } @Acceptable_Paths) {
+            return "$ok is not a known trusted path";
+        }
+    }
+
     return "not in desired path";     # unknown path element
 }
 
