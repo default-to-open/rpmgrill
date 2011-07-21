@@ -14,27 +14,27 @@ use File::Basename              qw(basename);
 
 my $tests = <<'END_TESTS';
 ------                            [the original mailman failure]
-/usr/lib/mailman
-/usr/lib/mailman/Mailman/subdir
-** /usr/lib/mailman/Mailman
+  /usr/lib/mailman
+! /usr/lib/mailman/Mailman
+  /usr/lib/mailman/Mailman/subdir
 
 ------                            [corrected situation. No gripe expected.]
-/usr/lib/mailman
-/usr/lib/mailman/Mailman
-/usr/lib/mailman/Mailman/subdir
+  /usr/lib/mailman
+  /usr/lib/mailman/Mailman
+  /usr/lib/mailman/Mailman/subdir
 
 ------                            [simple case. No gripe expected.]
-/usr/lib/mailman
+  /usr/lib/mailman
 
 ------                            [simple case, but deeper]
-/usr/lib/mailman/Mailman/subdir
+  /usr/lib/mailman/Mailman/subdir
 
 ------                            [made-up case with lots of missing dirs]
-/a/b/c/d/e/f/g
-/a/b/c/d/e/f/g/h/i/j/k
-** /a/b/c/d/e/f/g/h/i/j
-** /a/b/c/d/e/f/g/h/i
-** /a/b/c/d/e/f/g/h
+  /a/b/c/d/e/f/g
+! /a/b/c/d/e/f/g/h
+! /a/b/c/d/e/f/g/h/i
+! /a/b/c/d/e/f/g/h/i/j
+  /a/b/c/d/e/f/g/h/i/j/k
 END_TESTS
 my @tests;
 
@@ -46,11 +46,14 @@ for my $line (split "\n", $tests) {
         # Line of dashes. New test.
         push @tests, { name => $1, dirs => [], expect => [] };
     }
-    elsif ($line =~ m{^(/\S+)$}) {
+    elsif ($line =~ m{^\s+(/\S+)$}) {           # dir in manifest
         push @{ $tests[-1]->{dirs} }, $1;
     }
-    elsif ($line =~ m{^\*\*\s+(/\S+)$}) {
-        push @{ $tests[-1]->{expect} }, $1;
+    elsif ($line =~ m{^\!\s+(/\S+)$}) {         # dir NOT in manifest
+        # ...expect a warning about it.
+        # Note that we unshift, not push. This is important, because
+        # gripes are reported in depth-first order.
+        unshift @{ $tests[-1]->{expect} }, $1;
     }
     else {
         die "Cannot grok test definition line '$line'";
