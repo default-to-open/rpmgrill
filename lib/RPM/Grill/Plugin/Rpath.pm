@@ -140,7 +140,7 @@ sub _rpath_element_is_suspect {
 
     # Check if OK path element
     my $re = join('|', @Acceptable_Paths);
-    return if $rpath =~ m{^($re)/};
+    return if $rpath =~ m{^($re)(/|$)};
 
     # Not in desired path. Try to generate a helpful msg
     my @ok;
@@ -152,7 +152,7 @@ sub _rpath_element_is_suspect {
         }
     }
 
-    return "not in desired path";     # unknown path element
+    return "not a known trusted path";     # unknown path element
 }
 
 1;
