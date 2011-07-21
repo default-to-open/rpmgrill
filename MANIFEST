@@ -43,6 +43,7 @@ t/RPM/Grill/Plugin/BuildLog/01basic.t
 t/RPM/Grill/Plugin/DesktopLint/10basic.t
 t/RPM/Grill/Plugin/Multilib/10basic.t
 t/RPM/Grill/Plugin/Patches/01basic.t
+t/RPM/Grill/Plugin/Rpath/10basic.t
 t/RPM/Grill/Plugin/RpmMetadata/10basic.t
 t/RPM/Grill/Plugin/RpmMetadata/20wrongbasics.t
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/abrt-1.1.16-3.el6.expect
