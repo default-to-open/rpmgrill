@@ -33,6 +33,16 @@ my $tests = <<'END_TESTS';
 /usr/share/java-1.6.0-ibm/demo/jvmti/gctest/lib/libgctest.so     $ORIGIN/../../lib   /usr/share is not a known trusted path
 /usr/share/java-1.6.0-ibm/demo/jvmti/gctest/lib/libgctest.so     $ORIGIN             /usr/share is not a known trusted path
 
+# Weird case should never happen
+/usr/share/java-1.6.0-ibm/demo/jvmti/gctest/lib/libgctest.so     /usr/lib/../lib     '..' in rpath element
+
+# Back to OK
+/usr/lib/libfoo.so                                               $ORIGIN             -
+/usr/lib/libfoo.so                                               $ORIGIN/subdir      -
+
+/usr/lib/subdir/libfoo.so                                        $ORIGIN             -
+/usr/lib/subdir/libfoo.so                                        $ORIGIN/..          -
+/usr/lib/subdir/libfoo.so                                        $ORIGIN/../otherdir -
 END_TESTS
 
 for my $line (split "\n", $tests) {
