@@ -29,10 +29,10 @@ use Carp;
 #                         ^^^^^^^---- not in specfile
 
 # Order in which this plugin runs.  Set to a unique number [0 .. 99]
-sub order {999}    # FIXME
+sub order { 30 }    # FIXME
 
 # One-line description of this plugin
-sub blurb { return "checks for FIXME FIXME" }
+sub blurb { return "checks for rare problems in RPM manifests" }
 
 # FIXME
 sub doc {
