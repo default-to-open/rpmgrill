@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 - add a Requires for elfutils
+- new rpath plugin
 
 * Thu Jul  7 2011 Eduardo Santiago <santiago@redhat.com> - 0.03-1
 - add a Requires for desktop-file-validate
