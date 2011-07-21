@@ -56,25 +56,51 @@ END_DOC
 sub analyze {
     my $self = shift;
 
-    # FIXME: use what you need; delete what you don't
-
     #
-    # Loop over each arch and subpackage
+    # Pass 1: track all directory files in all RPM manifests..
     #
-    for my $arch ( $self->non_src_arches ) {
-        for my $subpkg ( $self->subpackages($arch) ) {
+    my %is_owned;
+    for my $rpm ( $self->rpms ) {
+        for my $f ( $rpm->files ) {
+            if ($f->is_dir) {
+                my $d = $f->path;
+                $d =~ s{/$}{};
 
-            # ...
+                $is_owned{ $d } = 1;
+            }
         }
     }
 
-    #
-    # Do something with the specfile
-    #
-    for my $line ( $self->specfile->lines ) {
-        my $s = $line->content;
+    # Helper function for pass 2: returns true if any parent
+    # directory of $d is owned by our package.
+    my $should_be_owned = sub {
+        my $d = shift;
 
-        # ...
+        while ($d =~ s{/[^/]+$}{}) {
+            return 1 if $is_owned{$d};
+        }
+        return;
+    };
+
+    #
+    # Pass 2: for each owned directory, check if there's a gap
+    # in its parents.
+    #
+    # FIXME: optimize. This is pretty inefficient.
+    #
+    my %griped;
+    for my $d (sort keys %is_owned) {
+        while ($d =~ s{/[^/]+$}{}) {
+            if (! $is_owned{$d} && $should_be_owned->($d)) {
+                unless ($griped{$d}++) {
+                    $self->gripe({
+                        code => 'UnownedDirectory',
+                        arch => 'src',
+                        diag => "Unowned mid-level directory <tt>$d</tt>",
+                    });
+                }
+            }
+        }
     }
 }
 
