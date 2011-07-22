@@ -1,11 +1,22 @@
 # -*- perl -*-
 #
-# RPM::Grill::Plugin::Manifest - FIXME
+# RPM::Grill::Plugin::Manifest - check for problems with list of shipped files
 #
-# $Id$
+# This is intended to catch something like:
+#
+#     https://errata.devel.redhat.com/rpmdiff/show/48150?result_id=695776
+#
+# ...in which mailman ships /usr/lib/mailman/Mailman but doesn't own it,
+# i.e. this is in the specfile:
+#
+#        /usr/lib/mailman
+#        /usr/lib/mailman/Mailman/Archiver
+#                         ^^^^^^^---- not in specfile
+#
 #
 # Real-world packages that trigger errors in this module:
 # See t/RPM::Grill/Plugin/90real-world.t
+#    mailman-2.1.12-14.el6_0.2
 #
 package RPM::Grill::Plugin::Manifest;
 
@@ -19,14 +30,6 @@ use Carp;
 
 ###############################################################################
 # BEGIN user-configurable section
-
-# FIXME FIXME FIXME: this is intended to catch something like
-#     https://errata.devel.redhat.com/rpmdiff/show/48150?result_id=695776
-# ...in which mailman ships /usr/lib/mailman/Mailman but doesn't own it,
-# i.e. this is in the specfile:
-#        /usr/lib/mailman
-#        /usr/lib/mailman/Mailman/Archiver
-#                         ^^^^^^^---- not in specfile
 
 # Order in which this plugin runs.  Set to a unique number [0 .. 99]
 sub order { 30 }    # FIXME
