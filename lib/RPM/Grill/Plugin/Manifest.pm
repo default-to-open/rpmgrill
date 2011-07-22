@@ -59,17 +59,28 @@ END_DOC
 sub analyze {
     my $self = shift;
 
+    # FHS = Filesystem Hierarchy Standard, eg the spec that says we
+    # shouldn't install into /usr/local : See http://www.pathname.com/fhs/
+    my %non_fhs;
+
     #
-    # Pass 1: track all directory files in all RPM manifests..
+    # Pass 1: track all directory files in all RPM manifests
     #
     my %is_owned;
     for my $rpm ( $self->rpms ) {
         for my $f ( $rpm->files ) {
-            if ($f->is_dir) {
-                my $d = $f->path;
-                $d =~ s{/$}{};
+            my $path = $f->path;
 
-                $is_owned{ $d } = 1;
+            # Check for /usr/local
+            if ($path =~ m{^/usr/local/}) {
+                $non_fhs{$f->arch}{$f->subpackage}{$path} = 1;
+            }
+
+
+            if ($f->is_dir) {
+                $path =~ s{/$}{};
+
+                $is_owned{ $path } = 1;
             }
         }
     }
@@ -103,6 +114,31 @@ sub analyze {
                     });
                 }
             }
+        }
+    }
+
+    # Report non-FHS files
+    for my $arch (sort keys %non_fhs) {
+        for my $subpackage (sort keys %{$non_fhs{$arch}}) {
+            my @files = sort keys %{ $non_fhs{$arch}{$subpackage} };
+
+            my $gripe = {
+                code       => 'NonFHS',
+                arch       => $arch,
+                subpackage => $subpackage,
+                diag       => "FHS-protected director",
+            };
+
+            # Just 1? Report it in the diag. More? List files in excerpt.
+            if (@files == 1) {
+                $gripe->{diag} .= "y <tt>@files</tt>";
+            }
+            else {
+                $gripe->{diag} .= "ies:";
+                $gripe->{context} = { excerpt => \@files },
+            }
+
+            $self->gripe( $gripe );
         }
     }
 }
