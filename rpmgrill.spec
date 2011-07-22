@@ -64,6 +64,9 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 - add a Requires for elfutils
 - new rpath plugin
+- new Manifest plugin: checks for non-FHS files (eg /usr/local/lib/perl5),
+  and for a weird situation (seen in mailman) where mid-level subdirs
+  are created but not in the manifest.
 
 * Thu Jul  7 2011 Eduardo Santiago <santiago@redhat.com> - 0.03-1
 - add a Requires for desktop-file-validate
