@@ -68,10 +68,10 @@ sub analyze {
     my $self = shift;
 
     for my $rpm ( $self->rpms ) {
-        for my $f ( $rpm->files ) {
-            if (my $rpath = $f->elf_rpath) {
-                $self->_check_rpath( $f, $rpath );
-            }
+        for my $f ( grep { $_->is_elf } $rpm->files ) {
+            $self->_check_rpath( $f );
+
+            # FIXME
         }
     }
 }
@@ -83,7 +83,10 @@ sub analyze {
 sub _check_rpath {
     my $self  = shift;
     my $f     = shift;                 # in: file obj
-    my $rpath = shift;
+
+    # We are called indiscriminately. Return if we have no RPATH to check.
+    my $rpath = $f->elf_rpath
+        or return;
 
     my $file_path = $f->path;
 
