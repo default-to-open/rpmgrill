@@ -8,63 +8,27 @@ use Test::Differences;
 
 use File::Path                  qw(mkpath rmtree);
 use File::Temp                  qw(tempdir);
-use File::Basename              qw(basename);
+use File::Basename              qw(dirname);
 
 # pass 1: read DATA
 my @tests;
-while (my $line = <DATA>) {
-    chomp $line;
+my $tests = <<'END_TESTS';
+  /usr/lib/mylib.a
+  /usr/bin/mybin
+! /usr/local/lib/mylib.a
+! /usr/local/lib/mylib.a
+! /media
+! /media/foo
+! /home/sdfsdf
+! /var/tmp
+! /usr/tmp
+END_TESTS
 
-    # Line of dashes: new test
-    if ($line =~ /^--/) {
-        my $dashcount = ($line =~ tr/-/-/);
-        $dashcount > 20
-            or die "Internal error: Cannot grok test line '$line'";
-        $line =~ /-([^-].*[^-])-/
-            or die "Internal error: no test name in '$line'";
-        push @tests, {
-            name         => $1,
-            files        => [],
-            gripes       => undef,
-        };
+for my $line (split "\n", $tests) {
+    $line =~ m{^(!)?\s+(/\S+)$} or die "Cannot grok: '$line'";
+    my ($not, $path) = ($1, $2);
 
-        # "this-is-a-test" => "this is a test"
-        $tests[-1]->{name} =~ tr/-/ /;
-    }
-
-    # Leading slash : new file
-    #                     1     1  2     2 3     3 4  4 5       5
-    elsif ($line =~ m{^\s*(\!\s+)?/([^/]+)/([^/]+)/(.*)/([^/\s]+)\s*}) {
-        push @{ $tests[-1]->{files} }, {
-            arch        => $2,
-            subpackage  => $3,
-            dirname     => $4,
-            basename    => $5,
-            path        => "$2/$3/payload/$4/$5",
-            fulldirname => "$2/$3/payload/$4",
-            rootpath    => "/$4/$5",
-        };
-
-        if ($1) {
-            $tests[-1]->{gripes} ||= { Manifest => [] };
-            push @{ $tests[-1]->{gripes}->{Manifest} }, {
-                arch => $2,
-                subpackage => $3,
-                code       => 'NonFHS',
-                diag       => "FHS-protected directory <tt>/$4/$5</tt>",
-            };
-        }
-    }
-
-    # Comments
-    elsif ($line =~ /^\#/) {
-        ;
-    }
-    # Text for a file
-    elsif ($line) {
-        die "Cannot grok: '$line'\n";
-        $tests[-1]->{files}->[-1]->{text} .= $line . "\n";
-    }
+    push @tests, [ $path, $not ];
 }
 
 #use Data::Dumper;print Dumper(\@tests);exit 0;
@@ -83,37 +47,48 @@ use_ok 'RPM::Grill::Plugin::Manifest'     or exit;
 for my $i (0 .. $#tests) {
     my $t = $tests[$i];
 
+    my ($path, $not) = @$t;
+
+    my $test_name = $path . ($not ? " [not acceptable]" : " [ok]");
+
+    my $dirname = dirname($path);
+
     # Create new tempdir for this individual test
     my $temp_subdir = sprintf("%s/%02d", $tempdir, $i);
     mkdir $temp_subdir, 02755
         or die "mkdir $temp_subdir: $!\n";
 
-    # Create all the needed files (includes writing them to RPM.per_file_etc)
-    for my $f (@{ $t->{files} }) {
-        # Make the path to each file, then touch the file
-        mkpath "$temp_subdir/$f->{fulldirname}", 0, 02755;
-        open OUT, '>', "$temp_subdir/$f->{path}" or die;
-        close OUT or die;
+    # Make the path to the file, then touch the file
+    mkpath "$temp_subdir/i386/mypkg/payload/$dirname", 0, 02755;
+    open OUT, '>', "$temp_subdir/i386/mypkg/payload/$path" or die "Cannot mk $path: $!";
+    close OUT or die;
 
-        # Create rpm.rpm
-        $f->{path} =~ m{^([^/]+/[^/]+)/} or die "foo: $f->{path}";
-        open OUT, '>', "$temp_subdir/$1/rpm.rpm" or die "open $1: $!";
-        close OUT;
+    # Create rpm.rpm
+    open OUT, '>', "$temp_subdir/i386/mypkg/rpm.rpm" or die "open rpm.rpm: $!";
+    close OUT;
 
-        # Append to RPM.per_file_metadata
-        my $per_file = join('/', $temp_subdir, $f->{arch},
-                            $f->{subpackage}, 'RPM.per_file_metadata');
-        open OUT, '>>', $per_file or die;
-        print OUT join("\t",
-                       '0000000000000000000000000000',
-                       '-rw-r--r--',
-                       'root',
-                       'root',
-                        "0",
-                       '(none)',
-                       $f->{rootpath},
-                    ), "\n";
-        close OUT or die;
+    # Append to RPM.per_file_metadata
+    my $per_file = "$temp_subdir/i386/mypkg/RPM.per_file_metadata";
+    open OUT, '>>', $per_file or die;
+    print OUT join("\t",
+                   '0000000000000000000000000000',
+                   '-rw-r--r--',
+                   'root',
+                   'root',
+                   "0",
+                   '(none)',
+                   $path,
+               ), "\n";
+    close OUT or die;
+
+    my $expected_gripes;
+    if ($not) {
+        $expected_gripes = { Manifest => [ {
+            arch       => 'i386',
+            subpackage => 'mypkg',
+            code       => 'NonFHS',
+            diag       => "FHS-protected directory <tt>$path</tt>",
+        } ] };
     }
 
     # invoke
@@ -123,24 +98,5 @@ for my $i (0 .. $#tests) {
 
     $obj->analyze;
 
-    eq_or_diff $obj->{gripes}, $t->{gripes}, $t->{name};
+    eq_or_diff $obj->{gripes}, $expected_gripes, $test_name;
 }
-
-__END__
-
-------no-problem-------------------
-
-/i386/mypkg/usr/lib/mylib.a
-/x86_64/mypkg/usr/lib/mylib.a
-
------/usr/local-(2-arches)--------------------
-
-! /i386/mypkg/usr/local/lib/mylib.a
-! /x86_64/mypkg/usr/local/lib/mylib.a
-
------------other---dirs-------------------
-
-! /i386/mypkg/media/foo
-! /i386/mypkg/home/sdfsdf
-! /i386/mypkg/var/tmp
-! /i386/mypkg/usr/tmp
