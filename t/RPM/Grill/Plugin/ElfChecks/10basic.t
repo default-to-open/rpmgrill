@@ -7,8 +7,8 @@ use Test::More;
 use Test::Differences;
 
 # Tests 1-2 : load our modules.  If any of these fail, abort.
-use_ok 'RPM::Grill'                  or exit;
-use_ok 'RPM::Grill::Plugin::Rpath'   or exit;
+use_ok 'RPM::Grill'                     or exit;
+use_ok 'RPM::Grill::Plugin::ElfChecks'  or exit;
 
 #
 # Test list. Format is:
@@ -60,7 +60,7 @@ for my $line (split "\n", $tests) {
     my ($path, $rpath, $expected_msg) = split ' ', $line, 3;
     $expected_msg = undef if $expected_msg eq '-';
 
-    my $actual_msg = RPM::Grill::Plugin::Rpath::_rpath_element_is_suspect( $path, $rpath );
+    my $actual_msg = RPM::Grill::Plugin::ElfChecks::_rpath_element_is_suspect( $path, $rpath );
     is $actual_msg, $expected_msg, "$path + $rpath";
 }
 

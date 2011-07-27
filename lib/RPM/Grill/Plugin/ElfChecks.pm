@@ -1,6 +1,6 @@
 # -*- perl -*-
 #
-# RPM::Grill::Plugin::Rpath - check RPATH in binaries
+# RPM::Grill::Plugin::ElfChecks - check ELF binaries (RPATH, RELRO, ...)
 #
 # $Id$
 #
@@ -9,7 +9,7 @@
 #
 # This module created in response to
 #   https://errata.devel.redhat.com/rpmdiff/show/52153?result_id=821293
-package RPM::Grill::Plugin::Rpath;
+package RPM::Grill::Plugin::ElfChecks;
 
 use base qw(RPM::Grill);
 
