@@ -72,7 +72,7 @@ sub analyze {
             my $path = $f->path;
 
             # Check for /usr/local
-            if ($path =~ m{^/usr/local/}) {
+            if ($path =~ m{^( /usr/local | /media | .*/tmp | /root | /mnt)(/|$)}ox) {
                 $non_fhs{$f->arch}{$f->subpackage}{$path} = 1;
             }
 
