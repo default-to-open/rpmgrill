@@ -49,7 +49,7 @@ for my $i (0 .. $#tests) {
 
     my ($path, $not) = @$t;
 
-    my $test_name = $path . ($not ? " [not acceptable]" : " [ok]");
+    my $test_name = $path . ($not ? " [not acceptable]" : " [acceptable]");
 
     my $dirname = dirname($path);
 
@@ -67,18 +67,13 @@ for my $i (0 .. $#tests) {
     open OUT, '>', "$temp_subdir/i386/mypkg/rpm.rpm" or die "open rpm.rpm: $!";
     close OUT;
 
-    # Append to RPM.per_file_metadata
+    # Create RPM.per_file_metadata. Note that the fields in the here-doc
+    # are separated by ONE TAB
     my $per_file = "$temp_subdir/i386/mypkg/RPM.per_file_metadata";
-    open OUT, '>>', $per_file or die;
-    print OUT join("\t",
-                   '0000000000000000000000000000',
-                   '-rw-r--r--',
-                   'root',
-                   'root',
-                   "0",
-                   '(none)',
-                   $path,
-               ), "\n";
+    open OUT, '>', $per_file or die;
+    print OUT <<"END_METADATA";
+0000000000000	-rw-r--r--	root	root	0	(none)	$path
+END_METADATA
     close OUT or die;
 
     my $expected_gripes;
