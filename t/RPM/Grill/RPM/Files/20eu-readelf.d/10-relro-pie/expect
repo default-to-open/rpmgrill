@@ -8,5 +8,5 @@
                       'libc.so.6'
                     ],
           'relro_partial' => 'R',
-          'rpath_full' => '1'
+          'relro_full' => '1'
         };
