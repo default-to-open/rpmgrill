@@ -43,6 +43,18 @@ sub doc {
 FIXME FIXME FIXME
 END_DOC
 
+# List of mount points / directories which should be left to the end user.
+our @Non_FHS = qw(
+                     /home
+                     /media
+                     /mnt
+                     /root
+                     /usr/local
+                     .*/tmp
+             );
+our $Non_FHS = join('|', @Non_FHS);
+
+
 # END   user-configurable section
 ###############################################################################
 
@@ -72,7 +84,7 @@ sub analyze {
             my $path = $f->path;
 
             # Check for /usr/local
-            if ($path =~ m{^( /usr/local | /media | .*/tmp | /root | /mnt | /home)(/|$)}ox) {
+            if ($path =~ m{^($Non_FHS)(/|$)}o) {
                 $non_fhs{$f->arch}{$f->subpackage}{$path} = 1;
             }
 
