@@ -1,0 +1,12 @@
+{
+          'pie' => '1',
+          'elf_type' => 'DYN (Shared object file)',
+          'libs' => [
+                      'libcap-ng.so.0',
+                      'liblber-2.4.so.2',
+                      'libldap-2.4.so.2',
+                      'libc.so.6'
+                    ],
+          'relro_partial' => 'R',
+          'rpath_full' => '1'
+        };
