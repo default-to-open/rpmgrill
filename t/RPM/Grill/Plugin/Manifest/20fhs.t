@@ -8,15 +8,16 @@ use Test::Differences;
 
 use File::Path                  qw(mkpath rmtree);
 use File::Temp                  qw(tempdir);
-use File::Basename              qw(dirname);
 
 # pass 1: read DATA
 my @tests;
 my $tests = <<'END_TESTS';
-  /usr/lib/mylib.a
-  /usr/bin/mybin
-! /usr/local/lib/mylib.a
-! /usr/local/lib/mylib.a
+  /usr/lib
+  /usr/lib64
+  /usr/lib64/mysubdir
+  /usr/bin
+! /usr/local/lib
+! /usr/local/lib64
 ! /media
 ! /media/foo
 ! /home/sdfsdf
@@ -33,10 +34,10 @@ for my $line (split "\n", $tests) {
 
 #use Data::Dumper;print Dumper(\@tests);exit 0;
 
-plan tests => 3 + @tests;
+plan tests => 3 + @tests + 1;
 
 # Pass 2: do the tests
-my $tempdir = tempdir("t-Multilib.XXXXXX", CLEANUP => !$ENV{DEBUG});
+my $tempdir = tempdir("t-Manifest.XXXXXX", CLEANUP => !$ENV{DEBUG});
 
 # Tests 1-3 : load our modules.  If any of these fail, abort.
 use_ok 'RPM::Grill'                       or exit;
@@ -44,12 +45,10 @@ use_ok 'RPM::Grill::RPM'                  or exit;
 use_ok 'RPM::Grill::Plugin::Manifest'     or exit;
 
 
-for my $i (0 .. $#tests) {
-    my $t = $tests[$i];
-
+for my $t (@tests) {
     my ($path, $not) = @$t;
 
-    my $test_name = $path . ($not ? " [not acceptable]" : " [acceptable]");
+    my $test_name = $path . ($not ? " [not acceptable]" : "");
 
     my $expected_gripes;
     if ($not) {
@@ -75,6 +74,23 @@ for my $i (0 .. $#tests) {
 #
 # One more; testing multi-bad-dir results
 #
+my @bad = sort map { $_->[0] } grep { $_->[1] } @tests;
+my $temp_subdir = make_tempdir( @bad );
+my $expected_gripes = { Manifest => [ {
+    arch       => 'i386',
+    subpackage => 'mypkg',
+    code       => 'NonFHS',
+    diag       => 'FHS-protected directories:',
+    context    => { excerpt    => [ @bad ] },
+} ] };
+
+
+my $obj = RPM::Grill->new( $temp_subdir );
+
+bless $obj, 'RPM::Grill::Plugin::Manifest';
+$obj->analyze;
+
+eq_or_diff $obj->{gripes}, $expected_gripes, 'aggregate results';
 
 
 
@@ -94,13 +110,8 @@ sub make_tempdir {
         or die "mkdir $temp_subdir: $!\n";
 
     for my $f (@_) {
-        my $dirname = dirname($f);
-
-        # Make the path to the file, then touch the file
-        mkpath "$temp_subdir/i386/mypkg/payload/$dirname", 0, 02755;
-        open OUT, '>', "$temp_subdir/i386/mypkg/payload/$f"
-            or die "Cannot mk $f: $!";
-        close OUT or die;
+        # Make the path
+        mkpath "$temp_subdir/i386/mypkg/payload$f", 0, 02755;
 
         # Create rpm.rpm
         open OUT, '>', "$temp_subdir/i386/mypkg/rpm.rpm"
@@ -112,7 +123,7 @@ sub make_tempdir {
         my $per_file = "$temp_subdir/i386/mypkg/RPM.per_file_metadata";
         open OUT, '>>', $per_file or die;
         print OUT <<"END_METADATA";
-0000000000000	-rw-r--r--	root	root	0	(none)	$f
+0000000000000	drwxr-xr-x	root	root	0	(none)	$f
 END_METADATA
         close OUT or die;
     }
