@@ -51,31 +51,6 @@ for my $i (0 .. $#tests) {
 
     my $test_name = $path . ($not ? " [not acceptable]" : " [acceptable]");
 
-    my $dirname = dirname($path);
-
-    # Create new tempdir for this individual test
-    my $temp_subdir = sprintf("%s/%02d", $tempdir, $i);
-    mkdir $temp_subdir, 02755
-        or die "mkdir $temp_subdir: $!\n";
-
-    # Make the path to the file, then touch the file
-    mkpath "$temp_subdir/i386/mypkg/payload/$dirname", 0, 02755;
-    open OUT, '>', "$temp_subdir/i386/mypkg/payload/$path" or die "Cannot mk $path: $!";
-    close OUT or die;
-
-    # Create rpm.rpm
-    open OUT, '>', "$temp_subdir/i386/mypkg/rpm.rpm" or die "open rpm.rpm: $!";
-    close OUT;
-
-    # Create RPM.per_file_metadata. Note that the fields in the here-doc
-    # are separated by ONE TAB
-    my $per_file = "$temp_subdir/i386/mypkg/RPM.per_file_metadata";
-    open OUT, '>', $per_file or die;
-    print OUT <<"END_METADATA";
-0000000000000	-rw-r--r--	root	root	0	(none)	$path
-END_METADATA
-    close OUT or die;
-
     my $expected_gripes;
     if ($not) {
         $expected_gripes = { Manifest => [ {
@@ -87,6 +62,7 @@ END_METADATA
     }
 
     # invoke
+    my $temp_subdir = make_tempdir( $path );
     my $obj = RPM::Grill->new( $temp_subdir );
 
     bless $obj, 'RPM::Grill::Plugin::Manifest';
@@ -94,4 +70,52 @@ END_METADATA
     $obj->analyze;
 
     eq_or_diff $obj->{gripes}, $expected_gripes, $test_name;
+}
+
+#
+# One more; testing multi-bad-dir results
+#
+
+
+
+
+
+
+###############################################################################
+# BEGIN helper
+
+sub make_tempdir {
+    use feature 'state';
+    state $i = 0;
+
+    # Create new tempdir for this individual test
+    my $temp_subdir = sprintf("%s/%02d", $tempdir, $i++);
+    mkdir $temp_subdir, 02755
+        or die "mkdir $temp_subdir: $!\n";
+
+    for my $f (@_) {
+        my $dirname = dirname($f);
+
+        # Make the path to the file, then touch the file
+        mkpath "$temp_subdir/i386/mypkg/payload/$dirname", 0, 02755;
+        open OUT, '>', "$temp_subdir/i386/mypkg/payload/$f"
+            or die "Cannot mk $f: $!";
+        close OUT or die;
+
+        # Create rpm.rpm
+        open OUT, '>', "$temp_subdir/i386/mypkg/rpm.rpm"
+            or die "open rpm.rpm: $!";
+        close OUT;
+
+        # Append to RPM.per_file_metadata. Note that the fields in the
+        # here-document are separated by ONE TAB
+        my $per_file = "$temp_subdir/i386/mypkg/RPM.per_file_metadata";
+        open OUT, '>>', $per_file or die;
+        print OUT <<"END_METADATA";
+0000000000000	-rw-r--r--	root	root	0	(none)	$f
+END_METADATA
+        close OUT or die;
+    }
+
+    return $temp_subdir;
 }
