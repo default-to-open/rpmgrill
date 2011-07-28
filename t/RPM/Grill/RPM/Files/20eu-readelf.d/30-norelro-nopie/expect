@@ -1,0 +1,25 @@
+{
+          'pie' => '1',
+          'elf_type' => 'EXEC (Executable file)',
+          'libs' => [
+                      'librpmbuild.so.1',
+                      'librpm.so.1',
+                      'libmagic.so.1',
+                      'librpmio.so.1',
+                      'libselinux.so.1',
+                      'libcap.so.2',
+                      'libacl.so.1',
+                      'libdb-4.8.so',
+                      'libbz2.so.1',
+                      'liblzma.so.0',
+                      'liblua-5.1.so',
+                      'libm.so.6',
+                      'libelf.so.1',
+                      'libnss3.so',
+                      'libpopt.so.0',
+                      'libz.so.1',
+                      'librt.so.1',
+                      'libpthread.so.0',
+                      'libc.so.6'
+                    ]
+        };
