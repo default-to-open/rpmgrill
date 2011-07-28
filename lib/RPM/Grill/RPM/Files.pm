@@ -365,6 +365,20 @@ sub elf_rpath {
     return $self->{_eu_readelf}{rpath};
 }
 
+################
+#  elf_is_pie  #  Returns true if ELF file is PIE
+################
+sub elf_is_pie {
+    my $self = shift;
+
+    $self->_run_eu_readelf();
+
+    return unless $self->{_eu_readelf}{elf_type} =~ /^DYN/;
+    return unless $self->{_eu_readelf}{debug};
+
+    return 1;           # FIXME: "DSO" vs "yes" ?
+}
+
 # END   code and helpers for running eu-readelf
 ###############################################################################
 # BEGIN Code and helpers for converting string (ls) mode to octal

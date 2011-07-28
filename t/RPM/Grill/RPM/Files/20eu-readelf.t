@@ -46,7 +46,7 @@ BEGIN {
     }
 }
 
-plan tests => 3 + @tests;
+plan tests => 3 + 2 * @tests;
 
 
 
@@ -94,6 +94,14 @@ for my $t (@tests) {
 
 #    use Data::Dumper; print STDERR Dumper($obj->{_eu_readelf});
     eq_or_diff $obj->{_eu_readelf}, $t->{expect}, $t->{name};
+
+    # Test name tells is whether the output should be PIE
+    if ($t->{name} =~ /-pie/) {
+        ok $obj->elf_is_pie, "$t->{name} is PIE";
+    }
+    else {
+        ok !$obj->elf_is_pie, "$t->{name} is not PIE";
+    }
 
     # KLUDGE: if the expect file consists solely of the string 'FIXME',
     # dump our actual results. This makes it easy for me to cut&paste
