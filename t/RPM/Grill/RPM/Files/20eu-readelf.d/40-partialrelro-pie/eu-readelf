@@ -1,0 +1,89 @@
+# source: eu-readelf -d -h -l /usr/sbin/postcat
+# source: postfix-2.7.4-1.fc14.x86_64
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Ident Version:                     1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           AMD x86-64
+  Version:                           1 (current)
+  Entry point address:               0x4d40
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          121640 (bytes into file)
+  Flags:                             
+  Size of this header:               64 (bytes)
+  Size of program header entries:    56 (bytes)
+  Number of program headers entries: 9
+  Size of section header entries:    64 (bytes)
+  Number of section headers entries: 29
+  Section header string table index: 28
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0001f8 0x0001f8 R E 0x8
+  INTERP         0x000238 0x0000000000000238 0x0000000000000238 0x00001c 0x00001c R   0x1
+	[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x01b6cc 0x01b6cc R E 0x200000
+  LOAD           0x01bce8 0x000000000021bce8 0x000000000021bce8 0x001d28 0x0031b8 RW  0x200000
+  DYNAMIC        0x01cbc0 0x000000000021cbc0 0x000000000021cbc0 0x000260 0x000260 RW  0x8
+  NOTE           0x000254 0x0000000000000254 0x0000000000000254 0x000044 0x000044 R   0x4
+  GNU_EH_FRAME   0x018088 0x0000000000018088 0x0000000000018088 0x00088c 0x00088c R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0x8
+  GNU_RELRO      0x01bce8 0x000000000021bce8 0x000000000021bce8 0x001318 0x001318 R   0x1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01      [RO: .interp]
+   02      [RO: .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .text .fini .rodata .eh_frame_hdr .eh_frame]
+   03      [RELRO: .ctors .dtors .jcr .data.rel.ro .dynamic .got] <RELRO: .got.plt> .data .bss
+   04      [RELRO: .dynamic]
+   05      [RO: .note.ABI-tag .note.gnu.build-id]
+   06      [RO: .eh_frame_hdr]
+   07     
+   08      [RELRO: .ctors .dtors .jcr .data.rel.ro .dynamic .got]
+
+Dynamic segment contains 38 entries:
+ Addr: 0x000000000021cbc0  Offset: 0x01cbc0  Link to section: [ 6] '.dynstr'
+  Type              Value
+  NEEDED            Shared library: [libldap-2.4.so.2]
+  NEEDED            Shared library: [liblber-2.4.so.2]
+  NEEDED            Shared library: [libpcre.so.0]
+  NEEDED            Shared library: [libmysqlclient.so.16]
+  NEEDED            Shared library: [libm.so.6]
+  NEEDED            Shared library: [libsasl2.so.2]
+  NEEDED            Shared library: [libssl.so.10]
+  NEEDED            Shared library: [libcrypto.so.10]
+  NEEDED            Shared library: [libdl.so.2]
+  NEEDED            Shared library: [libz.so.1]
+  NEEDED            Shared library: [libdb-4.8.so]
+  NEEDED            Shared library: [libnsl.so.1]
+  NEEDED            Shared library: [libresolv.so.2]
+  NEEDED            Shared library: [libc.so.6]
+  INIT              0x0000000000004820
+  FINI              0x0000000000014768
+  GNU_HASH          0x0000000000000298
+  STRTAB            0x0000000000001128
+  SYMTAB            0x0000000000000450
+  STRSZ             1673 (bytes)
+  SYMENT            24 (bytes)
+  DEBUG             
+  PLTGOT            0x000000000021cfe8
+  PLTRELSZ          1896 (bytes)
+  PLTREL            RELA
+  JMPREL            0x00000000000040b8
+  RELA              0x0000000000001928
+  RELASZ            10128 (bytes)
+  RELAENT           24 (bytes)
+  VERNEED           0x00000000000018c8
+  VERNEEDNUM        1
+  VERSYM            0x00000000000017b2
+  RELACOUNT         388
+  NULL              
+  NULL              
+  NULL              
+  NULL              
+  NULL              
