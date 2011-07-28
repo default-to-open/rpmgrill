@@ -1,0 +1,11 @@
+{
+          'pie' => '1',
+          'elf_type' => 'DYN (Shared object file)',
+          'libs' => [
+                      'libselinux.so.1',
+                      'libpam.so.0',
+                      'libdl.so.2',
+                      'libaudit.so.1',
+                      'libc.so.6',
+                    ],
+        };
