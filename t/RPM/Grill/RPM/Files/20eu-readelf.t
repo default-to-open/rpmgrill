@@ -46,7 +46,7 @@ BEGIN {
     }
 }
 
-plan tests => 3 + 2 * @tests;
+plan tests => 3 + 3 * @tests;
 
 
 
@@ -101,6 +101,15 @@ for my $t (@tests) {
     }
     else {
         ok !$obj->elf_is_pie, "$t->{name} is not PIE";
+    }
+
+    # Likewise for relro
+    if ($t->{name} =~ /-([^-]+)relro/) {
+        my $expected_relro = $1;
+        is $obj->elf_relro||'no', $expected_relro, "$t->{name} RELRO = $expected_relro";
+    }
+    else {
+        is $obj->elf_relro, '', "$t->{name} is not RELRO";
     }
 
     # KLUDGE: if the expect file consists solely of the string 'FIXME',

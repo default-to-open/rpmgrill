@@ -379,6 +379,27 @@ sub elf_is_pie {
     return 1;           # FIXME: "DSO" vs "yes" ?
 }
 
+###############
+#  elf_relro  #  Returns empty string (false), 'partial', or 'full'
+###############
+sub elf_relro {
+    my $self = shift;
+
+    $self->_run_eu_readelf();
+
+    if ($self->{_eu_readelf}{gnu_relro}) {
+        if ($self->{_eu_readelf}{bind_now}) {
+            return 'full';
+        }
+        return 'partial';
+    }
+    elsif ($self->{_eu_readelf}{bind_now}) {
+        warn "$ME: WEIRD: have BIND_NOW but no RELRO in " . $self->extracted_path;
+    }
+
+    return '';
+}
+
 # END   code and helpers for running eu-readelf
 ###############################################################################
 # BEGIN Code and helpers for converting string (ls) mode to octal
