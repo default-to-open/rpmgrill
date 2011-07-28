@@ -1,5 +1,5 @@
 {
-          'pie' => '1',
+          'debug' => '1',
           'elf_type' => 'DYN (Shared object file)',
           'libs' => [
                       'libcap-ng.so.0',
@@ -7,6 +7,6 @@
                       'libldap-2.4.so.2',
                       'libc.so.6'
                     ],
-          'relro_partial' => 'R',
-          'relro_full' => '1'
+          'gnu_relro' => 'R',
+          'bind_now' => '1'
         };

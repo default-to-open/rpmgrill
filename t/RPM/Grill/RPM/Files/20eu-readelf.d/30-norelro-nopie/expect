@@ -1,5 +1,5 @@
 {
-          'pie' => '1',
+          'debug' => '1',
           'elf_type' => 'EXEC (Executable file)',
           'libs' => [
                       'librpmbuild.so.1',

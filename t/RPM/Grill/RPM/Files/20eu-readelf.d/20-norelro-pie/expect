@@ -1,5 +1,5 @@
 {
-          'pie' => '1',
+          'debug' => '1',
           'elf_type' => 'DYN (Shared object file)',
           'libs' => [
                       'libselinux.so.1',
