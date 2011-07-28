@@ -387,6 +387,14 @@ sub elf_relro {
 
     $self->_run_eu_readelf();
 
+    # Here are a couple of good writeups:
+    #
+    #    http://www.gentoo.org/proj/en/hardened/hardened-toolchain.xml
+    #    https://wiki.ubuntu.com/Security/Features
+    #
+    # Basically:
+    #    * GNU_RELRO makes _part_ of the relocation table read-only ('partial')
+    #    * BIND_NOW makes _all_ of it RO ('full')
     if ($self->{_eu_readelf}{gnu_relro}) {
         if ($self->{_eu_readelf}{bind_now}) {
             return 'full';
@@ -394,6 +402,7 @@ sub elf_relro {
         return 'partial';
     }
     elsif ($self->{_eu_readelf}{bind_now}) {
+        # Should not happen
         warn "$ME: WEIRD: have BIND_NOW but no RELRO in " . $self->extracted_path;
     }
 
