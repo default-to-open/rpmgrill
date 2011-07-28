@@ -94,4 +94,13 @@ for my $t (@tests) {
 
 #    use Data::Dumper; print STDERR Dumper($obj->{_eu_readelf});
     eq_or_diff $obj->{_eu_readelf}, $t->{expect}, $t->{name};
+
+    # KLUDGE: if the expect file consists solely of the string 'FIXME',
+    # dump our actual results. This makes it easy for me to cut&paste
+    # into the expect file.
+    if (defined $t->{expect}) {
+        if ($t->{expect} eq 'FIXME') {
+            use Data::Dumper; print STDERR Dumper($obj->{_eu_readelf});
+        }
+    }
 }
