@@ -67,12 +67,70 @@ for my $line (split "\n", $acceptable_paths) {
 sub analyze {
     my $self = shift;
 
+    $self->{_plugin_state} = {};
+
+    # Pass 1: analyze every file. Some of these helpers may store gripes
+    # in an internal staging area, instead of calling ->gripe() directly.
     for my $rpm ( $self->rpms ) {
         for my $f ( grep { $_->is_elf } $rpm->files ) {
             $self->_check_rpath( $f );
 
             # FIXME
             $self->_check_relro( $f );
+        }
+    }
+
+    # Collect gripes. This is helpful for avoiding lots of the same message.
+    #
+    # The organization here looks something like:
+    #
+    #   |- diag
+    #   |  |- LibMissingRELRO = Library file<|s> not compiled with RELRO or PIE
+    #   |  `- SetxidMissingRELRO = Setxid file<|s> not compiled with RELRO or PIE
+    #   `- gripes
+    #      |- LibMissingRELRO  <--- code
+    #      |  |- i686          <--- arch
+    #      |  |  |- perl       <--- subpackage
+    #      |  |  |  |- 0 = /usr/lib/perl5/auto/B/B.so
+    #      |  |  |  |- 1 = /usr/lib/perl5/auto/Cwd/Cwd.so
+    #      :  :  :  :
+    #
+    for my $code (sort keys %{ $self->{_plugin_state}{gripes} }) {
+        my $code_gripes = $self->{_plugin_state}{gripes}{$code};
+
+        for my $arch (sort keys %$code_gripes) {
+            for my $subpackage (sort keys %{ $code_gripes->{$arch} }) {
+                # Here we are. Get list of files for this tuple.
+                my @files = @{ $code_gripes->{$arch}{$subpackage} };
+
+                my $gripe = {
+                    code => $code,
+                    arch => $arch,
+                    subpackage => $subpackage,
+                };
+
+                # Get the corresponding diag message for this code.
+                # It will look like "File<|s>", where <lhs|rhs> indicates
+                # what to show for singular (lhs) or plural (rhs).
+                my $diag = $self->{_plugin_state}{diag}{$code};
+
+                # Filter it as singular or plural.
+                # If singular, include filename as part of diagnostic.
+                # If plural, include filenames in our separate context.
+                if (@files == 1) {
+                    $diag =~ s{<(.*?)\|.*?>}{$1}g;
+                    $gripe->{diag} = "$diag: <tt>$files[0]</tt>";
+                }
+                else {                                  # plural
+                    $diag =~ s{<\|(.*?)>}{$1}g;
+                    $gripe->{diag} = $diag . ":";
+                    $gripe->{context} = {
+                        excerpt => \@files,
+                    };
+                }
+
+                $self->gripe($gripe);
+            }
         }
     }
 }
@@ -204,6 +262,15 @@ sub _check_relro {
     my $is_pie = $f->elf_is_pie;
     my $relro  = $f->elf_relro;
 
+    my $gripe = sub {
+        my $code = shift;
+        my $msg  = shift;
+
+        my $arch = $f->arch;
+        my $subp = $f->subpackage;
+        push @{ $self->{_plugin_state}{gripes}{$code}{$arch}{$subp} }, $file_path;
+        $self->{_plugin_state}{diag}{$code} = $msg;
+    };
 
     if ($is_pie) {
         if ($relro eq 'full') {
@@ -215,13 +282,14 @@ sub _check_relro {
 
         # PIE but not RELRO. Bad. (see above)
         # FIXME
-        my $not = 'not';
-        $not = 'only partially' if $relro eq 'partial';
-        $f->gripe({
-            code => 'MissingRELRO',
-            diag => "File is PIE but $not RELRO: <tt>$file_path</tt>",
-        });
-
+        if ($relro eq 'partial') {
+            $gripe->( 'PiePartialRelro',
+                      'File<|s> <is|are> PIE but only partially RELRO' );
+        }
+        else {
+            $gripe->( 'PiePartialRelro',
+                      'File<|s> <is|are> PIE but not RELRO' );
+        }
         # FIXME: is this enough diagnostic?
         return;
     }
@@ -231,10 +299,10 @@ sub _check_relro {
     # "we want all libraries to have partial relro"
     if ($file_path =~ m{/lib.*\.so$}) {
         if (! $relro) {
-            $f->gripe({
-                code => 'LibMissingRELRO',
-                diag => "Library file is missing RELRO (also PIE): <tt>$file_path</tt>",
-            });
+            $gripe->(
+                'LibMissingRELRO',
+                'Library file<|s> not compiled with RELRO or PIE',
+            );
         }
         return;         # Nothing more to check for libraries
     }
@@ -245,16 +313,16 @@ sub _check_relro {
         my $setxid = ($f->is_suid ? 'setuid' : 'setgid');
 
         if (!$relro) {
-            $f->gripe({
-                code => 'SetxidMissingRELRO',
-                diag => "$setxid file missing both RELRO and PIE: <tt>$file_path</tt>",
-            });
+            $gripe->(
+                'SetxidMissingRELRO',
+                'Setxid file<|s> not compiled with RELRO or PIE',
+            );
         }
         elsif ($relro ne 'full') {
-            $f->gripe({
-                code => 'SetxidPartialRELRO',
-                diag => "$setxid file has only partial RELRO (should be full). Also, missing PIE: <tt>$file_path</tt>",
-            });
+            $gripe->(
+                'SetxidPartialRELRO',
+                'Setxid file<|s> compiled with only partial RELRO (should be full)',
+            );
         }
 
         return;
