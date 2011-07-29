@@ -72,10 +72,14 @@ sub analyze {
             $self->_check_rpath( $f );
 
             # FIXME
+            $self->_check_relro( $f );
         }
     }
 }
 
+
+###############################################################################
+# BEGIN rpath code
 
 ##################
 #  _check_rpath  #  Check a complete rpath (i.e. multiple:elements)
@@ -166,6 +170,101 @@ sub _rpath_element_is_suspect {
 
     return "not a known trusted path";     # unknown path element
 }
+
+# END   rpath code
+###############################################################################
+# BEGIN relro code
+
+##################
+#  _check_relro  #
+##################
+#
+# The policy used here is defined by Steve Grubb:
+#
+#    we want all setuid/segid/setcap/daemons to be compiled with
+#    full relro and PIE. We want all libraries to have partial relro.
+#    ...
+#    when you have an application with PIE, you want full relro so that
+#    these sections become readonly and not part of an attacker's target areas.
+#
+#  http://post-office.corp.redhat.com/archives/os-devel-list/2011-July/msg00149.html
+#
+# See also discussion at https://fedorahosted.org/fesco/ticket/563
+#
+sub _check_relro {
+    my $self  = shift;
+    my $f     = shift;                 # in: file obj
+
+    my $file_path = $f->path;
+
+    # Files we are never interested in
+    return if $file_path =~ m{/lib.*/debug};            # eg /usr/lib/debug/...
+    return if $file_path =~ m{\.debug$};                # foo.debug
+
+    my $is_pie = $f->elf_is_pie;
+    my $relro  = $f->elf_relro;
+
+
+    if ($is_pie) {
+        if ($relro eq 'full') {
+            return;             # PIE + RELRO = always good (at least from
+                                # our perspective. Not necessarily from that
+                                # of the end user who has to wait longer
+                                # at program startup time).
+        }
+
+        # PIE but not RELRO. Bad. (see above)
+        # FIXME
+        my $not = 'not';
+        $not = 'only partially' if $relro eq 'partial';
+        $f->gripe({
+            code => 'MissingRELRO',
+            diag => "File is PIE but $not RELRO: <tt>$file_path</tt>",
+        });
+
+        # FIXME: is this enough diagnostic?
+        return;
+    }
+
+    # Not PIE. Should it be? What about RELRO?
+    #
+    # "we want all libraries to have partial relro"
+    if ($file_path =~ m{/lib.*\.so$}) {
+        if (! $relro) {
+            $f->gripe({
+                code => 'LibMissingRELRO',
+                diag => "Library file is missing RELRO (also PIE): <tt>$file_path</tt>",
+            });
+        }
+        return;         # Nothing more to check for libraries
+    }
+
+    # "setuid/setgid" ... "full RELRO and PIE"
+    # FIXME: how to check "cap"?
+    if ($f->is_suid || $f->is_sgid) {
+        my $setxid = ($f->is_suid ? 'setuid' : 'setgid');
+
+        if (!$relro) {
+            $f->gripe({
+                code => 'SetxidMissingRELRO',
+                diag => "$setxid file missing both RELRO and PIE: <tt>$file_path</tt>",
+            });
+        }
+        elsif ($relro ne 'full') {
+            $f->gripe({
+                code => 'SetxidPartialRELRO',
+                diag => "$setxid file has only partial RELRO (should be full). Also, missing PIE: <tt>$file_path</tt>",
+            });
+        }
+
+        return;
+    }
+
+    # FIXME: how to check daemon??
+}
+
+# END   relro code
+###############################################################################
 
 1;
 
