@@ -310,18 +310,18 @@ sub _check_relro {
     # "setuid/setgid" ... "full RELRO and PIE"
     # FIXME: how to check "cap"?
     if ($f->is_suid || $f->is_sgid) {
-        my $setxid = ($f->is_suid ? 'setuid' : 'setgid');
+        my $ug = ($f->is_suid ? 'u' : 'g');
 
         if (!$relro) {
             $gripe->(
-                'SetxidMissingRELRO',
-                'Setxid file<|s> not compiled with RELRO or PIE',
+                "Set${ug}idMissingRELRO",
+                "Set${ug}id file<|s> not compiled with RELRO or PIE",
             );
         }
         elsif ($relro ne 'full') {
             $gripe->(
-                'SetxidPartialRELRO',
-                'Setxid file<|s> compiled with only partial RELRO (should be full)',
+                "Set${ug}idPartialRELRO",
+                "Set${ug}id file<|s> compiled with only partial RELRO (should be full)",
             );
         }
 
