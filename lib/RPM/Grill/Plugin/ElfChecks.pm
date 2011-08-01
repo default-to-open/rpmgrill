@@ -287,7 +287,7 @@ sub _check_relro {
                       'File<|s> <is|are> PIE but only partially RELRO' );
         }
         else {
-            $gripe->( 'PiePartialRelro',
+            $gripe->( 'PieNotRelro',
                       'File<|s> <is|are> PIE but not RELRO' );
         }
         # FIXME: is this enough diagnostic?
