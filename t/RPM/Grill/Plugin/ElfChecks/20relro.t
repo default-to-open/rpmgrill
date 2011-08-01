@@ -229,3 +229,27 @@ i386 mypkg -rwxr-xr-x /usr/bin/foo [relro=no,pie=yes]
 i386 mypkg -rwxr-xr-x /usr/lib/libfoo.so [relro=no,pie=no]
 
 *** LibMissingRELRO
+
+---------------------- [setuid missing relro]
+
+i386 mypkg -rwsr-xr-x /usr/bin/foo [relro=no,pie=no]
+
+*** SetuidMissingRELRO
+
+---------------------- [setuid partial relro]
+
+i386 mypkg -rwsr-xr-x /usr/bin/foo [relro=partial,pie=no]
+
+*** SetuidPartialRELRO
+
+---------------------- [setgid missing relro]
+
+i386 mypkg -rwxr-sr-x /usr/bin/foo [relro=no,pie=no]
+
+*** SetgidMissingRELRO
+
+---------------------- [setgid partial relro]
+
+i386 mypkg -rwxr-sr-x /usr/bin/foo [relro=partial,pie=no]
+
+*** SetgidPartialRELRO
