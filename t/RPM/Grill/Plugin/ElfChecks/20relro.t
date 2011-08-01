@@ -23,14 +23,16 @@ while (my $line = <DATA>) {
 
     if ($line =~ /^-+\s+\[(.*)\]$/) {
         # Line of dashes. New test.
-        push @tests, { name => $1, files => [], expect => [] };
+        push @tests, { name => $1, files => [], expected_gripes => [] };
     }
     elsif ($line =~ m{^(\S+)\s+(\S+)\s+(\S+)\s+(/\S+)(\s+\[(.*)\])?$}) {
         my ($arch, $subpkg, $mode, $path, $flags) = ($1, $2, $3, $4, $6);
 
         push @{ $tests[-1]->{files} }, [ $arch, $subpkg, $mode, $path, $flags ];
     }
-    # FIXME: handle 'expect'
+    elsif ($line =~ m{^\*\*+\s+(\S+)$}) {
+        push @{ $tests[-1]->{expected_gripes} }, split ',', $1;
+    }
     else {
         die "Cannot grok test definition line '$line'";
     }
@@ -193,22 +195,14 @@ for my $i (0 .. $#tests) {
 
     $obj->analyze();
 
-    my $expected_gripes;
-    if (my $d = $t->{expect}) {
-        if (@$d) {
-            $expected_gripes = {
-                Manifest => [
-                    map { +{
-                        arch => 'src',
-                        code => 'UnownedDirectory',
-                        diag => "Unowned mid-level directory <tt>$_</tt>",
-                    } } @$d
-                ]
-            };
-        }
+    my @actual_gripes;
+    if (my $g = $obj->{gripes}) {
+        my %codes = map { $_->{code} => 1 } @{ $g->{ElfChecks} };
+
+        @actual_gripes = sort keys %codes;
     }
 
-    eq_or_diff $obj->{gripes}, $expected_gripes, $t->{name};
+    eq_or_diff \@actual_gripes, $t->{expected_gripes}, $t->{name};
 
 }
 
@@ -218,6 +212,20 @@ __DATA__
 
 i386 mypkg -rwxr-xr-x /usr/bin/foo [relro=partial,pie=no]
 
----------------------- [missing relro]
+---------------------- [PIE binary with partial relro]
 
 i386 mypkg -rwxr-xr-x /usr/bin/foo [relro=partial,pie=yes]
+
+*** PiePartialRelro
+
+---------------------- [PIE binary with no relro]
+
+i386 mypkg -rwxr-xr-x /usr/bin/foo [relro=no,pie=yes]
+
+*** PieNotRelro
+
+---------------------- [library without relro]
+
+i386 mypkg -rwxr-xr-x /usr/lib/libfoo.so [relro=no,pie=no]
+
+*** LibMissingRELRO
