@@ -27,15 +27,19 @@ use File::Basename      qw(dirname);
 sub order { 14 }
 
 # One-line description of this plugin
-sub blurb { return "checks for problems in RPATH" }
+sub blurb { return "checks for problems in ELF files" }
 
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This plugin contains two tests:
+
+  RPATH - looks for suspicious directories in ELF RPATH
+
+  RELRO - require security-enhanced compile options on certain executables
 END_DOC
 
-# Paths that are OK
+# Path components that are OK in RPATH.
 my $acceptable_paths = <<'END_ACCEPTABLE_PATHS';
 /lib
 /lib64
@@ -262,6 +266,8 @@ sub _check_relro {
     my $is_pie = $f->elf_is_pie;
     my $relro  = $f->elf_relro;
 
+    # Gripe shortcut. This lets us abbreviate our gripe calls to just
+    # a code and a message string.
     my $gripe = sub {
         my $code = shift;
         my $msg  = shift;
@@ -272,6 +278,7 @@ sub _check_relro {
         $self->{_plugin_state}{diag}{$code} = $msg;
     };
 
+    # First, check PIE. If we have PIE and RELRO, all is good.
     if ($is_pie) {
         if ($relro eq 'full') {
             return;             # PIE + RELRO = always good (at least from
