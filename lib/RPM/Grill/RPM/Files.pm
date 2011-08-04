@@ -49,6 +49,35 @@ w:0002
 x:0001 t:01001 T:01000
 END_LS_STRING_MODE
 
+# FIXME
+our $ReadElf_Parse_Table = <<'END_READELF';
+-h ELF Header        > /^\s+Type:\s+(.*)/                         : elf_type
+
+-d Dynamic segment   > /^\s*NEEDED\s+Shared library:\s+\[(\S+)\]/ : @libs
+-d Dynamic segment   > /^\s*RPATH\s.*\s\[(.*)\]/                  : rpath
+-d Dynamic segment   > /^\s+BIND_NOW\b/                           : bind_now = 1
+-d Dynamic segment   > /^\s+DEBUG\b/                              : debug    = 1
+
+-l Program Headers   > /^\s*GNU_RELRO\s.*\s(R\S*)\s+0x/           : gnu_relro
+END_READELF
+
+our %ReadElf_Parse_Table;
+our %ReadElf_Flags;
+for my $line (split "\n", $ReadElf_Parse_Table) {
+    next unless $line;                  # skip blank lines
+
+    $line =~ m{^(-\S+) \s+ (\S.*?\S) \s+ > \s+ /(.*?)/ \s+ : \s+ (.*)}xo
+        or die "$ME: Internal error: cannot grok readelf parse table definition '$line'";
+    my ($flag, $section, $re, $action) = ($1, $2, $3, $4);
+
+    $ReadElf_Flags{$flag}++;
+    $ReadElf_Parse_Table{$section}{$re} = $action;
+}
+
+our $ReadElf_Sections = join('|', sort keys %ReadElf_Parse_Table);
+our $ReadElf_Section_RE = qr/^($ReadElf_Sections).*:\s*$/;
+
+our @ReadElf_Flags = sort keys %ReadElf_Flags;
 
 # See <rpm/rpmfi.h>. This indicates that a file may be listed in
 # the specfile but not actually shipped in the rpm.
@@ -259,21 +288,50 @@ sub _run_eu_readelf {
     return unless $self->is_elf;
 
     my $file_path = $self->extracted_path;
-    my $cmd = "eu-readelf -d $file_path 2>/dev/null";
+    my $cmd = "eu-readelf @ReadElf_Flags $file_path 2>/dev/null";
     open my $fh_readelf, "-|", $cmd
         or die "$ME: Cannot fork: $!\n";
+
+    my $current_section;
+
     while (my $line = <$fh_readelf>) {
-        # FIXME: check to make sure we're in the right section
-        # FIXME: what about .gnu.liblist in -A?
-        if ($line =~ /^\s*NEEDED\s+Shared library:\s+\[(\S+)\]/) {
-            push @{ $self->{_eu_readelf}{libs} }, $1;
-        }
-        elsif ($line =~ /^\s*RPATH\s.*\s\[(.*)\]/) {
-            warn "$ME: WARNING: multiple rpaths for $file_path: $self->{_eu_readelf}{rpath}, $1"
-                if $self->{_eu_readelf}{rpath};
-            $self->{_eu_readelf}{rpath} = $1;
+        chomp $line;
+
+        if ($line =~ /^[A-Z].*\s((section|segment|contains)\s.*|Headers?):\s*$/) {
+            if ($line =~ /$ReadElf_Section_RE/) {
+                $current_section = $1;
+            }
+            else {
+                undef $current_section;
+            }
         }
 
+        elsif ($current_section) {
+            for my $re (sort keys %{ $ReadElf_Parse_Table{$current_section} }) {
+                if ($line =~ /$re/) {
+                    my $value = $1;
+                    my $action = $ReadElf_Parse_Table{$current_section}{$re};
+
+                    if ($action =~ /^\@(\S+)$/) {
+                        my $var = $1;
+                        push @{ $self->{_eu_readelf}{$var} }, $value;
+                    }
+                    elsif ($action =~ /^(\S+)\s*=\s*(\S+)$/) {
+                        # FIXME: what if already defined?
+                        $self->{_eu_readelf}{$1} = $2;
+                    }
+                    elsif ($action =~ /^(\S+)$/) {
+                        # FIXME: what if already defined?
+                        $self->{_eu_readelf}{$1} = $value;
+                    }
+                    else {
+                        die "$ME: Internal error: unknown action '$action' for RE '$re'";
+                    }
+                }
+            }
+        }
+
+        # FIXME: what about .gnu.liblist in -A?
     }
     close $fh_readelf
         or die "$ME: Command failed: $cmd\n";
@@ -305,6 +363,50 @@ sub elf_rpath {
     $self->_run_eu_readelf();
 
     return $self->{_eu_readelf}{rpath};
+}
+
+################
+#  elf_is_pie  #  Returns true if ELF file is PIE
+################
+sub elf_is_pie {
+    my $self = shift;
+
+    $self->_run_eu_readelf();
+
+    return unless $self->{_eu_readelf}{elf_type} =~ /^DYN/;
+    return unless $self->{_eu_readelf}{debug};
+
+    return 1;           # FIXME: "DSO" vs "yes" ?
+}
+
+###############
+#  elf_relro  #  Returns empty string (false), 'partial', or 'full'
+###############
+sub elf_relro {
+    my $self = shift;
+
+    $self->_run_eu_readelf();
+
+    # Here are a couple of good writeups:
+    #
+    #    http://www.gentoo.org/proj/en/hardened/hardened-toolchain.xml
+    #    https://wiki.ubuntu.com/Security/Features
+    #
+    # Basically:
+    #    * GNU_RELRO makes _part_ of the relocation table read-only ('partial')
+    #    * BIND_NOW makes _all_ of it RO ('full')
+    if ($self->{_eu_readelf}{gnu_relro}) {
+        if ($self->{_eu_readelf}{bind_now}) {
+            return 'full';
+        }
+        return 'partial';
+    }
+    elsif ($self->{_eu_readelf}{bind_now}) {
+        # Should not happen
+        warn "$ME: WEIRD: have BIND_NOW but no RELRO in " . $self->extracted_path;
+    }
+
+    return '';
 }
 
 # END   code and helpers for running eu-readelf
