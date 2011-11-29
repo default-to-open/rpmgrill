@@ -34,7 +34,7 @@ FIXME FIXME FIXME
 END_DOC
 
 # Path to whitelist files
-our $Whitelist_Dir = '/mnt/redhat/errata/rpmdiff_data/suid';
+our $Whitelist_Dir = '/mnt/redhat/scripts/rel-eng/rpmdiff_data/suid';
 
 # END   user-configurable section
 ###############################################################################

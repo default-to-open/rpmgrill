@@ -62,6 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+- bz750537 - suid whitelist now in /mnt/redhat/scripts/rel-eng
 - add a Requires for elfutils
 - new rpath plugin
 - new Manifest plugin: checks for non-FHS files (eg /usr/local/lib/perl5),
