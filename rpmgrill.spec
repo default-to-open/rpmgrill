@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.03
+Version:        0.04
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -62,6 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+* Fri Dec  2 2011 Ed Santiago <santiago@redhat.com> 0.04-1
 - bz750537 - suid whitelist now in /mnt/redhat/scripts/rel-eng
 - add a Requires for elfutils
 - new rpath plugin
