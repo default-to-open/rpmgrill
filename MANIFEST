@@ -9,11 +9,11 @@ lib/RPM/Grill/Plugin/AAATemplate.pm
 lib/RPM/Grill/Plugin/BuildLog.pm
 lib/RPM/Grill/Plugin/DanglingSymlinks.pm
 lib/RPM/Grill/Plugin/DesktopLint.pm
+lib/RPM/Grill/Plugin/ElfChecks.pm
 lib/RPM/Grill/Plugin/LibGather.pm
 lib/RPM/Grill/Plugin/Manifest.pm
 lib/RPM/Grill/Plugin/Multilib.pm
 lib/RPM/Grill/Plugin/Patches.pm
-lib/RPM/Grill/Plugin/Rpath.pm
 lib/RPM/Grill/Plugin/RpmMetadata.pm
 lib/RPM/Grill/Plugin/RpmRequires.pm
 lib/RPM/Grill/Plugin/RpmScripts.pm
@@ -41,9 +41,9 @@ t/RPM/Grill/Plugin/20docs.t
 t/RPM/Grill/Plugin/90real-world.t
 t/RPM/Grill/Plugin/BuildLog/01basic.t
 t/RPM/Grill/Plugin/DesktopLint/10basic.t
+t/RPM/Grill/Plugin/ElfChecks/10basic.t
 t/RPM/Grill/Plugin/Multilib/10basic.t
 t/RPM/Grill/Plugin/Patches/01basic.t
-t/RPM/Grill/Plugin/Rpath/10basic.t
 t/RPM/Grill/Plugin/RpmMetadata/10basic.t
 t/RPM/Grill/Plugin/RpmMetadata/20wrongbasics.t
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/abrt-1.1.16-3.el6.expect
