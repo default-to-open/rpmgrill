@@ -9,27 +9,35 @@ use Test::Differences;
 use File::Path                  qw(mkpath rmtree);
 use File::Temp                  qw(tempdir);
 
-# pass 1: read DATA
+# pass 1: read tests. Anything with an exclamation point in front is
+# expected to fail.
+#
+# Note that some directories are separated by spaces. That indicates
+# that the left-hand side is the actual FHS-protected directory, and
+# the right-hand side is a subdirectory. This is needed because the
+# test highlights the FHS part in <b>bold</b>, to make it clear
+# that (e.g.) /home is the problem, not /home/fribbedygibbet.
 my @tests;
 my $tests = <<'END_TESTS';
   /usr/lib
   /usr/lib64
-  /usr/lib64/mysubdir
+  /usr/lib64 /mysubdir
   /usr/bin
-! /usr/local/lib
-! /usr/local/lib64
+! /usr/local  /lib
+! /usr/local  /lib64
 ! /media
-! /media/foo
-! /home/sdfsdf
+! /media /foo
+! /home  /sdfsdf
 ! /var/tmp
 ! /usr/tmp
 END_TESTS
 
 for my $line (split "\n", $tests) {
-    $line =~ m{^(!)?\s+(/\S+)$} or die "Cannot grok: '$line'";
-    my ($not, $path) = ($1, $2);
+    $line =~ m{^(!)?\s+(/\S+)(\s+(/\S+))?$} or die "Cannot grok: '$line'";
+    my ($not, $path, $subpath) = ($1, $2, $4||'');
 
-    push @tests, [ $path, $not ];
+    # [ Path, 0=pass 1=fail, path-with-highlights ]
+    push @tests, [ "$path$subpath", $not, "<b>$path</b>$subpath" ];
 }
 
 #use Data::Dumper;print Dumper(\@tests);exit 0;
@@ -46,7 +54,7 @@ use_ok 'RPM::Grill::Plugin::Manifest'     or exit;
 
 
 for my $t (@tests) {
-    my ($path, $not) = @$t;
+    my ($path, $not, $highlighted_path) = @$t;
 
     my $test_name = $path . ($not ? " [not acceptable]" : "");
 
@@ -56,7 +64,7 @@ for my $t (@tests) {
             arch       => 'i386',
             subpackage => 'mypkg',
             code       => 'NonFHS',
-            diag       => "FHS-protected directory <tt>$path</tt>",
+            diag       => "FHS-protected directory <tt>$highlighted_path</tt>",
         } ] };
     }
 
@@ -74,14 +82,17 @@ for my $t (@tests) {
 #
 # One more; testing multi-bad-dir results
 #
-my @bad = sort map { $_->[0] } grep { $_->[1] } @tests;
-my $temp_subdir = make_tempdir( @bad );
+my @failing_tests = grep { $_->[1] } @tests;
+my @bad_dirs      = sort map { $_->[0] } @failing_tests;
+my @bad_excerpt   = sort map { $_->[2] } @failing_tests;
+
+my $temp_subdir = make_tempdir( @bad_dirs );
 my $expected_gripes = { Manifest => [ {
     arch       => 'i386',
     subpackage => 'mypkg',
     code       => 'NonFHS',
     diag       => 'FHS-protected directories:',
-    context    => { excerpt    => [ @bad ] },
+    context    => { excerpt    => [ @bad_excerpt ] },
 } ] };
 
 

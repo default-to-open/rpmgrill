@@ -84,8 +84,8 @@ sub analyze {
             my $path = $f->path;
 
             # Check for /usr/local
-            if ($path =~ m{^($Non_FHS)(/|$)}o) {
-                $non_fhs{$f->arch}{$f->subpackage}{$path} = 1;
+            if ($path =~ m{^($Non_FHS)(/.*|$)}o) {
+                $non_fhs{$f->arch}{$f->subpackage}{"<b>$1</b>$2"} = 1;
             }
 
 
