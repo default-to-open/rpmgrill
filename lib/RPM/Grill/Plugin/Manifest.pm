@@ -73,6 +73,9 @@ sub analyze {
 
     # FHS = Filesystem Hierarchy Standard, eg the spec that says we
     # shouldn't install into /usr/local : See http://www.pathname.com/fhs/
+    #
+    # 2012-01-13 pathname.com is unreachable. Here's another FHS document:
+    # http://docs.redhat.com/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Storage_Administration_Guide/s1-filesystem-fhs.html
     my %non_fhs;
 
     #
