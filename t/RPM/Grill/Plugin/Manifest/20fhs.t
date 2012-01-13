@@ -26,10 +26,16 @@ my $tests = <<'END_TESTS';
 ! /usr/local  /lib
 ! /usr/local  /lib64
 ! /media
-! /media /foo
-! /home  /sdfsdf
+! /media    /subdir
+! /home
+! /home     /subdir
 ! /var/tmp
+! /var/tmp  /subdir
 ! /usr/tmp
+! /usr/tmp  /subdir
+! /tmp
+! /tmp      /subdir
+  /var/spool/foo/tmp
 END_TESTS
 
 for my $line (split "\n", $tests) {

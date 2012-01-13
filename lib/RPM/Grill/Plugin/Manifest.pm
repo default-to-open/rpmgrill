@@ -50,7 +50,7 @@ our @Non_FHS = qw(
                      /mnt
                      /root
                      /usr/local
-                     .*/tmp
+                     /(?:usr/|var/)?tmp
              );
 our $Non_FHS = join('|', @Non_FHS);
 
