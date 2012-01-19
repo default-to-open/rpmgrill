@@ -389,7 +389,8 @@ This may affect someone who downloads your SRPM for viewing.
 
 =item   MacroSurprise
 
-Did you know that RPM expands macros even inside comments?<br/>
+Did you know that RPM expands macros even inside comments?
+
 Sometimes this is OK: %{name}, %{version}. But when %{foo} is
 a multi-line macro, this can cause unpleasant surprises.
 
