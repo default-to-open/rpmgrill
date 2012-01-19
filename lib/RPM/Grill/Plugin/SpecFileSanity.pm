@@ -249,14 +249,14 @@ sub _check_for_other_specfile_problems {
                 if ($v ne $nvr[1]) {
                     $self->gripe({
                         code => 'ChangelogBadVersion',
-                        diag => "First %changelog entry is for <var>$v</var>; expected <var>$nvr[1]</var>",
+                        diag => "First %changelog entry is for <var>$v-$r</var>; I was expecting <var>$nvr[1]</var> as the version, not $v",
                         context => $context,
                     });
                 }
                 elsif ($nvr[2] !~ /^$r\b/) {
                     $self->gripe({
                         code => 'ChangelogBadRelease',
-                        diag => "First %changelog entry is for <var>$v-$r</var>, which doesn't quite match <var>$nvr[1]-<u>$nvr[2]</u></var>",
+                        diag => "First %changelog entry is for <var>$v-$r</var>; I was expecting <var>$nvr[1]-<u>$nvr[2]</u></var>",
                         context => $context,
                     });
 
