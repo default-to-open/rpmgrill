@@ -256,7 +256,7 @@ sub _check_for_other_specfile_problems {
                 elsif ($nvr[2] !~ /^$r\b/) {
                     $self->gripe({
                         code => 'ChangelogBadRelease',
-                        diag => "First %changelog entry is for <var>$v-$r</var>; I was expecting <var>$nvr[1]-<u>$nvr[2]</u></var>",
+                        diag => "First %changelog entry is for <var>$v-<u>$r</u></var>; I was expecting <var>$nvr[1]-<u>$nvr[2]</u></var>",
                         context => $context,
                     });
 
