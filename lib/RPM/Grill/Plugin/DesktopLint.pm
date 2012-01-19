@@ -404,6 +404,23 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   DesktopFileValidation
+
+rpmgrill invokes C<desktop-file-validate> on .desktop files.
+This is the output from that command.
+
+=item   DesktopExecFileMissing
+
+Your .desktop file includes C<Exec=I<foo>>, but
+there's no /usr/bin/I<foo> in this package or any of its subpackages.
+This probably means that I<foo> is provided by a dependency.
+
+=back
+
 =head1	SEE ALSO
 
 L<>

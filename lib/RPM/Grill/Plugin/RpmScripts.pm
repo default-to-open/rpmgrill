@@ -479,6 +479,53 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   UseraddNoHomedir
+
+Invocation of C<useradd> without an explicit home directory.
+
+=item   UseraddBadShell
+
+Invocation of C<useradd> with an unexpected login shell: the expectation
+is that shell will be C</sbin/nologin>
+
+=item   UseraddNoShell
+
+Invocation of C<useradd> without a -s/--shell option. This is probably bad.
+
+=item   UseraddWrongUid
+
+Invocation of C<useradd> with the wrong numeric UID for an account.
+This error means that there B<is> a UID defined for the user in
+the B<setup> package. You should be using that UID.
+
+=item   UseraddUnknownUid
+
+Blah blah FIXME
+
+=item   UseraddCheckUid
+
+This is a case that rpmgrill can't realistically verify on its own, because
+rpm macros and/or shell environment variables may not expand the same way
+in the rpmgrill environment as they do in real life.
+
+=item   UseraddNoUid
+
+Invoking C<useradd> without an explicit UID.
+
+=item   GroupaddWrongGid
+
+=item   GroupaddCheckGid
+
+This is a case that rpmgrill can't realistically verify on its own, because
+rpm macros and/or shell environment variables may not expand the same way
+in the rpmgrill environment as they do in real life.
+
+=back
+
 =head1	SEE ALSO
 
 L<>

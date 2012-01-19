@@ -180,6 +180,10 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+none (yet)
+
 =head1	SEE ALSO
 
 L<>

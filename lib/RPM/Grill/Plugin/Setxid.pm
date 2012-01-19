@@ -232,6 +232,37 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   SetuidDirectory
+
+There is no reason to have a Setuid directory. Perhaps you meant to
+make it setB<g>id (group)?
+
+=item   UnauthorizedSetxid
+
+All setgid directories and setuid/setgid files must be enumerated in
+a L<whitelist|https://FIXME.redhat.com/FIXME>. sdfdsf
+
+=item   WrongFileMode
+
+rpmgrill found a setuid/setgid file which is whitelisted, but
+the file B<permissions don't match> what's specified in the whitelist.
+
+=item   WrongFileUser
+
+rpmgrill found a setuid/setgid file which is whitelisted, but
+the file B<owner doesn't match> the one specified in the whitelist.
+
+=item   WrongFileGroup
+
+rpmgrill found a setuid/setgid file which is whitelisted, but
+the file B<group doesn't match> the one specified in the whitelist.
+
+=back
+
 =head1	SEE ALSO
 
 L<>

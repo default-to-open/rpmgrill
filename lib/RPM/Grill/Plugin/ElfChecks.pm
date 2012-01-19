@@ -399,6 +399,42 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   BadRpath
+
+=item   PiePartialRelro
+
+FIXME
+
+=item   PieNotRelro
+
+FIXME
+
+=item   LibMissingRelro
+
+FIXME
+
+=item   SetuidMissingRelro
+
+FIXME
+
+=item   SetgidMissingRelro
+
+FIXME
+
+=item   SetuidPartialRelro
+
+FIXME
+
+=item   SetgidPartialRelro
+
+FIXME
+
+=back
+
 =head1	SEE ALSO
 
 L<>

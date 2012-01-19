@@ -151,6 +151,20 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   NonUtf8
+
+Packaging guidelines require that the rpm specfile be encoded in UTF-8.
+This message code indicates that your specfile includes characters
+that are not valid in UTF-8.
+
+FIXME: link to packaging guidelines
+
+=back
+
 =head1	SEE ALSO
 
 L<>

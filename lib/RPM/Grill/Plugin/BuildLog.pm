@@ -261,6 +261,47 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over 4
+
+=item   MacroExpansion
+
+FIXME
+
+=item   BufferOverflow
+
+FIXME
+
+=item   TypePun
+
+I have no idea, but rpmdiff runs this check and apparently it's a
+good thing to fix. This probably needs to be fixed upstream.
+
+=item   IntegerOverflow
+
+FIXME
+
+=item   BrokenMemset
+
+FIXME
+
+=item   PatchApply
+
+FIXME
+
+=item   MakeError
+
+Possible error trapped by 'make'. This indicates the presence of
+C<make [...] Error> somewhere in the log.
+
+=item   MiscBuildError
+
+Possible error in the build log. This indicates the presence of
+C<failed with exit status:> somewhere in the log.
+
+=back
+
 =head1	SEE ALSO
 
 L<>

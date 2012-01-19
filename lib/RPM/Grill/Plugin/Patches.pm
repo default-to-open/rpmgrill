@@ -176,6 +176,27 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   DuplicatePatch
+
+Multiple definitions seen for C<PatchNN>.
+This is often caused by a C<%if> in the specfile, but
+it could also be an unintentional duplication.
+
+=item   BadPatchFuzz
+
+Overriding patch's fuzz factor is a bad idea. It means: "those
+three lines of context that diff provides? Toss some of those
+away, and try again". You can end up with code that compiles
+but is silently corrupt. There really is no reason for this.
+Why not take the time to regenerate your patches?
+See L<bz692142|https://bugzilla.redhat.com/show_bug.cgi?id=692142>
+
+=back
+
 =head1	SEE ALSO
 
 L<Fixme::Xxxx>

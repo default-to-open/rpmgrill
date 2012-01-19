@@ -343,6 +343,64 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   CannotRunRpm
+
+rpmgrill tries to run C<rpm -q --specfile I<path>>. This error code
+indicates that there was a failure invoking the C<rpm> command. There
+is no stderr available, so it's probably impossible to know what
+happened. If you're seeing this error, it means something very
+weird and unexpected has happened.
+
+=item   BadExitStatusFromRpm
+
+rpmgrill tries to run C<rpm -q --specfile I<path>>. This error code
+indicates that there was a failure invoking the C<rpm> command. There
+is no stderr available, but rpmgrill was able to get an exit code.
+If you're seeing this error, it means something very
+weird and unexpected has happened.
+
+=item   RpmParseDependency
+
+rpmgrill runs C<rpm -q --specfile I<path>> and reports
+any problems it finds. This warning usually means that your specfile
+has a macro that invokes I<ruby>, I<python>, or some
+other tool which is not installed on this system. B<I know>:
+you probably have that tool as a package dependency. But remember,
+this is the B<specfile>. In the B<SRPM>. People viewing
+the SRPM may not have all your prereqs installed.
+
+=item   RpmParseWarnings
+
+rpmgrill runs C<rpm -q --specfile I<path>> and reports
+any problems it finds. Typical problems:
+
+  sh: ...fg: no job control
+  You probably have a stray % (percent sign) somewhere
+
+=item   RpmParseErrors
+
+rpmgrill runs C<rpm -q --specfile I<path>> and reports
+any problems it finds. This error means that the rpm command failed.
+This may affect someone who downloads your SRPM for viewing.
+
+=item   MacroSurprise
+
+Did you know that RPM expands macros even inside comments?<br/>
+Sometimes this is OK: %{name}, %{version}. But when %{foo} is
+a multi-line macro, this can cause unpleasant surprises.
+
+B<Recommendation>: Double-percent them all: %%{name}, etc.
+
+=item   ChangelogEmptyFIXME
+
+FIXME
+
+=back
+
 =head1	SEE ALSO
 
 L<>

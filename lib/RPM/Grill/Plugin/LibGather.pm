@@ -139,6 +139,10 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+none
+
 =head1	SEE ALSO
 
 L<>

@@ -384,6 +384,94 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   WrongName
+
+FIXME
+
+=item   WrongVersion
+
+FIXME
+
+=item   WrongRelease
+
+FIXME
+
+=item   NoVendor
+
+FIXME - can this happen?
+
+=item   WrongVendor
+
+The B<Vendor> field in the RPM specfile is expected to be C<Red Hat, Inc.>
+exactly like that, with the comma and the period.
+
+Yes, we know this is nitpicky.
+
+=item   NoBuildHost
+
+The C<Build Host> field in the rpm metadata is empty. Can this happen?
+
+=item   BadBuildHost
+
+The C<Build Host> field in the rpm metadata is expected to be a host
+in the C<.redhat.com> domain.
+
+=item   InvalidURL
+
+The C<URL> field in the rpm specfile is expected to be of the form
+C<protocol://host...>. This code indicates that the URL does not
+conform to that requirement.
+
+=item   UnknownProtocol
+
+The C<URL> field in the rpm specfile is expected to be of the form
+C<protocol://host...>. This code indicates that C<protocol> is not
+one that rpmgrill recognizes (http, https, ftp, git).
+
+This is probably OK. It probably just means that rpmgrill needs to
+be taught about a new protocol. But it could also be a typo.
+
+=item   InvalidURL2222
+
+FIXME: no dots
+
+=item   BadURL
+
+rpmgrill tried to do an HTTP GET on the URL, but it failed. Maybe the
+host is unreachable?
+
+FIXME: Every so often, for reasons I don't understand, it gets a
+timeout and reports a problem with a host that is clearly
+reachable. Suggestions welcome.
+
+=item   NoSuchHost
+
+The hostname in the rpm specfile URL does not resolve. This probably
+means your URL is invalid.
+
+=item   WeirdHost
+
+The hostname in the rpm specfile URL resolves externally (outside
+redhat.com) but not internally. This is weird. It is not expected
+to happen. If it does, Ed would love to hear about it.
+
+=item   HostnameLeak
+
+The hostname in the rpm specfile URL resolves inside redhat.com
+but not outside. This probably means that you're using an
+B<internal-only host>. If this package has any external visibility,
+you may want to consider changing the URL.
+
+This test is a good candidate for a whitelist: some sort of
+small database indicating which packages (eg errata, rpmdiff)
+we should silently excuse.
+
+=back
+
 =head1	SEE ALSO
 
 L<>

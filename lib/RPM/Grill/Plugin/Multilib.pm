@@ -163,6 +163,20 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over 4
+
+=item   MultilibMismatch
+
+The 64- and 32-bit versions of FILE differ. This means that yum/rpm
+will refuse to install both versions at once. Please don't blame
+rpmgrill for this: we're just reporting a potential problem. If this
+package will never ever ever be installed multilib, you can ignore
+this warning.
+
+=back
+
 =head1	SEE ALSO
 
 L<>

@@ -216,6 +216,20 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   UnownedDirectory
+
+FIXME
+
+=item   NonFHS
+
+See L<http://docs.redhat.com/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Storage_Administration_Guide/s1-filesystem-fhs.html>
+
+=back
+
 =head1	SEE ALSO
 
 L<>

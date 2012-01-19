@@ -204,6 +204,20 @@ FIXME document methods
 
 =head1	FILES
 
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   ClamAV
+
+The ClamAV "antivirus" tool has found something suspicious in
+your package. This is so unlikely, so rare, so exceptional, that
+it's gotta be worth looking into.
+
+FIXME
+
+=back
+
 =head1	SEE ALSO
 
 L<>
