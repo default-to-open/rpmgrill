@@ -218,8 +218,8 @@ sub analyze {
         my @cmds = split /\s+\|\|\s+/, $s;
 
         for my $x (@cmds) {
-            if ($x =~ /\b((user|group)add\b.*)/) {
-                my $cmd = $1;
+            if ($x =~ /\b((fedora-)?(user|group)add\b.*)/) {
+                my ($cmd, $is_fedora, $which) = ($1, $2, $3);
 
                 # Remove redirection, eg '2>/dev/null'
                 $cmd =~ s{\s+\d*>\s*\S+}{ }g;
@@ -235,7 +235,19 @@ sub analyze {
                     excerpt => $cmd,
                     sub     => $section,
                 });
-                _check_generic_add( $spec, $cmd );
+
+                if ($is_fedora) {
+                    # Specfile is using fedora-useradd / -groupadd.
+                    # This is common when porting pkgs from fedora
+                    $spec->gripe({
+                        code => 'FedoraUserMgmt',
+                        diag => "Your specfile is using fedora-${which}add. Please use just <tt>${which}add</tt>.",
+                    });
+                }
+                else {
+                    # Regular useradd/groupadd. Check the options.
+                    _check_generic_add( $spec, $cmd );
+                }
             }
         }
     }
@@ -523,6 +535,12 @@ Invoking C<useradd> without an explicit UID.
 This is a case that rpmgrill can't realistically verify on its own, because
 rpm macros and/or shell environment variables may not expand the same way
 in the rpmgrill environment as they do in real life.
+
+=item   FedoraUserMgmt
+
+Your package is using fedora-useradd and/or fedora-groupadd, from
+the fedora-usermgmt package. Since we're in RedHatLand, not
+FedoraLand, you should be using just plain useradd/groupadd.
 
 =back
 

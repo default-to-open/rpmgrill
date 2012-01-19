@@ -1,0 +1,30 @@
+{
+  RpmScripts => [
+    {
+      arch => 'src',
+      code => 'FedoraUserMgmt',
+      context => {
+        excerpt => [
+          'fedora-groupadd 33 -r bacula &>/dev/null'
+        ],
+        lineno => '707',
+        path => 'bacula-5.0.3-19.el7.spec',
+        sub => '%pre common'
+      },
+      diag => 'Your specfile is using fedora-groupadd. Please use just <tt>groupadd</tt>.'
+    },
+    {
+      arch => 'src',
+      code => 'FedoraUserMgmt',
+      context => {
+        excerpt => [
+          'fedora-useradd  33 -r -s /sbin/nologin -d /var/spool/bacula -M \\*'
+        ],
+        lineno => '708',
+        path => 'bacula-5.0.3-19.el7.spec',
+        sub => '%pre common'
+      },
+      diag => 'Your specfile is using fedora-useradd. Please use just <tt>useradd</tt>.'
+    }
+  ]
+}
