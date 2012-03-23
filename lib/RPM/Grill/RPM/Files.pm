@@ -269,6 +269,8 @@ sub AUTOLOAD {
     croak "$ME: Unknown field " . __PACKAGE__ . "->$field()";
 }
 
+sub DESTROY { }
+
 ###############################################################################
 # BEGIN code and helpers for running eu-readelf
 

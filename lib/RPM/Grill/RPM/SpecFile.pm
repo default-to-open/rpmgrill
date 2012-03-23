@@ -102,6 +102,8 @@ sub new {
     return bless $self, $class;
 }
 
+sub DESTROY { }
+
 sub path {
     my $self = shift;
 
@@ -230,6 +232,8 @@ sub AUTOLOAD {
 
     croak "$ME: Unknown field " . __PACKAGE__ . "->$field()";
 }
+
+sub DESTROY { }
 
 1;
 

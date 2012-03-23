@@ -182,6 +182,8 @@ sub new {
     return $self;
 }
 
+sub DESTROY {}
+
 ##############
 #  specfile  #  Finds the specfile, invokes subclass on it
 ##############
