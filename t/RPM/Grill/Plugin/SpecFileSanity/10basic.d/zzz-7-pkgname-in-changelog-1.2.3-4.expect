@@ -1,0 +1,15 @@
+{
+  SpecFileSanity => [
+    {
+      code => 'ChangelogOnlyNeedsVR',
+      context => {
+        excerpt => [
+          '* Fri May 20 2011 Eduardo Santiago <santiago@redhat.com> zzz-7-pkgname-in-changelog-1.2.3-4'
+        ],
+        lineno => '10',
+        path => 'zzz-7-pkgname-in-changelog-1.2.3-4.spec'
+      },
+      diag => '%changelog entries should only include Version-Release, not package name; try just <var>1.2.3-4</var>'
+    }
+  ]
+}

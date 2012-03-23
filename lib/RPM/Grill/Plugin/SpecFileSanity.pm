@@ -222,6 +222,15 @@ sub _check_for_other_specfile_problems {
             my $vr = $1;                # eg 1.2-4
             my @nvr = $self->nvr;       # eg foo, 1.2, 4.el5
 
+            # Some people include package name, e.g. qemu-kvm-0.12.1.2
+            if ($vr =~ s{^(\d+:)?$nvr[0]-}{$1 || ''}e) {
+                $self->gripe({
+                    code => 'ChangelogOnlyNeedsVR',
+                    diag => "%changelog entries should only include Version-Release, not package name; try just <var>$vr</var>",
+                    context => $context,
+                });
+            }
+
             # FIXME FIXME FIXME: handle epoch
             if ($vr =~ s/^(\d+)://) {
                 my $epoch_cl = $1;              # epoch in changelog
