@@ -405,9 +405,44 @@ a multi-line macro, this can cause unpleasant surprises.
 
 B<Recommendation>: Double-percent them all: %%{name}, etc.
 
-=item   ChangelogEmptyFIXME
+=item   ChangelogMissing
 
-FIXME
+There is no %changelog section in your specfile. Can this happen?
+
+=item   ChangelogEmpty
+
+The %changelog section in your specfile is empty. This error doesn't
+sound like it could happen, but it does.
+
+=item   ChangelogOnlyNeedsVR
+
+You included your package name in the %changelog entry. All you need
+is the Version-Release.
+See L<http://fedoraproject.org/wiki/Packaging:Guidelines#Changelogs>
+
+=item   ChangelogWrongEpoch
+
+You included an epoch in your %changelog entry, but it's the wrong one.
+
+=item   ChangelogUnexpectedEpoch
+
+You included an epoch in your %changelog entry, but the specfile itself
+does not define an Epoch.
+
+=item   ChangelogBadVersion
+
+The version string in your first %changelog entry does not match the
+one defined in the package specfile.
+
+=item   ChangelogBadRelease
+
+The release string in your first %changelog entry does not match the
+one defined in the package specfile.
+
+=item   ChangelogWeirdLine
+
+I could not parse the first line of the %changelog section in your specfile.
+See L<http://fedoraproject.org/wiki/Packaging:Guidelines#Changelogs>
 
 =back
 
