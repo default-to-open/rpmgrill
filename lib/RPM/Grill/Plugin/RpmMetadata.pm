@@ -85,7 +85,7 @@ sub analyze {
 
         # Name, Version and Release must always match
         $nvr{Name} = $subpkg;
-        for my $field qw(Name Version Release) {
+        for my $field (qw(Name Version Release)) {
             my $actual = $metadata->get($field) // '[empty]';
             my $expect = $nvr{$field};
             $actual eq $expect
@@ -285,7 +285,7 @@ sub _check_host {
     $res{ext} = Net::DNS::Resolver->new( nameservers => \@External_NS );
 
     my %found;
-    for my $where qw(int ext) {
+    for my $where (qw(int ext)) {
         if ( my $query = $res{$where}->search($host) ) {
             for my $rr ( $query->answer ) {
                 if ( $rr->type =~ /^(A|CNAME)$/ ) {

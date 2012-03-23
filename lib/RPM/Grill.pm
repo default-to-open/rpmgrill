@@ -435,7 +435,7 @@ sub from_xml {
     delete $ref->{package};
 
     # Timestamp, version, and tool name
-    for my $field qw(tool version timestamp) {
+    for my $field (qw(tool version timestamp)) {
         $self->{results}->{"_$field"} = delete $ref->{$field}
             or die "$ME: Internal error: no $field in $xml";
     }
@@ -628,7 +628,7 @@ sub rpms {
 
         my %keys = @_;
         my @filter;
-        for my $field qw(arch subpackage) {
+        for my $field (qw(arch subpackage)) {
             if (my $want = delete $keys{$field}) {
                 push @filter, "$field == '$want'";
                 @rpms = grep { $_->{$field} eq $want } @rpms;

@@ -108,7 +108,7 @@ sub _check_setxid {
     #
     # File is on whitelist, but double-check permissions, owner, and group
     #
-    for my $field qw(mode user group) {
+    for my $field (qw(mode user group)) {
         my $expected = $wl->{$field};
         my $actual = $f->{$field} || "[no $field]";
         if ( $actual ne $expected ) {
