@@ -18,12 +18,14 @@ use_ok 'RPM::Grill'                       or exit;
 
 
 # Make a bunch of temp dirs
-for my $arch qw( src i686 x86_64 ia64 ppc ppc64 s390 s390x ) {
-    for my $subpkg qw(mypkg mysubpkg) {
+for my $arch (qw( src i686 x86_64 ia64 ppc ppc64 s390 s390x )) {
+    for my $subpkg (qw(mypkg mysubpkg)) {
         my $d = "$tempdir/$arch/$subpkg";
-        mkpath $d,     0, 0755;
-        open TMP, '>', "$d/rpm.rpm";
-        close TMP;
+        unless ($d =~ m{/src/mysubpkg}) {
+            mkpath $d,     0, 0755;
+            open TMP, '>', "$d/rpm.rpm";
+            close TMP;
+        }
     }
 }
 

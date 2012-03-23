@@ -146,7 +146,7 @@ sub new {
             my $arch = $rpm->arch;
             if ($arch eq 'src') {
                 if (exists $self->{_srpm}) {
-                    warn "$ME: WARNING! Multiple srpms!";
+                    warn "$ME: WARNING! Multiple srpms! $self->{_srpm}{path} / $rpm->{path}";
                 }
                 $self->{_srpm} = $rpm;
             }
