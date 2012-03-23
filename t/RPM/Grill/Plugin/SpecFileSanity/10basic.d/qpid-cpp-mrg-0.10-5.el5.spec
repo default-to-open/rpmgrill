@@ -5,8 +5,8 @@
 
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
-%{!?ruby_sitelib: %define ruby_sitelib %(/usr/bin/ruby -rrbconfig  -e 'puts Config::CONFIG["sitelibdir"] ')}
-%{!?ruby_sitearch: %define ruby_sitearch %(/usr/bin/ruby -rrbconfig -e 'puts Config::CONFIG["sitearchdir"] ')}
+%{!?ruby_sitelib: %define ruby_sitelib %(/usr/bin/rubyXXX -rrbconfig  -e 'puts Config::CONFIG["sitelibdir"] ')}
+%{!?ruby_sitearch: %define ruby_sitearch %(/usr/bin/rubyXXX -rrbconfig -e 'puts Config::CONFIG["sitearchdir"] ')}
 
 
 # base version of qpid
