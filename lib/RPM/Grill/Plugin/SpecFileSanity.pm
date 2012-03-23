@@ -256,11 +256,23 @@ sub _check_for_other_specfile_problems {
             if ($vr =~ m{^(.*)-(.*)$}) {
                 my ($v, $r) = ($1, $2);
                 if ($v ne $nvr[1]) {
-                    $self->gripe({
-                        code => 'ChangelogBadVersion',
-                        diag => "First %changelog entry is for <var>$v-$r</var>; I was expecting <var>$nvr[1]</var> as the version, not $v",
-                        context => $context,
-                    });
+                    # Version does not match. But can we match partially?
+                    if ($v =~ /^(.+)\b$nvr[1]$/) {
+                        # Yes: there's a prefix before the version.
+                        $self->gripe({
+                            code => 'ChangelogCruftInVersion',
+                            diag => "First %changelog entry includes unnecessary cruft (<var>$1</var>) in the version string; You only need <var>$nvr[1]</var>.",
+                            context => $context,
+                        });
+                    }
+                    else {
+                        # No. Something completely unexpected
+                        $self->gripe({
+                            code => 'ChangelogBadVersion',
+                            diag => "First %changelog entry is for <var>$v-$r</var>; I was expecting <var>$nvr[1]</var> as the version, not $v",
+                            context => $context,
+                        });
+                    }
                 }
                 elsif ($nvr[2] !~ /^$r\b/) {
                     $self->gripe({
@@ -419,6 +431,11 @@ sound like it could happen, but it does.
 You included your package name in the %changelog entry. All you need
 is the Version-Release.
 See L<http://fedoraproject.org/wiki/Packaging:Guidelines#Changelogs>
+
+=item   ChangelogCruftInVersion
+
+The version string in your first %changelog entry includes unnecessary
+cruft.
 
 =item   ChangelogWrongEpoch
 
