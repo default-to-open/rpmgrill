@@ -62,6 +62,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+- bz802557 - test for non-systemd files
+- cleanup in FHS test
+- lots more cleanup
+
 * Fri Dec  2 2011 Ed Santiago <santiago@redhat.com> 0.04-1
 - bz750537 - suid whitelist now in /mnt/redhat/scripts/rel-eng
 - add a Requires for elfutils
