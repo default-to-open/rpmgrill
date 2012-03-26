@@ -185,6 +185,20 @@ sub _check_exec {
         }
     }
 
+    # Special case for RHEL6 and xdg-open
+    if ($exec eq '/usr/bin/xdg-open') {
+        if ($f->grill->major_release =~ /^RHEL(\d+)/ && $1 >= 6) {
+            if (! grep { $_ eq 'xdg-utils' } $f->rpm->requires) {
+                $f->gripe(
+                    { code => 'DesktopExecMissingReq',
+                      diag => "Package should Require: xdg-utils",
+                  });
+            }
+
+            return;
+        }
+    }
+
     # Exec is not in our same arch.
     #
     # As of RHEL6:
