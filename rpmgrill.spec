@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.04
+Version:        0.05
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -62,6 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+* Mon Mar 26 2012 Ed Santiago <santiago@redhat.com> 0.05-1
 - bz802557 - test for non-systemd files
 - cleanup in FHS test
 - lots more cleanup
