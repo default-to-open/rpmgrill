@@ -58,6 +58,23 @@ use_ok 'RPM::Grill'                       or exit;
 use_ok 'RPM::Grill::RPM'                  or exit;
 use_ok 'RPM::Grill::Plugin::Manifest'     or exit;
 
+# Kludge alert
+package RPM::Grill::RPM;
+use subs qw(nvr);
+package RPM::Grill;
+use subs qw(major_release);
+package main;
+
+# Set a fake NVR
+{
+    no warnings 'redefine';
+    *RPM::Grill::RPM::nvr = sub {
+        return "1.el6";
+    };
+    *RPM::Grill::major_release = sub {
+        return "RHEL6";
+    };
+}
 
 for my $t (@tests) {
     my ($path, $not, $highlighted_path) = @$t;

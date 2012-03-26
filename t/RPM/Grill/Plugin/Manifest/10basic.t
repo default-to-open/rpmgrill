@@ -116,6 +116,17 @@ for my $i (0 .. $#tests) {
 
     bless $obj, 'RPM::Grill::Plugin::Manifest';
 
+    # Set a fake NVR
+    {
+        no warnings 'redefine';
+        *RPM::Grill::RPM::nvr = sub {
+            return "1.el6";
+        };
+        *RPM::Grill::major_release = sub {
+            return "RHEL6";
+        };
+    }
+
     RPM::Grill::Plugin::Manifest::analyze( $obj );
 
     my $expected_gripes;

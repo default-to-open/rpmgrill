@@ -78,6 +78,9 @@ sub analyze {
     # http://docs.redhat.com/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Storage_Administration_Guide/s1-filesystem-fhs.html
     my %non_fhs;
 
+    # bz802557 : check for non-systemd files
+    my %non_systemd;
+
     #
     # Pass 1: track all directory files in all RPM manifests
     #
@@ -96,6 +99,13 @@ sub analyze {
                 $path =~ s{/$}{};
 
                 $is_owned{ $path } = 1;
+            }
+
+            # bz802557: check for non-systemd files
+            if ($self->major_release =~ /^RHEL(\d+)/ && $1 >= 7) {
+                if ( $path =~ m{^/etc/(xinetd\.d|init\.d)/}) {
+                    $non_systemd{$f->arch}{$f->subpackage}{$path} = 1;
+                }
             }
         }
     }
@@ -150,6 +160,30 @@ sub analyze {
             }
             else {
                 $gripe->{diag} .= "ies:";
+                $gripe->{context} = { excerpt => \@files },
+            }
+
+            $self->gripe( $gripe );
+        }
+    }
+
+    # Report non-systemd files
+    for my $arch (sort keys %non_systemd) {
+        for my $subpackage (sort keys %{$non_systemd{$arch}}) {
+            my @files = sort keys %{ $non_systemd{$arch}{$subpackage} };
+
+            my $gripe = {
+                code       => 'NonSystemdFile',
+                arch       => $arch,
+                subpackage => $subpackage,
+                diag       => "Non-systemd file",
+            };
+
+            if (@files == 1) {
+                $gripe->{diag} .= ": <tt>@files</tt>";
+            }
+            else {
+                $gripe->{diag} .= "s:";
                 $gripe->{context} = { excerpt => \@files },
             }
 
