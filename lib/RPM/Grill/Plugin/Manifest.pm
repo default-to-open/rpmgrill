@@ -262,6 +262,10 @@ FIXME
 
 See L<http://docs.redhat.com/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Storage_Administration_Guide/s1-filesystem-fhs.html>
 
+=item   NonSystemdFile
+
+See L<https://bugzilla.redhat.com/show_bug.cgi?id=802557>
+
 =back
 
 =head1	SEE ALSO
