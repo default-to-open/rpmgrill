@@ -11,7 +11,7 @@ package RPM::Grill::Plugin::DesktopLint;
 
 use strict;
 use warnings;
-our $VERSION = "0.01";
+our $VERSION = '0.01';
 
 use base qw(RPM::Grill);
 use RPM::Grill::dprintf;

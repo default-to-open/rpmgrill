@@ -16,7 +16,7 @@ use base qw(RPM::Grill);
 
 use strict;
 use warnings;
-our $VERSION = "0.01";
+our $VERSION = '0.01';
 
 use Carp;
 use Tie::File;

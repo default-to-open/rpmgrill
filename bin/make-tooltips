@@ -13,7 +13,7 @@ use strict;
 use warnings;
 
 (our $ME = $0) =~ s|.*/||;
-(our $VERSION = '$Revision: 0.0 $ ') =~ tr/[0-9].//cd;
+our $VERSION = '0.0';
 
 # For debugging, show data structures using DumpTree($var)
 #use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
