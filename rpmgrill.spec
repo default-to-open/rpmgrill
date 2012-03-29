@@ -62,6 +62,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+- version string cleanup
+
 * Mon Mar 26 2012 Ed Santiago <santiago@redhat.com> 0.05-1
 - bz802557 - test for non-systemd files
 - cleanup in FHS test
