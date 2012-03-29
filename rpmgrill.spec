@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.05
+Version:        0.06
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -62,6 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+* Thu Mar 29 2012 Ed Santiago <santiago@redhat.com> 0.06-1
 - version string cleanup
 
 * Mon Mar 26 2012 Ed Santiago <santiago@redhat.com> 0.05-1
