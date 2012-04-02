@@ -46,8 +46,8 @@ our @Metadata_Fields = (
 # outside our network (if it doesn't, it's an internal hostname that
 # shouldn't be exposed).
 #
-# The addresses below are ns1/ns2.rh.c as of 2011-01-19
-our @External_NS = qw(172.16.48.210 10.5.19.1);
+# The addresses below are ns1/ns2.rh.c as of 2012-04-02
+our @External_NS = qw(10.39.144.11 10.5.19.1);
 
 # Standard protocols for the URL field
 our @Valid_URL_Protocols = qw(http https ftp git);
