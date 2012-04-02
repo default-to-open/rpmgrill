@@ -371,18 +371,6 @@ FIXME document methods
 
 =over   4
 
-=item   WrongName
-
-FIXME
-
-=item   WrongVersion
-
-FIXME
-
-=item   WrongRelease
-
-FIXME
-
 =item   NoVendor
 
 FIXME - can this happen?
