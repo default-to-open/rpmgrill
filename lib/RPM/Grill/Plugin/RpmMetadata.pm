@@ -85,6 +85,7 @@ sub analyze {
         _check_vendor($metadata);
         _check_build_host($metadata);
         _check_url($metadata);
+        _check_description($metadata);
 
         # Preserve values for consistency between RPMs
         # FIXME
@@ -155,6 +156,8 @@ sub _check_vendor {
 #######################
 sub _check_build_host {
     my $metadata = shift;
+
+    $metadata->context({});
 
     # FIXME: is this OK for srpms?
     my $buildhost = $metadata->get('Build Host')
@@ -307,6 +310,37 @@ sub _check_host {
     return;
 }
 
+########################
+#  _check_description  #  bz802555: Look for "Fedora" without "Red Hat"
+########################
+sub _check_description {
+    my $metadata = shift;
+
+    $metadata->context({});
+
+    my $description = $metadata->description
+        or do {
+            $metadata->gripe({
+                code => 'NoDescription',
+                diag => 'RPM Description field is missing/empty',
+            });
+            return;
+        };
+
+    # "Fedora" is OK but _only_ in the context of "Fedora or Red Hat"
+    # or vice-versa.
+    if ($description =~ /\bFedora\b/) {
+        unless ($description =~ /\bRed[\s\n]Hat[\s\n]or[\s\n]Fedora\b/
+                    || $description =~ /\bFedora[\s\n]or[\s\n]Red[\s\n]Hat\b/) {
+            $metadata->gripe({
+                code => 'FedoraInDescription',
+                diag => 'RPM Description mentions "Fedora"',
+            });
+        }
+    }
+}
+
+
 # END   individual checks
 ###############################################################################
 
@@ -441,6 +475,16 @@ you may want to consider changing the URL.
 This test is a good candidate for a whitelist: some sort of
 small database indicating which packages (eg errata, rpmdiff)
 we should silently excuse.
+
+=item   FedoraInDescription
+
+The RPM Description field mentions Fedora without a corresponding
+"or Red Hat". Please review the description string and (1) change
+Fedora to Red Hat (making other changes as necessary); or (2) change
+it to read "Fedora or Red Hat". If you think this test is being
+too strict, please file a bug against Brewtap (FIXME: provide link).
+
+See bz802555.
 
 =back
 

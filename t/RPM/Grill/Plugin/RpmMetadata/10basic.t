@@ -348,3 +348,56 @@ The git dæmon for supporting git:// access to git repositories
 -|    context    => { path => '[RPM metadata]',
 -|                    excerpt => ['URL: xtp://ftp.redhat.com/blahblah'] },
 -|  }
+
+---------Fedora-no-RedHat------------------------------------------------
+
+Name        : git-daemon           Relocations: (not relocatable)
+Version     : 1.7.1                     Vendor: Red Hat, Inc.
+Release     : 2.el6_0.1             Build Date: Thu 16 Dec 2010 07:25:20 AM MST
+Install Date: (not installed)       Build Host: x86-010.build.bos.redhat.com
+Group       : Development/Tools     Source RPM: git-1.7.1-2.el6_0.1.src.rpm
+Size        : 499329                   License: GPLv2
+Signature   : (none)
+Packager    : Red Hat, Inc. <http://bugzilla.redhat.com/bugzilla>
+URL         : ftp://ftp.redhat.com/blahblah
+Summary     : Git protocol dæmon
+Description :
+Blah blah blah blah Fedora
+
+-|  { arch       => 'src',
+-|    subpackage => 'git-daemon',
+-|    code       => 'FedoraInDescription',
+-|    diag       => 'RPM Description mentions "Fedora"',
+-|    context    => { path => '[RPM metadata]' },
+-|  }
+
+---------Fedora-with-RedHat-1----------------------------------------------
+
+Name        : git-daemon           Relocations: (not relocatable)
+Version     : 1.7.1                     Vendor: Red Hat, Inc.
+Release     : 2.el6_0.1             Build Date: Thu 16 Dec 2010 07:25:20 AM MST
+Install Date: (not installed)       Build Host: x86-010.build.bos.redhat.com
+Group       : Development/Tools     Source RPM: git-1.7.1-2.el6_0.1.src.rpm
+Size        : 499329                   License: GPLv2
+Signature   : (none)
+Packager    : Red Hat, Inc. <http://bugzilla.redhat.com/bugzilla>
+URL         : ftp://ftp.redhat.com/blahblah
+Summary     : Git protocol dæmon
+Description :
+Blah blah blah blah Fedora or Red Hat
+
+---------Fedora-with-RedHat-2----------------------------------------------
+
+Name        : git-daemon           Relocations: (not relocatable)
+Version     : 1.7.1                     Vendor: Red Hat, Inc.
+Release     : 2.el6_0.1             Build Date: Thu 16 Dec 2010 07:25:20 AM MST
+Install Date: (not installed)       Build Host: x86-010.build.bos.redhat.com
+Group       : Development/Tools     Source RPM: git-1.7.1-2.el6_0.1.src.rpm
+Size        : 499329                   License: GPLv2
+Signature   : (none)
+Packager    : Red Hat, Inc. <http://bugzilla.redhat.com/bugzilla>
+URL         : ftp://ftp.redhat.com/blahblah
+Summary     : Git protocol dæmon
+Description :
+Blah blah blah blah Red Hat
+or Fedora
