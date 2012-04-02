@@ -134,6 +134,7 @@ sub _check_vendor {
         $diag .= ' (case matters)'      if lc($vendor) eq 'red hat, inc.';
         $diag .= ' (the dot matters)'   if    $vendor  eq 'Red Hat, Inc';
         $diag .= ' (the comma matters)' if    $vendor  =~ /^Red Hat Inc/;
+        $diag .= ' (missing "Inc.")'    if lc($vendor) eq 'red hat';
 
         $metadata->gripe(
             {   code    => 'WrongVendor',

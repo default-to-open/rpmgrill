@@ -167,7 +167,7 @@ Blah blah
 -|  }
 
 
----------WrongVendor------------------------------------------------------
+---------WrongVendor-1----------------------------------------------------
 
 Name        : mypkg                Relocations: (not relocatable)
 Version     : 4.5                       Vendor: Not Red Hat, Inc.
@@ -187,6 +187,50 @@ Blah blah
 -|    diag       => 'Vendor field must be "Red Hat, Inc."',
 -|    context    => { path => '[RPM metadata]',
 -|                    excerpt => ['Vendor: Not Red Hat, Inc.'] },
+-|  }
+
+---------WrongVendor-2-----------------------------------------------------
+
+Name        : mypkg                Relocations: (not relocatable)
+Version     : 4.5                       Vendor: Red Hat, Inc
+Release     : 63.10.el5_6           Build Date: Wed 12 Jan 2011 05:44:46 AM MST
+Install Date: (not installed)       Build Host: x86-005.build.bos.redhat.com
+Group       : Applications/System   Source RPM: (none)
+Size        : 1454223                  License: GPLv2+
+Signature   : (none)
+Packager    : Red Hat, Inc. <http://bugzilla.redhat.com/bugzilla>
+Summary     : Virtual Desktop Server Manager
+Description :
+Blah blah
+
+-|  { arch       => 'src',
+-|    subpackage => 'mypkg',
+-|    code       => 'WrongVendor',
+-|    diag       => 'Vendor field must be "Red Hat, Inc." (the dot matters)',
+-|    context    => { path => '[RPM metadata]',
+-|                    excerpt => ['Vendor: Red Hat, Inc'] },
+-|  }
+
+---------WrongVendor-3-----------------------------------------------------
+
+Name        : mypkg                Relocations: (not relocatable)
+Version     : 4.5                       Vendor: Red Hat
+Release     : 63.10.el5_6           Build Date: Wed 12 Jan 2011 05:44:46 AM MST
+Install Date: (not installed)       Build Host: x86-005.build.bos.redhat.com
+Group       : Applications/System   Source RPM: (none)
+Size        : 1454223                  License: GPLv2+
+Signature   : (none)
+Packager    : Red Hat, Inc. <http://bugzilla.redhat.com/bugzilla>
+Summary     : Virtual Desktop Server Manager
+Description :
+Blah blah
+
+-|  { arch       => 'src',
+-|    subpackage => 'mypkg',
+-|    code       => 'WrongVendor',
+-|    diag       => 'Vendor field must be "Red Hat, Inc." (missing "Inc.")',
+-|    context    => { path => '[RPM metadata]',
+-|                    excerpt => ['Vendor: Red Hat'] },
 -|  }
 
 ---------VendorMissingDot---------------------------------------------------
