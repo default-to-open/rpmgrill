@@ -302,6 +302,30 @@ The git dæmon for supporting git:// access to git repositories
 -|  }
 
 
+---------InvalidURL------------------------------------------------------
+
+Name        : git-daemon           Relocations: (not relocatable)
+Version     : 1.7.1                     Vendor: Red Hat, Inc.
+Release     : 2.el6_0.1             Build Date: Thu 16 Dec 2010 07:25:20 AM MST
+Install Date: (not installed)       Build Host: x86-010.build.bos.redhat.com
+Group       : Development/Tools     Source RPM: git-1.7.1-2.el6_0.1.src.rpm
+Size        : 499329                   License: GPLv2
+Signature   : (none)
+Packager    : Red Hat, Inc. <http://bugzilla.redhat.com/bugzilla>
+URL         : www.redhat.com
+Summary     : Git protocol dæmon
+Description :
+The git dæmon for supporting git:// access to git repositories
+
+-|  { arch       => 'src',
+-|    subpackage => 'git-daemon',
+-|    code       => 'InvalidURL',
+-|    diag       => 'URL must be of the form &lt;protocol&gt;://&lt;host&gt;',
+-|    context    => { path => '[RPM metadata]',
+-|                    excerpt => ['URL: www.redhat.com'] },
+-|  }
+
+
 ---------BadProtocol------------------------------------------------------
 
 Name        : git-daemon           Relocations: (not relocatable)
