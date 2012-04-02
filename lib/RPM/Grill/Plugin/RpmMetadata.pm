@@ -70,9 +70,6 @@ our %Is_Valid_URL_Protocol = map { $_ => 1 } @Valid_URL_Protocols;
 sub analyze {
     my $self = shift;
 
-    my @nvr = $self->nvr;
-    my %nvr = map { $_ => shift(@nvr) } qw(Name Version Release);
-
     #
     # Loop over each arch and subpackage
     #
@@ -82,20 +79,6 @@ sub analyze {
         my $metadata = $rpm->metadata;
         my $arch     = $rpm->arch;
         my $subpkg   = $rpm->subpackage;
-
-        # Name, Version and Release must always match
-        $nvr{Name} = $subpkg;
-        for my $field (qw(Name Version Release)) {
-            my $actual = $metadata->get($field) // '[empty]';
-            my $expect = $nvr{$field};
-            $actual eq $expect
-                or $metadata->gripe(
-                    {
-                        code       => "Wrong$field",
-                        diag       => "$field: expected $expect, got $actual",
-                    }
-                );
-        }
 
         # Farm off the individual checks.
         # FIXME: Each of these sets gripe state/context
