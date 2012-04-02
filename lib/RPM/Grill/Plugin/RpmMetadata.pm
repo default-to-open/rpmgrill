@@ -201,7 +201,7 @@ sub _check_url {
         or do {
         $metadata->gripe(
             {   code => 'InvalidURL',
-                diag => "URL must be of the form <protocol>://<host>...",
+                diag => "URL must be of the form &lt;protocol&gt;://&lt;host&gt;",
             }
         );
         return;
@@ -221,7 +221,7 @@ sub _check_url {
     # Hostname must include at least one dot. If it doesn't, gripe & bail out.
     if ( $host !~ /\./ ) {
         $metadata->gripe(
-            {   code => 'InvalidURL',
+            {   code => 'InvalidHostnameInURL',
                 diag => "URL hostname contains no dots",
             }
         );
