@@ -62,6 +62,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+- bz802555 - new test for "Fedora" in RPM description
+
 * Thu Mar 29 2012 Ed Santiago <santiago@redhat.com> 0.06-1
 - version string cleanup
 
