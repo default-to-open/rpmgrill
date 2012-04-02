@@ -107,6 +107,17 @@ sub analyze {
                     $non_systemd{$f->arch}{$f->subpackage}{$path} = 1;
                 }
             }
+
+            # bz802555: check for "Fedora" in filenames
+            if ($path =~ /fedora/i) {
+                $self->gripe({
+                    code       => 'FedoraInFilename',
+                    arch       => $f->arch,
+                    subpackage => $f->subpackage,
+                    diag       => "Filenames should not include 'Fedora'",
+                    context    => { path => $path },
+                });
+            }
         }
     }
 
