@@ -407,9 +407,9 @@ one that rpmgrill recognizes (http, https, ftp, git).
 This is probably OK. It probably just means that rpmgrill needs to
 be taught about a new protocol. But it could also be a typo.
 
-=item   InvalidURL2222
+=item   InvalidHostnameInURL
 
-FIXME: no dots
+The hostname in the URL field contains no dots.
 
 =item   BadURL
 
