@@ -105,9 +105,20 @@ sub analyze {
             }
 
             # bz802557: check for non-systemd files
+            # bz802554: check for files that should be in /usr
             if ($self->major_release =~ /^RHEL(\d+)/ && $1 >= 7) {
                 if ( $path =~ m{^/etc/(xinetd\.d|init\.d)/}) {
                     $non_systemd{$f->arch}{$f->subpackage}{$path} = 1;
+                }
+
+                if ($path =~ m{^(/bin|/sbin|/lib64)/}) {
+                    my $where = $1;
+                    $self->gripe({
+                        code       => 'MoveToUsr',
+                        arch       => $f->arch,
+                        subpackage => $f->subpackage,
+                        diag       => "$where no longer exists; please move <tt>$path</tt> to <b>/usr</b>",
+                    });
                 }
             }
 
