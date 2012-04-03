@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.06
+Version:        0.07
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -62,6 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+* Tue Apr  3 2012 Ed Santiago <santiago@redhat.com> 0.07-1
 - bz802554 - new test for RHEL7 files not under /usr
 - bz802555 - new test for "Fedora" in RPM description
 - internal cleanup
