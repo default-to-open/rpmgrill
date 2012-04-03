@@ -407,6 +407,18 @@ FIXME document methods
 
 =over   4
 
+=item   WrongName
+
+Deprecated code; no longer used in production. This was a useless test.
+
+=item   WrongVersion
+
+Deprecated code; no longer used in production. This was a useless test.
+
+=item   WrongRelease
+
+Deprecated code; no longer used in production. This was a useless test.
+
 =item   NoVendor
 
 FIXME - can this happen?
