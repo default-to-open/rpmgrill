@@ -1,0 +1,26 @@
+This is how to use gripe.
+
+Full example showing all the available fields:
+
+  $self->gripe({
+                arch       => ...
+                subpackage => ...
+                code       => 'ShortCodeName',
+                diag       => "This is a human-readable string",
+                context    => {
+                                 path    => "/path/to/file",
+                                 lineno  => 123,
+                                 sub     => ???,
+                                 excerpt => "e.g. from a build log",
+                              },
+             });
+
+In real life, you won't use all of those.
+
+I'm finding it hard to deal with context. Here are some of
+the real-world cases it has to cope with:
+
+  * The problem is with the CONTENT of {path}
+  * The problem is with {path} itself
+  * The problem is in the specfile (path unknown)
+  * The problem is in a build log
