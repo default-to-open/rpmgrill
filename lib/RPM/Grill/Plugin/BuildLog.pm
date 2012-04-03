@@ -19,8 +19,9 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use CGI                 qw(escapeHTML);
 use Tie::File;
-use Fcntl qw(O_RDONLY);
+use Fcntl               qw(O_RDONLY);
 
 # Program name of our caller
 ( our $ME = $0 ) =~ s|.*/||;
@@ -179,7 +180,7 @@ ARCH:
                     my $to   = $lineno + $tuple->{context}->{'+'};
 
                     # Actual context lines
-                    my @context = @lines[ $from .. $to ];
+                    my @context = map { escapeHTML($_) } @lines[ $from .. $to ];
 
                     # Where that context is
                     my %context = (

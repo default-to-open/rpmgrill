@@ -18,6 +18,7 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use CGI                 qw(escapeHTML);
 use File::Basename      qw(dirname);
 
 ###############################################################################
@@ -168,12 +169,12 @@ sub _check_rpath {
             # Problem found; report it.
             # For readability, on multi-element RPATHs, highlight
             # the offending one.
-            my $excerpt = $rpath;
+            my $excerpt = escapeHTML($rpath);
             if (@rpath > 1) {
                 $excerpt = join(':',
-                                @rpath[0..$i-1],
+                                (map { escapeHTML($_) } @rpath[0..$i-1]),
                                 "<u>$rpath[$i]</u>",
-                                @rpath[$i+1..$#rpath]);
+                                (map { escapeHTML($_) } @rpath[$i+1..$#rpath]));
             }
 
             # FIXME: gripe

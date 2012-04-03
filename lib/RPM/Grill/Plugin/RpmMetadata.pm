@@ -17,6 +17,7 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use CGI                                 qw(escapeHTML);
 use Net::DNS;
 use LWP::UserAgent;
 
@@ -142,7 +143,7 @@ sub _check_vendor {
                 diag    => $diag,
                 context => {
                     path    => '[RPM metadata]',
-                    excerpt => "Vendor: $vendor"
+                    excerpt => escapeHTML("Vendor: $vendor"),
                 },
             }
         );
@@ -178,7 +179,7 @@ sub _check_build_host {
                 diag    => 'Build Host is not within .redhat.com',
                 context => {
                     path    => '[RPM metadata]',
-                    excerpt => "Build Host: $buildhost"
+                    excerpt => escapeHTML("Build Host: $buildhost"),
                 },
             }
         );
@@ -197,7 +198,7 @@ sub _check_url {
         or return;
 
     # Include context for any gripes we emit
-    $metadata->context({ excerpt => "URL: $url" });
+    $metadata->context({ excerpt => escapeHTML("URL: $url") });
 
     # E.g. http://my.host, git://another.host/foo.git
     my ( $protocol, $host ) = ( $url =~ m{^(\w+)://([^/]+)} )

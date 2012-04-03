@@ -27,6 +27,7 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use CGI                         qw(escapeHTML);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -91,7 +92,9 @@ sub analyze {
 
             # Check for /usr/local
             if ($path =~ m{^($Non_FHS)(/.*|$)}o) {
-                $non_fhs{$f->arch}{$f->subpackage}{"<b>$1</b>$2"} = 1;
+                my ($parent, $rest) = ($1, $2);
+                my $highlighted_name = "<b>" . escapeHTML($parent) . "</b>" . escapeHTML($rest);
+                $non_fhs{$f->arch}{$f->subpackage}{$highlighted_name} = 1;
             }
 
 

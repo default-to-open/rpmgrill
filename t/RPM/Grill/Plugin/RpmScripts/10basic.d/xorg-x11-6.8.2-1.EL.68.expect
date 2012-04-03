@@ -4,7 +4,7 @@
       'arch' => 'src',
       'context' => {
         'excerpt' => [
-          'useradd -c "X Font Server" -r -s $LOGINSHELL -u 43 -d /etc/X11/fs xfs'
+          'useradd -c &quot;X Font Server&quot; -r -s $LOGINSHELL -u 43 -d /etc/X11/fs xfs'
         ],
         'sub' => '%triggerpostun xfs -- XFree86-xfs',
         'path' => 'xorg-x11-6.8.2-1.EL.68.spec',
@@ -17,7 +17,7 @@
       'arch' => 'src',
       'context' => {
         'excerpt' => [
-          'useradd -c "X Font Server" -r -s $LOGINSHELL -u 43 -d /etc/X11/fs xfs'
+          'useradd -c &quot;X Font Server&quot; -r -s $LOGINSHELL -u 43 -d /etc/X11/fs xfs'
         ],
         'sub' => '%pre xfs',
         'path' => 'xorg-x11-6.8.2-1.EL.68.spec',

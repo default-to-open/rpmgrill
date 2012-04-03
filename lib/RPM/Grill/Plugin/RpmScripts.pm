@@ -16,6 +16,7 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use CGI                         qw(escapeHTML);
 use Getopt::Long                qw(:config gnu_getopt);
 use Text::ParseWords;
 use RPM::Grill::dprintf;
@@ -232,7 +233,7 @@ sub analyze {
                 # Set up context (for gripes), and analyze the line
                 $spec->context({
                     lineno  => $lineno,
-                    excerpt => $cmd,
+                    excerpt => escapeHTML($cmd),
                     sub     => $section,
                 });
 

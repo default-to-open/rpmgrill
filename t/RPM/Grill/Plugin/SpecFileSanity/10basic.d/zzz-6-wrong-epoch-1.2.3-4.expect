@@ -4,7 +4,7 @@
       code => 'ChangelogWrongEpoch',
       context => {
         excerpt => [
-          '* Fri May 20 2011 Eduardo Santiago <santiago@redhat.com> 2:1.2.3-4'
+          '* Fri May 20 2011 Eduardo Santiago &lt;santiago@redhat.com&gt; 2:1.2.3-4'
         ],
         lineno => '11',
         path => 'zzz-6-wrong-epoch-1.2.3-4.spec'

@@ -5,7 +5,7 @@
       code => 'FedoraUserMgmt',
       context => {
         excerpt => [
-          'fedora-groupadd 33 -r bacula &>/dev/null'
+          'fedora-groupadd 33 -r bacula &amp;&gt;/dev/null'
         ],
         lineno => '707',
         path => 'bacula-5.0.3-19.el7.spec',

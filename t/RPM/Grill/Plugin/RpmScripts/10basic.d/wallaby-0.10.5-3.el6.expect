@@ -4,7 +4,7 @@
       'arch' => 'src',
       'context' => {
         'excerpt' => [
-          'useradd -r -g condor -d %{_localstatedir}/lib/wallaby -s /sbin/nologin     -c "Owner of Wallaby service" wallaby'
+          'useradd -r -g condor -d %{_localstatedir}/lib/wallaby -s /sbin/nologin     -c &quot;Owner of Wallaby service&quot; wallaby'
         ],
         'sub' => '%pre',
         'path' => 'wallaby-0.10.5-3.el6.spec',

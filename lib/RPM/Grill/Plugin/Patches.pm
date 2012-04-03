@@ -16,7 +16,8 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
-use File::Basename qw(basename);
+use CGI                                 qw(escapeHTML);
+use File::Basename                      qw(basename);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -65,7 +66,7 @@ sub analyze {
                         {   code    => 'DuplicatePatch',
                             arch    => 'src',
                             context => {
-                                excerpt => "$Patch_Defined{$n}\n$s",
+                                excerpt => escapeHTML("$Patch_Defined{$n}\n$s"),
                                 path    => basename( $self->specfile->path ),
                                 lineno  => $line->lineno,
                             },
@@ -106,7 +107,7 @@ sub analyze {
                     {   code    => 'BadPatchFuzz',
                         arch    => 'src',
                         context => {
-                            excerpt => $s,
+                            excerpt => escapeHTML($s),
                             path    => basename( $self->specfile->path ),
                             lineno  => $line->lineno,
                         },

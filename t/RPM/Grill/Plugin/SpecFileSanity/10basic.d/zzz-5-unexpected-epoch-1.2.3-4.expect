@@ -4,7 +4,7 @@
       code => 'ChangelogUnexpectedEpoch',
       context => {
         excerpt => [
-          '* Fri May 20 2011 Eduardo Santiago <santiago@redhat.com> 0:1.2.3-4'
+          '* Fri May 20 2011 Eduardo Santiago &lt;santiago@redhat.com&gt; 0:1.2.3-4'
         ],
         lineno => '10',
         path => 'zzz-5-unexpected-epoch-1.2.3-4.spec'

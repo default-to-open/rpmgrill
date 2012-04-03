@@ -4,7 +4,7 @@
       code => 'ChangelogBadVersion',
       context => {
         excerpt => [
-          '* Fri May 20 2011 Eduardo Santiago <santiago@redhat.com> 1.1-1'
+          '* Fri May 20 2011 Eduardo Santiago &lt;santiago@redhat.com&gt; 1.1-1'
         ],
         lineno => '10',
         path => 'zzz-1-badversion-1.2.3-4.spec'

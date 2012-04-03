@@ -4,7 +4,7 @@
       code => 'ChangelogCruftInVersion',
       context => {
         excerpt => [
-          '* Fri May 20 2011 Eduardo Santiago <santiago@redhat.com> blahblah-1.2-3'
+          '* Fri May 20 2011 Eduardo Santiago &lt;santiago@redhat.com&gt; blahblah-1.2-3'
         ],
         lineno => '10',
         path => 'zzz-8-cruft-in-changelog-1.2-3.spec'

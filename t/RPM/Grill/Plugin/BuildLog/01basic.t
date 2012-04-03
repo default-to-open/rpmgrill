@@ -97,7 +97,7 @@ update.c:154: warning: dereferencing type-punned pointer will break strict-alias
 -|    diag    => 'gcc warnings',
 -|    context => { lineno => 3, path => "noarch/build.log",
 -|    excerpt => [
--|         'update.c: In function `update\':',
+-|         'update.c: In function `update&#39;:',
 -|         'update.c:154: warning: dereferencing type-punned pointer will break strict-aliasing rules',
 -|        ], },
 -|  } ] }
@@ -130,11 +130,11 @@ gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -
 -|    excerpt => [
 -|         '                 from ../../../include/k5-platform.h:46,',
 -|         '                 from k5sealv3.c:32:',
--|         'In function \'memset\',',
--|         '    inlined from \'gss_krb5int_make_seal_token_v3\' at k5sealv3.c:162:',
--|         '/usr/include/bits/string3.h:83: warning: call to \'__warn_memset_zero_len\' declared with attribute warning: memset used with constant zero length parameter; this could be due to transposed parameters',
--|         'gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -I. -I. -I./.. -I../generic -I./../generic -I../mechglue -I./../mechglue -DKRB5_DEPRECATED=1 -I/usr/include/et -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i686 -mtune=atom -fasynchronous-unwind-tables -I/usr/include/et -fPIC -fno-strict-aliasing -fstack-protector-all -Wall -Wcast-align -Wshadow -Wmissing-prototypes -Wno-format-zero-length -Woverflow -Wstrict-overflow -Wmissing-format-attribute -Wmissing-prototypes -Wreturn-type -Wmissing-braces -Wparentheses -Wswitch -Wunused-function -Wunused-label -Wunused-variable -Wunused-value -Wunknown-pragmas -Wsign-compare -Werror=declaration-after-statement -Werror=variadic-macros -pthread -c k5unseal.c -o k5unseal.so.o && mv -f k5unseal.so.o k5unseal.so',
--|         'gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -I. -I. -I./.. -I../generic -I./../generic -I../mechglue -I./../mechglue -DKRB5_DEPRECATED=1 -I/usr/include/et -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i686 -mtune=atom -fasynchronous-unwind-tables -I/usr/include/et -fPIC -fno-strict-aliasing -fstack-protector-all -Wall -Wcast-align -Wshadow -Wmissing-prototypes -Wno-format-zero-length -Woverflow -Wstrict-overflow -Wmissing-format-attribute -Wmissing-prototypes -Wreturn-type -Wmissing-braces -Wparentheses -Wswitch -Wunused-function -Wunused-label -Wunused-variable -Wunused-value -Wunknown-pragmas -Wsign-compare -Werror=declaration-after-statement -Werror=variadic-macros -pthread -c k5unsealiov.c -o k5unsealiov.so.o && mv -f k5unsealiov.so.o k5unsealiov.so',
+-|         'In function &#39;memset&#39;,',
+-|         '    inlined from &#39;gss_krb5int_make_seal_token_v3&#39; at k5sealv3.c:162:',
+-|         '/usr/include/bits/string3.h:83: warning: call to &#39;__warn_memset_zero_len&#39; declared with attribute warning: memset used with constant zero length parameter; this could be due to transposed parameters',
+-|         'gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -I. -I. -I./.. -I../generic -I./../generic -I../mechglue -I./../mechglue -DKRB5_DEPRECATED=1 -I/usr/include/et -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i686 -mtune=atom -fasynchronous-unwind-tables -I/usr/include/et -fPIC -fno-strict-aliasing -fstack-protector-all -Wall -Wcast-align -Wshadow -Wmissing-prototypes -Wno-format-zero-length -Woverflow -Wstrict-overflow -Wmissing-format-attribute -Wmissing-prototypes -Wreturn-type -Wmissing-braces -Wparentheses -Wswitch -Wunused-function -Wunused-label -Wunused-variable -Wunused-value -Wunknown-pragmas -Wsign-compare -Werror=declaration-after-statement -Werror=variadic-macros -pthread -c k5unseal.c -o k5unseal.so.o &amp;&amp; mv -f k5unseal.so.o k5unseal.so',
+-|         'gcc -fPIC -DSHARED -D_GSS_STATIC_LINK=1  -I../../../include -I../../../include -I. -I. -I./.. -I../generic -I./../generic -I../mechglue -I./../mechglue -DKRB5_DEPRECATED=1 -I/usr/include/et -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -m32 -march=i686 -mtune=atom -fasynchronous-unwind-tables -I/usr/include/et -fPIC -fno-strict-aliasing -fstack-protector-all -Wall -Wcast-align -Wshadow -Wmissing-prototypes -Wno-format-zero-length -Woverflow -Wstrict-overflow -Wmissing-format-attribute -Wmissing-prototypes -Wreturn-type -Wmissing-braces -Wparentheses -Wswitch -Wunused-function -Wunused-label -Wunused-variable -Wunused-value -Wunknown-pragmas -Wsign-compare -Werror=declaration-after-statement -Werror=variadic-macros -pthread -c k5unsealiov.c -o k5unsealiov.so.o &amp;&amp; mv -f k5unsealiov.so.o k5unsealiov.so',
 -|        ], }
 -|  } ] }
 
@@ -171,7 +171,7 @@ ranlib libucvko_s.a
 -|    diag    => 'Possible integer overflow (this may be a security problem)',
 -|    context => { lineno => 18, path => "noarch/build.log",
 -|    excerpt => [
--|         'nsUnicodeToJamoTTF.cpp:876: warning: assuming signed overflow does not occur when assuming that (X + c) < X is always false'
+-|         'nsUnicodeToJamoTTF.cpp:876: warning: assuming signed overflow does not occur when assuming that (X + c) &lt; X is always false'
 -|        ], },
 -|  } ] }
 
@@ -203,7 +203,7 @@ Executing(%build): /bin/sh -e /var/tmp/rpm-tmp.19153
 -|    diag    => 'Possible failure to apply a patch',
 -|    context => { lineno => 13, path => "noarch/build.log",
 -|    excerpt => [
--|         '+ echo \'Patch #2 (cpufrequtils-aperf-makefile.patch):\'',
+-|         '+ echo &#39;Patch #2 (cpufrequtils-aperf-makefile.patch):&#39;',
 -|         '+ patch -p1 -s',
 -|         'missing header for unified diff at line 3 of patch',
 -|        ], },
@@ -279,7 +279,7 @@ make: *** [check] Error 2
 -|    diag    => 'Possible error from \'make\'',
 -|    context => { lineno => 8, path => "noarch/build.log",
 -|    excerpt => [
--|         'make[2]: Entering directory `/builddir/build/BUILD/glibc-2.3.6/linuxthreads\'',
+-|         'make[2]: Entering directory `/builddir/build/BUILD/glibc-2.3.6/linuxthreads&#39;',
 -|         'Starting process a',
 -|         'Starting process b',
 -|         'make[2]: *** [/builddir/build/BUILD/glibc-2.3.6/build-i686-linux/linuxthreads/tst-clock1.out] Error 1',
@@ -291,8 +291,8 @@ make: *** [check] Error 2
 -|    context => { lineno => 13, path => "noarch/build.log",
 -|    excerpt => [
 -|         'Starting process a',
--|         'make[2]: Target `tests\' not remade because of errors.',
--|         'make[2]: Leaving directory `/builddir/build/BUILD/glibc-2.3.6/linuxthreads\'',
+-|         'make[2]: Target `tests&#39; not remade because of errors.',
+-|         'make[2]: Leaving directory `/builddir/build/BUILD/glibc-2.3.6/linuxthreads&#39;',
 -|         'make[1]: *** [linuxthreads/tests] Error 2',
 -|        ], },
 -|  },
@@ -301,8 +301,8 @@ make: *** [check] Error 2
 -|    diag    => 'Possible error from \'make\'',
 -|    context => { lineno => 29, path => "noarch/build.log",
 -|    excerpt => [
--|         'make[1]: Target `check\' not remade because of errors.',
--|         'make[1]: Leaving directory `/builddir/build/BUILD/glibc-2.3.6\'',
+-|         'make[1]: Target `check&#39; not remade because of errors.',
+-|         'make[1]: Leaving directory `/builddir/build/BUILD/glibc-2.3.6&#39;',
 -|         '+ sleep 10s',
 -|         'make: *** [check] Error 2',
 -|        ], },

@@ -4,7 +4,7 @@
       'arch' => 'src',
       'context' => {
         'excerpt' => [
-          'useradd -r        -g sesame -d %{_localstatedir}/lib/sesame -s /sbin/nologin        -c "Owner of the sesame daemon" sesame'
+          'useradd -r        -g sesame -d %{_localstatedir}/lib/sesame -s /sbin/nologin        -c &quot;Owner of the sesame daemon&quot; sesame'
         ],
         'sub' => '%pre',
         'path' => 'sesame-0.10-1.el6.spec',

@@ -18,7 +18,8 @@ use RPM::Grill::dprintf;
 
 
 use Carp;
-use IPC::Run qw(run timeout);
+use CGI                 qw(escapeHTML);
+use IPC::Run            qw(run timeout);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -137,7 +138,7 @@ sub _check_desktop_file {
         chomp;    # Trim newline & trailing blanks
         s/\s+$//;
 
-        $f->context( { lineno => $., excerpt => $_ } );
+        $f->context( { lineno => $., excerpt => escapeHTML($_) } );
 
         # Exec can be 'Exec=foo' or 'Exec=/some/path/foo arg1 arg2 ...'
         # We only care about the foo, not about args.

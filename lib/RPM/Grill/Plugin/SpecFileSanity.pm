@@ -18,8 +18,9 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use CGI                                 qw(escapeHTML);
 use File::Basename;
-use IPC::Run qw(run timeout);
+use IPC::Run                            qw(run timeout);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -126,7 +127,7 @@ sub _run_actual_rpm_command {
             { code => 'RpmParseDependency',
               diag => "Possible macro expansion failure running '@rpm $specfile_basename'",
               context => {
-                  excerpt => $msg,
+                  excerpt => escapeHTML($msg),
                   path    => $specfile_basename,
               },
               # FIXME: hint => "maybe (pkg) is not installed"?
@@ -143,7 +144,7 @@ sub _run_actual_rpm_command {
         {   code    => "RpmParse$what",
             diag    => "$what running '@rpm $specfile_basename'",
             context => {
-                excerpt => $stderr,
+                excerpt => escapeHTML($stderr),
                 path    => $specfile_basename,
             },
         }
@@ -178,7 +179,7 @@ sub _check_for_other_specfile_problems {
                     context => {
                         path    => $specfile_basename,
                         lineno  => $lineno,
-                        excerpt => $s,
+                        excerpt => escapeHTML($s),
                     },
                 });
         }
@@ -214,7 +215,7 @@ sub _check_for_other_specfile_problems {
         my $context = {
             path   => $specfile_basename,
             lineno => $cl_lineno,
-            excerpt => $cl_first,
+            excerpt => escapeHTML($cl_first),
         };
 
         # Parse out the V-R, eg "* <date> <author> 1.2-4"
