@@ -65,9 +65,8 @@ __DATA__
 
 --------------Simple aggregation------------------------
 
-- i386   pkg Code "My Diag"
-- x86_64 pkg Code "My Diag"
-
+- i386        pkg Code "My Diag"
+- x86_64      pkg Code "My Diag"
 + i386,x86_64 pkg Code "My Diag"
 
 --------------No aggregation (different codes)--------------
