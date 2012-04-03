@@ -32,12 +32,14 @@ META.json
 META.yml
 README
 README.about
+README.gripe
 t/00.load.t
 t/perlcritic.t
 t/pod-coverage.t
 t/pod.t
 t/RPM/Grill/10arch-order.t
 t/RPM/Grill/20multilib.t
+t/RPM/Grill/30aggregate_gripes.t
 t/RPM/Grill/Plugin/10order.t
 t/RPM/Grill/Plugin/20docs.t
 t/RPM/Grill/Plugin/90real-world.t
@@ -48,6 +50,7 @@ t/RPM/Grill/Plugin/ElfChecks/20relro.t
 t/RPM/Grill/Plugin/Manifest/10basic.t
 t/RPM/Grill/Plugin/Manifest/20fhs.t
 t/RPM/Grill/Plugin/Manifest/30systemd.t
+t/RPM/Grill/Plugin/Manifest/40fedora.t
 t/RPM/Grill/Plugin/Multilib/10basic.t
 t/RPM/Grill/Plugin/Patches/01basic.t
 t/RPM/Grill/Plugin/RpmMetadata/10basic.t
