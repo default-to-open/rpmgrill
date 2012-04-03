@@ -64,6 +64,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 - bz802554 - new test for RHEL7 files not under /usr
 - bz802555 - new test for "Fedora" in RPM description
+- internal cleanup
 
 * Thu Mar 29 2012 Ed Santiago <santiago@redhat.com> 0.06-1
 - version string cleanup
