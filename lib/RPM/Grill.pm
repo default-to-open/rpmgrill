@@ -880,8 +880,8 @@ sub aggregate_gripes {
     my $gripes = $self->{gripes}->{$module}
         or return;
 
-    use Clone qw(clone);
-    use Test::Deep::NoTest;
+    use Clone                   qw(clone);
+    use Test::Deep::NoTest      qw(eq_deeply ignore);
 
     # Aggregate by arch.  If we have the same message differing
     # only in arch, consolidate them together.
