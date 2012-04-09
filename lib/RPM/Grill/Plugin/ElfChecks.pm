@@ -414,7 +414,7 @@ FIXME
 
 FIXME
 
-=item   LibMissingRelro
+=item   LibMissingRELRO
 
 FIXME
 
