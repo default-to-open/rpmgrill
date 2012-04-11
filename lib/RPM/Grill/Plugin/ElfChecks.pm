@@ -412,27 +412,33 @@ FIXME
 
 =item   PieNotRelro
 
-FIXME
+File compiled with PIE but not RELRO.
+
+FIXME: I don't remember why this is important.
 
 =item   LibMissingRELRO
 
-FIXME
+Library file not compiled with RELRO or PIE.
 
-=item   SetuidMissingRelro
+FIXME: I don't remember why this is important.
 
-FIXME
+=item   SetuidMissingRELRO
 
-=item   SetgidMissingRelro
+Setuid executable not compiled with RELRO. This is probably bad.
 
-FIXME
+=item   SetgidMissingRELRO
 
-=item   SetuidPartialRelro
+Setgid executable not compiled with RELRO. This is probably bad.
 
-FIXME
+=item   SetuidPartialRELRO
 
-=item   SetgidPartialRelro
+Setuid executable compiled with I<partial> RELRO. I don't know
+what this means or why (if) it's bad.
 
-FIXME
+=item   SetgidPartialRELRO
+
+Setuid executable compiled with I<partial> RELRO. I don't know
+what this means or why (if) it's bad.
 
 =back
 

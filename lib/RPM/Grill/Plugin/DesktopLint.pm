@@ -434,6 +434,19 @@ Your .desktop file includes C<Exec=I<foo>>, but
 there's no /usr/bin/I<foo> in this package or any of its subpackages.
 This probably means that I<foo> is provided by a dependency.
 
+=item   DesktopExecMissingReq
+
+Your .desktop file uses htmlview or xdg-open, but your specfile
+does not have a matching C<Require:> line for that tool.
+
+=item   DesktopIconFileMissing
+
+Your .desktop file specifies an icon which is not present in this package.
+
+FIXME: this is probably a false alarm, because the icon may be in
+another package. But there's not really any way for Brewtap to
+know or test that. Should we just remove this test?
+
 =back
 
 =head1	SEE ALSO
