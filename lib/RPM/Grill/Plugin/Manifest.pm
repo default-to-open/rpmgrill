@@ -289,7 +289,23 @@ See L<http://docs.redhat.com/docs/en-US/Red_Hat_Enterprise_Linux/6/html/Storage_
 
 =item   NonSystemdFile
 
-See L<https://bugzilla.redhat.com/show_bug.cgi?id=802557>
+See L<bz802557|https://bugzilla.redhat.com/show_bug.cgi?id=802557>
+
+=item   MoveToUsr
+
+RHEL7 is doing away with C</usr>. Your package has one or more
+files that are still living there.
+See L<bz802554|https://bugzilla.redhat.com/show_bug.cgi?id=802554>
+
+=item   FedoraInFilename
+
+Files containing C<fedora> as part of the name might be inappropriate
+for RHEL. See L<bz802555|https://bugzilla.redhat.com/show_bug.cgi?id=802555>
+
+(Note: As of April 2012 there are some known false positives here
+that should be whitelisted. Ed is trying to figure out a way to
+whitelist these).
+
 
 =back
 
