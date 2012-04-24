@@ -281,7 +281,12 @@ FIXME document methods
 
 =item   UnownedDirectory
 
-FIXME
+I'm not sure this is a real problem. Basically: your package claims
+ownership of the parent directory, and at least one subdirectory inside
+the complained-about directory, but not the complained-about directory
+itself. This may have to do with the rpm C<%dir> directive. I need to
+learn more about packaging, and may remove this test if it's useless.
+If you're rpm-savvy, help would be appreciated.
 
 =item   NonFHS
 
