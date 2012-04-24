@@ -360,11 +360,18 @@ sub _check_useradd {
                 }
             }
             else {
+                my $diag = "Invocation of <tt>useradd</tt> with UID <var>$uid</var>, but there's no assigned UID for <var>$username</var> in $UidGid_File";
+
+                # e.g. amanda-3.3.0-5.el7, which specifies 33 for %amanda_user
+                if (defined (my $uid_assigned = $UidGid{_by_uid}{$uid})) {
+                    $diag .= " (WARNING: UID <var>$uid</var> is assigned to <b>$uid_assigned->{NAME}</b>";
+                }
+
                 # FIXME: this may be serious, because it could collide
                 # with a UID assigned later
                 $spec->gripe({
                     code => 'UseraddUnknownUid',
-                    diag => "Invocation of <tt>useradd</tt> with UID <var>$uid</var>, but there's no assigned UID for <var>$username</var> in $UidGid_File",
+                    diag => $diag,
                 });
             }
         }
