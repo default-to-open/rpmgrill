@@ -62,6 +62,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+- UID/GID test: look for UID conflicts, e.g. amanda-3.3.0-5.el7
+
 * Tue Apr  3 2012 Ed Santiago <santiago@redhat.com> 0.07-1
 - bz802554 - new test for RHEL7 files not under /usr
 - bz802555 - new test for "Fedora" in RPM description
