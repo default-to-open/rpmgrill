@@ -103,11 +103,15 @@ sub analyze {
         'Signature',  'Size',       'Relocations'
         );
 
-    for my $k ( sort keys %by_value ) {
-        my $v = $by_value{$k};
+    for my $field ( sort keys %by_value ) {
+        my $v = $by_value{$field};
         next if keys(%$v) == 1;
 
-        #        use Data::Dumper; print Dumper($v);
+        # FIXME: This means that there are differing values for $field.
+        # This may be expected (e.g. %description in subpackages), or
+        # may be bad (FIXME: like what?). Since I don't think it's very
+        # likely to happen, I'm leaving this test unimplemented.
+        #        use Data::Dumper; print STDERR Dumper($v);
     }
 }
 
