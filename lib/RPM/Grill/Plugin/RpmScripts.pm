@@ -139,9 +139,11 @@ my %UidGid;
         chomp;
         if (my @values = split ' ', $_) {
             if (! @label) {
+                # First time through: we have a list of labels for the columns.
                 @label = @values;
             }
             else {
+                # All subsequent lines are uid mappings
                 my %x = map { $label[$_] => $values[$_] } (0 .. $#label);
 
                 # Special case: handle something like this:
@@ -154,7 +156,9 @@ my %UidGid;
                 $x{GID} = undef         if $x{GID} eq '-';
 
                 # Preserve, keyed on username
-                $UidGid{$values[0]} = \%x;
+                $UidGid{_by_name}{$x{NAME}} = \%x;
+                $UidGid{_by_uid}{$x{UID}}   = \%x       if $x{UID};
+                $UidGid{_by_gid}{$x{GID}}   = \%x       if $x{GID};
             }
         }
     }
@@ -339,7 +343,7 @@ sub _check_useradd {
     #
     # Userid
     #
-    my $expected_uid = $UidGid{$username}{UID};
+    my $expected_uid = $UidGid{_by_name}{$username}{UID};
 
     if (my $uid = $options->{uid}) {
         if ($uid =~ /^\d+$/) {
@@ -410,7 +414,7 @@ sub _check_groupadd {
     my $options   = shift;
     my $groupname = shift;
 
-    if (defined (my $expected_gid = $UidGid{$groupname}{GID})) {
+    if (defined (my $expected_gid = $UidGid{_by_name}{$groupname}{GID})) {
         if (defined (my $actual_gid = $options->{gid})) {
             if ($actual_gid =~ /^\d+$/) {
                 if ($actual_gid != $expected_gid) {
