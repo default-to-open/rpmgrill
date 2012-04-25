@@ -50,6 +50,23 @@ x:0001 t:01001 T:01000
 END_LS_STRING_MODE
 
 # FIXME
+#
+# This table defines the way we invoke eu-readelf, and what we get out of it.
+# Format is:
+#
+#  [flag] [section]  >  [regex] : [action]
+#
+# where:
+#
+#  [flag]    is the command-line option to eu-readelf. These may appear more
+#            than once (like -d).
+#  [section] is the label that eu-readelf emits for the given flag
+#  [regex]   is a regular expression to search for inside this section
+#  [action]  is what to do if we find the regex. Action can be of three forms:
+#                     a) @something    - preserve $1, keeping a list of all seen
+#                     b) something     - preserve $1, and hope we see just one
+#                     c) something = 1 - just mark that we've seen this.
+#
 our $ReadElf_Parse_Table = <<'END_READELF';
 -h ELF Header        > /^\s+Type:\s+(.*)/                         : elf_type
 
