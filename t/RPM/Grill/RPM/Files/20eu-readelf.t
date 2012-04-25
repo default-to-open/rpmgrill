@@ -69,8 +69,8 @@ package main;
 
     $prog =~ s/^eu-readelf\s+//
         or die "invoked with wrong program (expected eu-readelf): $prog";
-    $prog =~ s/^-d -h -l //
-        or die "eu-readelf invoked with wrong flags (expected '-d -h -l'): $prog";
+    $prog =~ s/^-S -d -h -l //
+        or die "eu-readelf invoked with wrong flags (expected '-S -d -h -l'): $prog";
 
     # Strip off '2>/dev/null'
     $prog =~ s{\s*\d*>\s*.*$}{};
