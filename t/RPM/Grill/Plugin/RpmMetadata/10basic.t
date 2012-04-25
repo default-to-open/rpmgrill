@@ -368,7 +368,34 @@ Blah blah blah blah Fedora
 -|    subpackage => 'git-daemon',
 -|    code       => 'FedoraInDescription',
 -|    diag       => 'RPM Description mentions "Fedora"',
--|    context    => { path => '[RPM metadata]' },
+-|    context    => { path => '[RPM metadata]',
+-|                    excerpt => ['Blah blah blah blah Fedora<br/>'] },
+-|  }
+
+---------Fedora-no-RedHat-abbreviated----------------------------------------
+
+Name        : git-daemon           Relocations: (not relocatable)
+Version     : 1.7.1                     Vendor: Red Hat, Inc.
+Release     : 2.el6_0.1             Build Date: Thu 16 Dec 2010 07:25:20 AM MST
+Install Date: (not installed)       Build Host: x86-010.build.bos.redhat.com
+Group       : Development/Tools     Source RPM: git-1.7.1-2.el6_0.1.src.rpm
+Size        : 499329                   License: GPLv2
+Signature   : (none)
+Packager    : Red Hat, Inc. <http://bugzilla.redhat.com/bugzilla>
+URL         : ftp://ftp.redhat.com/blahblah
+Summary     : Git protocol dæmon
+Description :
+This is a very long description string, the goal here is to
+see if the abbreviation code that shows Fedora in the excerpt
+will trigger and shorten this very long description into
+something shorter.
+
+-|  { arch       => 'src',
+-|    subpackage => 'git-daemon',
+-|    code       => 'FedoraInDescription',
+-|    diag       => 'RPM Description mentions "Fedora"',
+-|    context    => { path => '[RPM metadata]',
+-|                    excerpt => ['[...] see if the abbreviation code that shows Fedora in the excerpt<br/>will trigger and shorten [...]'] },
 -|  }
 
 ---------Fedora-with-RedHat-1----------------------------------------------

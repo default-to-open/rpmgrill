@@ -334,12 +334,24 @@ sub _check_description {
 
     # "Fedora" is OK but _only_ in the context of "Fedora or Red Hat"
     # or vice-versa.
-    if ($description =~ /\bFedora\b/) {
+    if ($description =~ /\bFedora\b/i) {
         unless ($description =~ /\bRed[\s\n]Hat[\s\n]or[\s\n]Fedora\b/
                     || $description =~ /\bFedora[\s\n]or[\s\n]Red[\s\n]Hat\b/) {
+
+            # Provide a helpful excerpt, but no more than 40 characters
+            # to the left or to the right of 'Fedora'. For legibility.
+            my $excerpt = escapeHTML($description);
+            $excerpt =~ s{^.*\s(.{40,}Fedora)}{\[...\] $1}s;
+            $excerpt =~ s{(Fedora.{1,40})\s.*$}{$1 \[...\]}s;
+            $excerpt =~ s{\n}{<br/>}g;
+
             $metadata->gripe({
-                code => 'FedoraInDescription',
-                diag => 'RPM Description mentions "Fedora"',
+                code    => 'FedoraInDescription',
+                diag    => 'RPM Description mentions "Fedora"',
+                context => {
+                    path    => '[RPM metadata]',
+                    excerpt => $excerpt,
+                },
             });
         }
     }
