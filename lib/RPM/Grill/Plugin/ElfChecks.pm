@@ -82,6 +82,16 @@ sub analyze {
 
             # FIXME
             $self->_check_relro( $f );
+
+            # bz809907: complain if compiled with gstabs
+            if ($f->elf_has_stabs) {
+                $self->gripe({
+                    arch => $f->arch,
+                    subpackage => $f->subpackage,
+                    code => 'ElfHasStabs',
+                    diag => "File compiled with -gstabs: <tt>".$f->path."</tt>",
+                });
+            }
         }
     }
 

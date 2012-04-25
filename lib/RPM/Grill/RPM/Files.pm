@@ -76,6 +76,8 @@ our $ReadElf_Parse_Table = <<'END_READELF';
 -d Dynamic segment   > /^\s+DEBUG\b/                              : debug    = 1
 
 -l Program Headers   > /^\s*GNU_RELRO\s.*\s(R\S*)\s+0x/           : gnu_relro
+
+-S Section Headers   > /^\[\s*\d+\]\s+\.stab(str)?\s/             : stabs = 1
 END_READELF
 
 our %ReadElf_Parse_Table;
@@ -426,6 +428,17 @@ sub elf_relro {
     }
 
     return '';
+}
+
+###################
+#  elf_has_stabs  #  For bz809907; returns true if object is built with -gstabs
+###################
+sub elf_has_stabs {
+    my $self = shift;
+
+    $self->_run_eu_readelf();
+
+    return $self->{_eu_readelf}{stabs};
 }
 
 # END   code and helpers for running eu-readelf
