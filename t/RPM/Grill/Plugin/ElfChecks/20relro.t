@@ -58,44 +58,6 @@ my $tempdir = tempdir("t-ElfChecks.XXXXXX", CLEANUP => !$ENV{DEBUG});
 ##package main;
 
 
-#
-# override open(), so we can feed fake eu-readelf data to the script
-#
-package RPM::Grill::RPM::Files;
-use subs qw(open);
-package main;
-
-# When called to eu-readelf ddd/libxxx.a, read the file
-# test-work-dir/ddd/eu-readelf.xxx instead.
-*RPM::Grill::RPM::Files::open = sub {
-    # e.g (undef, '-|', 'eu-readelf -a -b -c ...')
-    my $pipe = $_[1];           # must be '-|'
-    my $prog = $_[2];           # eu-readelf ...
-
-
-    unless ($pipe eq '-|' && $prog =~ /^eu-readelf/) {
-        if (@_ == 2)    { return CORE::open($_[0], $_[1]) }
-        elsif (@_ == 3) { return CORE::open($_[0], $_[1], $_[2]) }
-        elsif (@_ == 4) { return CORE::open($_[0], $_[1], $_[2], $_[3]) }
-        else            { die "open failed, '@_'"; }
-    }
-
-    $pipe eq '-|'
-        or die "Internal error: wrong 'open' (@_)";
-
-    $prog =~ s/^eu-readelf\s+//
-        or die "invoked with wrong program (expected eu-readelf): $prog";
-    $prog =~ s/^-d -h -l //
-        or die "eu-readelf invoked with wrong flags (expected '-d -h -l'): $prog";
-
-    # Strip off '2>/dev/null'
-    $prog =~ s{\s*\d*>\s*.*$}{};
-
-    # e.g. 20gripes.d/10-basic/eu-readelf
-    return CORE::open($_[0], '<', "$test_subdir/$prog/eu-readelf" );
-};
-
-
 
 
 for my $i (0 .. $#tests) {
