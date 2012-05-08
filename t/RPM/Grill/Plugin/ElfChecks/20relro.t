@@ -209,14 +209,14 @@ i386 mypkg -rwxr-sr-x /usr/bin/foo [relro=partial,pie=no]
 
 ---------------------- [daemon partial relro]
 
-i386 mypkg -rwxr-sr-x /usr/bin/foo    [relro=partial,pie=no]
+i386 mypkg -rwxr-xr-x /usr/bin/foo    [relro=partial,pie=no]
 i386 mypkg -rwxr-xr-x /etc/init.d/foo []
 
 *** DaemonPartialRELRO
 
 ---------------------- [daemon missing relro]
 
-i386 mypkg -rwxr-sr-x /usr/bin/foo    [relro=no,pie=no]
+i386 mypkg -rwxr-xr-x /usr/bin/foo    [relro=no,pie=no]
 i386 mypkg -rwxr-xr-x /etc/init.d/foo []
 
 *** DaemonMissingRELRO
