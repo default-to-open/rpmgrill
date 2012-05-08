@@ -31,6 +31,10 @@ my $builder = Module::Build->new(
         'version'          => 0,
     },
 
+    doc_files => {
+        'doc/tooltips.txt' => 'usr/share/rpmgrill/tooltips.txt',
+    },
+
     # Tests only
     build_requires => {
         'Test::More'        => 0,
@@ -40,4 +44,5 @@ my $builder = Module::Build->new(
     add_to_cleanup      => [ 'RPM-Grill-*' ],
 );
 
+$builder->add_build_element('doc');
 $builder->create_build_script();
