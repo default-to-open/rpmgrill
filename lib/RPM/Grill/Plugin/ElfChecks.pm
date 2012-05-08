@@ -325,28 +325,35 @@ sub _check_relro {
         return;         # Nothing more to check for libraries
     }
 
-    # "setuid/setgid" ... "full RELRO and PIE"
+    # "we want all setuid/segid/setcap/daemons to be compiled with full
+    # relro and PIE."
+    #
+    # Here we identify if our file is one of those types. If it is,
+    # we check RELRO. Note that the order below is important: we
+    # want Setuid to be more important than Setgid, and both more
+    # important than Daemon.
+    my $label;
+    $label = 'Daemon'   if $f->is_daemon;
+    $label = 'Setgid'   if $f->is_sgid;
+    $label = 'Setuid'   if $f->is_suid;
     # FIXME: how to check "cap"?
-    if ($f->is_suid || $f->is_sgid) {
-        my $ug = ($f->is_suid ? 'u' : 'g');
 
+    if ($label) {
         if (!$relro) {
             $gripe->(
-                "Set${ug}idMissingRELRO",
-                "Set${ug}id file<|s> not compiled with RELRO or PIE",
+                "${label}MissingRELRO",
+                "$label file<|s> not compiled with RELRO or PIE",
             );
         }
         elsif ($relro ne 'full') {
             $gripe->(
-                "Set${ug}idPartialRELRO",
-                "Set${ug}id file<|s> compiled with only partial RELRO (should be full)",
+                "${label}PartialRELRO",
+                "${label} file<|s> compiled with only partial RELRO (should be full)",
             );
         }
 
         return;
     }
-
-    # FIXME: how to check daemon??
 }
 
 # END   relro code
