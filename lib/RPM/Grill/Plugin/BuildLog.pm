@@ -37,7 +37,10 @@ sub blurb { return "reports compile-time problems you may have missed" }
 
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This module scans the build logs (all arches), looking for
+and griping about common warnings. These are warnings that
+may still result in a successful build but which could result
+in broken or insecure executables.
 END_DOC
 
 #

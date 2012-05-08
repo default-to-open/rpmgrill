@@ -36,7 +36,8 @@ sub blurb { return "checks for problems with useradd, etc" }
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This module checks for problems in the rpm install scripts,
+such as running 'useradd' with the wrong uid.
 END_DOC
 
 #

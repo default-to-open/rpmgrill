@@ -30,7 +30,9 @@ sub blurb { return "gathers info about libs used by this pkg" }
 
 # FIXME
 sub doc { return <<"END_DOC" };
-FIXME FIXME FIXME
+This module does not report any tests. It is an internal data-collection
+module used to gather information which will later be used by
+Package Wrangler.
 END_DOC
 
 our $Log = 'rpmgrill.pw-linkage.txt';

@@ -41,7 +41,8 @@ sub blurb { return "checks for rare problems in RPM manifests" }
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This module runs a variety of tests on the RPM manifest, i.e.
+the list of files shipped in an RPM.
 END_DOC
 
 # List of mount points / directories which should be left to the end user.

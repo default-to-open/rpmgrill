@@ -30,8 +30,7 @@ sub blurb { return "checks specfile for unapplied patches" }
 
 sub doc {
     return <<"END_DOC" }
-FIXME: check for unapplied patches
-FIXME: check for fuzz
+This module checks for unapplied patches and for bad values of fuzz.
 END_DOC
 
 # END   user-configurable section

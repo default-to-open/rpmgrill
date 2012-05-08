@@ -32,7 +32,9 @@ sub blurb { return "checks for common problems in .desktop files" }
 
 sub doc {
     return <<"END_DOC" }
-Blah blah blah
+This module checks for common problems in .desktop files. We run
+the RHEL 'desktop-file-validate' program, and also run consistency
+checks of our own on the Exec and Icon lines.
 END_DOC
 
 # END   user-configurable section

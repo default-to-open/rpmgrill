@@ -31,7 +31,7 @@ sub blurb { return "checks for FIXME FIXME" }
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+FIXME FIXME FIXME - placeholder, unimplemented
 END_DOC
 
 # END   user-configurable section

@@ -30,7 +30,9 @@ sub blurb { return "runs antivirus checks" }
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This module runs clamav against files in an rpm. Silly as that may seem,
+there may be customers who run clamav and may be concerned to see it trigger.
+This module may help us avoid an embarrassment in the field.
 END_DOC
 
 # END   user-configurable section

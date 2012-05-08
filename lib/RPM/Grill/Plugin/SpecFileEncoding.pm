@@ -33,7 +33,7 @@ sub blurb { return "warns about non-UTF-8 characters in a specfile" }
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This module warns about non-UTF8 characters in the specfile.
 END_DOC
 
 # END   user-configurable section

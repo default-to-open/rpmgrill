@@ -34,7 +34,8 @@ sub blurb { return "checks for dangling symlinks" }
 
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This module is currently (2012-05-08) unimplemented. It's too
+hard to get it right.
 END_DOC
 
 # END   user-configurable section

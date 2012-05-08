@@ -30,7 +30,9 @@ sub blurb { return "warns about set[ug]id programs not on the whitelist" }
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This plugin warns about setxid (setuid, setgid) files not on the
+authorized whitelist. The whitelist is currently (2012-05-08)
+maintained by Josh Bressers.
 END_DOC
 
 # Path to whitelist files

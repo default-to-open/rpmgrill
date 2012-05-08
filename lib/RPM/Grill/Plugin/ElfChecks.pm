@@ -37,7 +37,10 @@ This plugin contains two tests:
 
   RPATH - looks for suspicious directories in ELF RPATH
 
-  RELRO - require security-enhanced compile options on certain executables
+  RELRO - require security-enhanced compile options on certain executables.
+
+See http://post-office.corp.redhat.com/archives/os-devel-list/2011-July/msg00149.html
+for more details.
 END_DOC
 
 # Path components that are OK in RPATH.

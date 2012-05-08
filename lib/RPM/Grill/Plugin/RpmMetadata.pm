@@ -33,7 +33,8 @@ sub blurb { return "check for problems in RPM metadata" }
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This module examines the 'rpm -q' of RPMs in this build,
+and gripes about various esoteric (potential) problems.
 END_DOC
 
 # Expected metadata fields.

@@ -28,7 +28,13 @@ sub blurb { return "reports multilib conflicts" }
 
 sub doc {
     return <<"END_DOC" }
-Blah blah blah
+This module tests for multilib incompatibilities, i.e. conflicts that
+will prevent 32- and 64-bit versions of a package from being installed
+together.
+
+This may not be important for your package. Perhaps your package will
+never be installed multilib. There is no mechanism for determining
+that.
 END_DOC
 
 # END   user-configurable section
