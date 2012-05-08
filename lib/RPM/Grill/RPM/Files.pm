@@ -185,6 +185,17 @@ sub is_elf {
 }
 
 ###############
+#  is_daemon  #  FIXME
+###############
+sub is_daemon {
+    my $self = shift;
+
+    $self->rpm->_find_daemon_files;
+
+    return $self->{_is_daemon};
+}
+
+###############
 #  file_type  # ...as determined by libmagic
 ###############
 sub file_type {

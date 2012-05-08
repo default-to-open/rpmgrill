@@ -202,6 +202,74 @@ sub files {
     return wantarray ? @{ $self->{files} } : $self->{files};
 }
 
+
+##################
+#  daemon_files  #  Identifies the files in this RPM which may be daemons
+##################
+sub _find_daemon_files {
+    my $self = shift;
+
+    my @all_files = $self->files;
+    my %is_daemon;
+
+    #
+    # Find all /etc/init.d/* or /lib/systemd/* files in _this_ RPM.
+    #
+    for my $f (@all_files) {
+        # Old-style /etc/init.d file.
+        if ($f->path =~ m{^/etc(/rc\.d)?/init\.d/([^/]+)$}) {
+            my $initfile_basename = $2;
+
+            # If this RPM includes a bin file with the same name as
+            # the init file, or with a 'd' suffix, assume it's a daemon.
+            # e.g. /etc/init.d/syslog -> /sbin/syslogd
+            #      /etc/init.d/acpid  -> /usr/sbin/acpid
+            $_->{_is_daemon} = 1
+                for grep { $_->path =~ m{/s?bin/${initfile_basename}d?$} } @all_files;
+
+            # Read through the file, looking for lines of the form
+            #     [ -x /usr/sbin/whatever ] || exit 5
+            if (open my $initfile_fh, '<', $f->extracted_path) {
+              LINE:
+                while (my $line = <$initfile_fh>) {
+                    next LINE   if $line =~ /^\s*\#/;
+
+                    if ($line =~ m{\s-\w\s+(/\S+)\s.*\sexit\s5}) {
+                        my $daemon = $1;
+
+                        $_->{_is_daemon} = 1
+                            for grep { $_->path eq $daemon } @all_files;
+                    }
+                }
+                close $initfile_fh;
+            }
+        }
+
+        # New-style (RHEL7 and up) systemd file
+        elsif ($f->path =~ m{/lib(64)?/systemd(/.*)?/([^/]+)$}) {
+            # Read through the file, looking for lines of the form
+            #     ExecStart=/usr/bin/fubar, mark fubar as daemon
+            if (open my $initfile_fh, '<', $f->extracted_path) {
+              LINE:
+                while (my $line = <$initfile_fh>) {
+                    next LINE   if $line =~ /^\s*\#/;
+
+                    if ($line =~ m{\s*ExecStart=-?(\S+)}) {
+                        my $daemon = $1;
+                        $_->{_is_daemon} = 1
+                            for grep { $_->path eq $daemon } @all_files;
+                    }
+                }
+                close $initfile_fh;
+            }
+        }
+    }
+
+    # No return value
+    return;
+}
+
+
 use overload '""' => \&_as_string;
 
 sub _as_string {
