@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.07
+Version:        0.08
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -62,6 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+* Tue May  8 2012 Ed Santiago <santiago@redhat.com> 0.08-1
 - RELRO tests: try to identify daemon files (and complain about missing RELRO)
 - bz809907: look for and gripe about executables built with -gstabs
 - UID/GID test: look for UID conflicts, e.g. amanda-3.3.0-5.el7
