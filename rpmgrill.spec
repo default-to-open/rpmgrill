@@ -60,6 +60,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 %{_mandir}/man1/*
 %{_mandir}/man3/*
+/usr/share/rpmgrill/*
 
 %changelog
 * Tue May  8 2012 Ed Santiago <santiago@redhat.com> 0.08-1
