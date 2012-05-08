@@ -441,21 +441,39 @@ FIXME: I don't remember why this is important.
 
 =item   SetuidMissingRELRO
 
-Setuid executable not compiled with RELRO. This is probably bad.
+Setuid executable not compiled with RELRO.
+See L<http://post-office.corp.redhat.com/archives/os-devel-list/2011-July/msg00149.html>.
 
 =item   SetgidMissingRELRO
 
-Setgid executable not compiled with RELRO. This is probably bad.
+Setgid executable not compiled with RELRO.
+See L<http://post-office.corp.redhat.com/archives/os-devel-list/2011-July/msg00149.html>.
+
+=item   DaemonMissingRELRO
+
+Daemon executable not compiled with RELRO.
+See L<http://post-office.corp.redhat.com/archives/os-devel-list/2011-July/msg00149.html>.
+Note that we use heuristics to identify daemons, and these may result in
+false positives (we identify "foo" as a daemon but it really isn't) and
+false negatives (we fail to identify "bar" as a daemon, and don't check it for RELRO).
 
 =item   SetuidPartialRELRO
 
-Setuid executable compiled with I<partial> RELRO. I don't know
-what this means or why (if) it's bad.
+Setuid executable compiled with only I<partial> RELRO (RHEL6 requires I<full>).
+See L<http://post-office.corp.redhat.com/archives/os-devel-list/2011-July/msg00149.html>.
 
 =item   SetgidPartialRELRO
 
-Setuid executable compiled with I<partial> RELRO. I don't know
-what this means or why (if) it's bad.
+Setgid executable compiled with only I<partial> RELRO (RHEL6 requires I<full>).
+See L<http://post-office.corp.redhat.com/archives/os-devel-list/2011-July/msg00149.html>.
+
+=item   DaemonPartialRELRO
+
+Daemon executable compiled with only I<partial> RELRO (RHEL6 requires I<full>).
+See L<http://post-office.corp.redhat.com/archives/os-devel-list/2011-July/msg00149.html>.
+Note that we use heuristics to identify daemons, and these may result in
+false positives (we identify "foo" as a daemon but it really isn't) and
+false negatives (we fail to identify "bar" as a daemon, and don't check it for RELRO).
 
 =back
 
