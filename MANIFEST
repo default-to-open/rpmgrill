@@ -51,11 +51,14 @@ t/RPM/Grill/Plugin/Manifest/10basic.t
 t/RPM/Grill/Plugin/Manifest/20fhs.t
 t/RPM/Grill/Plugin/Manifest/30systemd.t
 t/RPM/Grill/Plugin/Manifest/40fedora.t
+t/RPM/Grill/Plugin/Manifest/50usr.t
 t/RPM/Grill/Plugin/Multilib/10basic.t
 t/RPM/Grill/Plugin/Patches/01basic.t
 t/RPM/Grill/Plugin/RpmMetadata/10basic.t
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/abrt-1.1.16-3.el6.expect
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/abrt-1.1.16-3.el6.spec
+t/RPM/Grill/Plugin/RpmScripts/10basic.d/amanda-3.3.0-5.el7.expect
+t/RPM/Grill/Plugin/RpmScripts/10basic.d/amanda-3.3.0-5.el7.spec
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/bacula-5.0.3-19.el7.expect
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/bacula-5.0.3-19.el7.spec
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/luci-0.22.2-14.el6_0.2.spec
@@ -112,6 +115,7 @@ t/RPM/Grill/Plugin/SpecFileSanity/10basic.t
 t/RPM/Grill/Plugin/VirusCheck/01basic.t
 t/RPM/Grill/RPM/10basic.t
 t/RPM/Grill/RPM/20requires.t
+t/RPM/Grill/RPM/30daemons.t
 t/RPM/Grill/RPM/Files/10numeric_mode.t
 t/RPM/Grill/RPM/Files/20eu-readelf.d/10-fullrelro-pie/eu-readelf
 t/RPM/Grill/RPM/Files/20eu-readelf.d/10-fullrelro-pie/expect
@@ -121,6 +125,8 @@ t/RPM/Grill/RPM/Files/20eu-readelf.d/30-norelro-nopie/eu-readelf
 t/RPM/Grill/RPM/Files/20eu-readelf.d/30-norelro-nopie/expect
 t/RPM/Grill/RPM/Files/20eu-readelf.d/40-partialrelro-pie/eu-readelf
 t/RPM/Grill/RPM/Files/20eu-readelf.d/40-partialrelro-pie/expect
+t/RPM/Grill/RPM/Files/20eu-readelf.d/50-stabs/eu-readelf
+t/RPM/Grill/RPM/Files/20eu-readelf.d/50-stabs/expect
 t/RPM/Grill/RPM/Files/20eu-readelf.t
 t/RPM/Grill/RPM/Specfile/01basic.t
 TODO
