@@ -51,15 +51,6 @@ use_ok 'RPM::Grill::Plugin::ElfChecks'    or exit;
 # Run the tests
 my $tempdir = tempdir("t-ElfChecks.XXXXXX", CLEANUP => !$ENV{DEBUG});
 
-##package RPM::Grill::RPM;
-##use subs qw(nvr);
-##package RPM::Grill;
-##use subs qw(major_release);
-##package main;
-
-
-
-
 for my $i (0 .. $#tests) {
     my $t = $tests[$i];
 
@@ -124,7 +115,7 @@ for my $i (0 .. $#tests) {
             my $path   = $f->path;
 
             $f->{_file_type} = "ELF blah blah";
-            $f->{_eu_readelf} = { };
+            $f->{_eu_readelf} = { elf_type => "UNKNOWN" };
 
             if (my $flags = $flags{$arch}{$subpkg}{$path}) {
                 if ($flags =~ s/relro=(full|partial|no)//) {
@@ -215,3 +206,17 @@ i386 mypkg -rwxr-sr-x /usr/bin/foo [relro=no,pie=no]
 i386 mypkg -rwxr-sr-x /usr/bin/foo [relro=partial,pie=no]
 
 *** SetgidPartialRELRO
+
+---------------------- [daemon partial relro]
+
+i386 mypkg -rwxr-sr-x /usr/bin/foo    [relro=partial,pie=no]
+i386 mypkg -rwxr-xr-x /etc/init.d/foo []
+
+*** DaemonPartialRELRO
+
+---------------------- [daemon missing relro]
+
+i386 mypkg -rwxr-sr-x /usr/bin/foo    [relro=no,pie=no]
+i386 mypkg -rwxr-xr-x /etc/init.d/foo []
+
+*** DaemonMissingRELRO
