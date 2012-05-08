@@ -1,6 +1,4 @@
 bin/rpmgrill
-bin/run-analysis
-bin/wrangler-get-linkages
 Build.PL
 Changes
 doc/tooltips.txt
