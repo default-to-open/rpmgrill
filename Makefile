@@ -16,6 +16,7 @@ $(NAME)-$(VERSION).tar.bz2:
 	./Build distdir
 	test -d $(NAME)-0.0 || exit 1
 	find $(NAME)-0.0 -type f | xargs perl -pi -e "s/VERSION\s+=\s+'.*?';/VERSION = '$(VERSION)';/"
+	perl -I$(NAME)-0.0/lib $(NAME)-0.0/bin/make-tooltips >| $(NAME)-0.0/doc/tooltips.txt
 	mv $(NAME)-0.0 $(NAME)-$(VERSION)
 	tar cjf $(NAME)-$(VERSION).tar.bz2 $(NAME)-$(VERSION)
 	rm -rf $(NAME)-$(VERSION)
