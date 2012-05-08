@@ -478,6 +478,11 @@ Note that we use heuristics to identify daemons, and these may result in
 false positives (we identify "foo" as a daemon but it really isn't) and
 false negatives (we fail to identify "bar" as a daemon, and don't check it for RELRO).
 
+=item   ElfHasStabs
+
+Executable has been compiled with C<-gstabs>. This can cause strange
+problems. See L<bz809907|https://bugzilla.redhat.com/show_bug.cgi?id=809907>.
+
 =back
 
 =head1	SEE ALSO
