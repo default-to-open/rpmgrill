@@ -63,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- bz802555 (Fedora/branding): ignore "fedora" in filenames in srpm
+
 * Tue May  8 2012 Ed Santiago <santiago@redhat.com> 0.08-1
 - RELRO tests: try to identify daemon files (and complain about missing RELRO)
 - bz809907: look for and gripe about executables built with -gstabs
