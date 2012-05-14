@@ -13,9 +13,10 @@ use File::Temp                  qw(tempdir);
 # expected to fail the Fedora test
 my @tests;
 my $tests = <<'END_TESTS';
-  /usr/share/doc/README         /usr/share/doc/README.redhat
-! /usr/share/doc/README.fedora
-! /usr/share/doc/README.Fedora  /etc/init.fedora
+  i686 /usr/share/doc/README         /usr/share/doc/README.redhat
+! i686 /usr/share/doc/README.fedora
+! i686 /usr/share/doc/README.Fedora  /etc/init.fedora
+  src  /README.fedora
 END_TESTS
 
 for my $line (split "\n", $tests) {
@@ -28,10 +29,11 @@ for my $line (split "\n", $tests) {
         shift @atoms;
     }
 
-    my $test_name = "@atoms";
+    my $test_name = $line;
 
     push @tests, {
         name  => $test_name,
+        arch  => shift(@atoms),
         paths => \@atoms,
         fail  => $not,
     };
@@ -74,7 +76,7 @@ for my $t (@tests) {
         my @paths = @{$t->{paths}};
 
         my @g = map { +{
-            arch       => 'i386',
+            arch       => $t->{arch},
             subpackage => 'mypkg',
             code       => 'FedoraInFilename',
             diag       => "Filenames should not include \'Fedora\'",
@@ -85,7 +87,7 @@ for my $t (@tests) {
     }
 
     # invoke
-    my $temp_subdir = make_tempdir( @{$t->{paths}} );
+    my $temp_subdir = make_tempdir( $t->{arch}, @{$t->{paths}} );
     my $obj = RPM::Grill->new( $temp_subdir );
 
     bless $obj, 'RPM::Grill::Plugin::Manifest';
@@ -99,6 +101,8 @@ for my $t (@tests) {
 # BEGIN helper
 
 sub make_tempdir {
+    my $arch = shift;
+
     use feature 'state';
     state $i = 0;
 
@@ -109,16 +113,16 @@ sub make_tempdir {
 
     for my $f (@_) {
         # Make the path
-        mkpath "$temp_subdir/i386/mypkg/payload$f", 0, 02755;
+        mkpath "$temp_subdir/$arch/mypkg/payload$f", 0, 02755;
 
         # Create rpm.rpm
-        open OUT, '>', "$temp_subdir/i386/mypkg/rpm.rpm"
+        open OUT, '>', "$temp_subdir/$arch/mypkg/rpm.rpm"
             or die "open rpm.rpm: $!";
         close OUT;
 
         # Append to RPM.per_file_metadata. Note that the fields in the
         # here-document are separated by ONE TAB
-        my $per_file = "$temp_subdir/i386/mypkg/RPM.per_file_metadata";
+        my $per_file = "$temp_subdir/$arch/mypkg/RPM.per_file_metadata";
         open OUT, '>>', $per_file or die;
         print OUT <<"END_METADATA";
 0000000000000	-rwxr-xr-x	root	root	0	(none)	$f
