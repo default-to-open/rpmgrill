@@ -35,6 +35,9 @@ my $builder = Module::Build->new(
         'doc/tooltips.txt' => 'usr/share/rpmgrill/tooltips.txt',
     },
 
+    # Argh. Without this, tooltips.txt just goes into blib and stays there
+    install_path        => { 'usr/share/rpmgrill' => '/usr/share/rpmgrill' },
+
     # Tests only
     build_requires => {
         'Test::More'        => 0,
