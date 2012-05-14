@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.08
+Version:        0.09
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Mon May 14 2012 Ed Santiago <santiago@redhat.com> 0.09-1
 - bz802555 (Fedora/branding): ignore "fedora" in filenames in srpm
 
 * Tue May  8 2012 Ed Santiago <santiago@redhat.com> 0.08-1
