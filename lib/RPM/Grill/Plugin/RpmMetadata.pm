@@ -324,36 +324,38 @@ sub _check_description {
 
     $metadata->context({});
 
-    my $description = $metadata->description
-        or do {
-            $metadata->gripe({
-                code => 'NoDescription',
-                diag => 'RPM Description field is missing/empty',
-            });
-            return;
-        };
+    for my $where (qw(Summary Description)) {
+        my $s = $metadata->get(lc $where)
+            or do {
+                $metadata->gripe({
+                    code => "No$where",
+                    diag => "RPM $where field is missing/empty",
+                });
+                return;
+            };
 
-    # "Fedora" is OK but _only_ in the context of "Fedora or Red Hat"
-    # or vice-versa.
-    if ($description =~ /\bFedora\b/i) {
-        unless ($description =~ /\bRed[\s\n]Hat[\s\n]or[\s\n]Fedora\b/
-                    || $description =~ /\bFedora[\s\n]or[\s\n]Red[\s\n]Hat\b/) {
+        # "Fedora" is OK but _only_ in the context of "Fedora or Red Hat"
+        # or vice-versa.
+        if ($s =~ /\bFedora\b/i) {
+            unless ($s =~ /\bRed[\s\n]Hat[\s\n]or[\s\n]Fedora\b/
+                 || $s =~ /\bFedora[\s\n]or[\s\n]Red[\s\n]Hat\b/) {
 
-            # Provide a helpful excerpt, but no more than 40 characters
-            # to the left or to the right of 'Fedora'. For legibility.
-            my $excerpt = escapeHTML($description);
-            $excerpt =~ s{^.*\s(.{40,}Fedora)}{\[...\] $1}s;
-            $excerpt =~ s{(Fedora.{1,40})\s.*$}{$1 \[...\]}s;
-            $excerpt =~ s{\n}{<br/>}g;
+                # Provide a helpful excerpt, but no more than 40 characters
+                # to the left or to the right of 'Fedora'. For legibility.
+                my $excerpt = escapeHTML($s);
+                $excerpt =~ s{^.*\s(.{40,}Fedora)}{\[...\] $1}s;
+                $excerpt =~ s{(Fedora.{1,40})\s.*$}{$1 \[...\]}s;
+                $excerpt =~ s{\n}{<br/>}g;
 
-            $metadata->gripe({
-                code    => 'FedoraInDescription',
-                diag    => 'RPM Description mentions "Fedora"',
-                context => {
-                    path    => '[RPM metadata]',
-                    excerpt => $excerpt,
-                },
-            });
+                $metadata->gripe({
+                    code    => "FedoraIn$where",
+                    diag    => qq{RPM $where mentions \"Fedora\"},
+                    context => {
+                        path    => '[RPM metadata]',
+                        excerpt => $excerpt,
+                    },
+                });
+            }
         }
     }
 }
