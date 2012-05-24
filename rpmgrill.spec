@@ -63,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- bz802555 (Fedora/branding), cont'd: also check RPM Summary
+
 * Mon May 14 2012 Ed Santiago <santiago@redhat.com> 0.09-1
 - bz802555 (Fedora/branding): ignore "fedora" in filenames in srpm
 
