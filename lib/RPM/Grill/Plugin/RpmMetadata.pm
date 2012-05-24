@@ -508,15 +508,26 @@ This test is a good candidate for a whitelist: some sort of
 small database indicating which packages (eg errata, rpmdiff)
 we should silently excuse.
 
+=item   FedoraInSummary
+
+The RPM Summary field mentions Fedora without a corresponding
+"or Red Hat". Please review the summary string and (1) change
+Fedora to Red Hat (making other changes as necessary); or (2) change
+it to read "Fedora or Red Hat". If you think this test is being
+too strict, please file a bug against Brewtap.
+
+See L<bz802555|https://bugzilla.redhat.com/show_bug.cgi?id=802555>
+
 =item   FedoraInDescription
 
 The RPM Description field mentions Fedora without a corresponding
 "or Red Hat". Please review the description string and (1) change
 Fedora to Red Hat (making other changes as necessary); or (2) change
 it to read "Fedora or Red Hat". If you think this test is being
-too strict, please file a bug against Brewtap (FIXME: provide link).
+too strict, please file a bug against Brewtap.
 
-See bz802555.
+See L<bz802555|https://bugzilla.redhat.com/show_bug.cgi?id=802555>
+
 
 =back
 
