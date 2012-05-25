@@ -9,7 +9,7 @@ use warnings;
 use Test::More;
 use Test::Differences;
 
-use File::Slurp         qw(read_dir read_file);
+use File::Slurp         qw(read_dir read_file write_file);
 
 our @tests;
 
@@ -32,6 +32,13 @@ BEGIN {
 
         $t->{expect} = eval read_file("$test_subdir/$expect");
         die "FIXME: Error reading $test_subdir/$expect: $@"     if $@;
+
+        $t->{expect_path} = "$test_subdir/$expect";
+
+        # Useful when adding new tests: this will be true if the .expect file
+        # is nonzero size. When false (empty file), special-case code below
+        # will trigger and will fill in the file.
+        $t->{have_expect} = -s $t->{expect_path};
 
         push @tests, $t;
     }
@@ -74,6 +81,32 @@ for my $t (@tests) {
         fail "$name : $@";
     }
     else {
-        eq_or_diff $grill->{gripes}, $t->{expect}, $name;
+        if ($t->{have_expect}) {
+            # The usual case. We have something to expect (even if it's undef).
+            # Run the test.
+            eq_or_diff $grill->{gripes}, $t->{expect}, $name;
+        }
+        else {
+            # Only triggers once, when adding a new test and the .expect file
+            # is empty. In this case, we just fill the file in with our
+            # obtained results. This makes it easy to add new tests or,
+            # occasionally, to reset the expected output of a test.
+            diag "FIRST TIME: writing $t->{expect_path}";
+
+            use Time::Piece;
+            my $timestamp = localtime->datetime;
+            use Data::Dumper;
+            $Data::Dumper::Terse  = 1;  # Omit the '$VAR1 = ...' prefix
+            $Data::Dumper::Indent = 1;  # Compact but readable
+
+          SKIP: {
+                write_file(
+                    $t->{expect_path},
+                    "# Created: $timestamp\n",
+                    Dumper($grill->{gripes})
+                );
+                skip $name, 1;
+            }
+        }
     }
 }
