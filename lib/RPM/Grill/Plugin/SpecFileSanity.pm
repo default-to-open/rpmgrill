@@ -172,14 +172,16 @@ sub _check_for_other_specfile_problems {
 
         # Look for macros in comments
         # FIXME: also look in %changelog, in %if, ...
-        if ($s =~ /^\s*#.*[^%]%(patch|if|else|endif|define)/o) {
+        if ($s =~ /^(\s*#.*[^%])%(patch|if|else|endif|define)/o) {
+            my ($lhs, $match, $rhs) = ($1, $2, $');
             $self->gripe(
                 {   code    => "MacroSurprise",
-                    diag    => "RPM macros in comments; possible unexpected behavior",
+                    diag    => "RPM <tt>%$match</tt> macro in comments; this may cause unexpected behavior",
                     context => {
                         path    => $specfile_basename,
                         lineno  => $lineno,
-                        excerpt => escapeHTML($s),
+                        excerpt => escapeHTML($lhs) . "<b>%$match</b>"
+                                 . escapeHTML($rhs),
                     },
                 });
         }

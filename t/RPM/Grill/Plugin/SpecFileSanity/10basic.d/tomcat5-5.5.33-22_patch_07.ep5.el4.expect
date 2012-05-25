@@ -1,59 +1,59 @@
-# Created: 2012-05-25T11:34:02
+# Created: 2012-05-25T12:31:31
 {
   'SpecFileSanity' => [
     {
       'context' => {
         'excerpt' => [
-          '# %patch36'
+          '# <b>%patch</b>36'
         ],
         'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
         'lineno' => '618'
       },
-      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'diag' => 'RPM <tt>%patch</tt> macro in comments; this may cause unexpected behavior',
       'code' => 'MacroSurprise'
     },
     {
       'context' => {
         'excerpt' => [
-          '# %patch38'
+          '# <b>%patch</b>38'
         ],
         'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
         'lineno' => '620'
       },
-      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'diag' => 'RPM <tt>%patch</tt> macro in comments; this may cause unexpected behavior',
       'code' => 'MacroSurprise'
     },
     {
       'context' => {
         'excerpt' => [
-          '# %patch39'
+          '# <b>%patch</b>39'
         ],
         'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
         'lineno' => '621'
       },
-      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'diag' => 'RPM <tt>%patch</tt> macro in comments; this may cause unexpected behavior',
       'code' => 'MacroSurprise'
     },
     {
       'context' => {
         'excerpt' => [
-          '# %patch42'
+          '# <b>%patch</b>42'
         ],
         'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
         'lineno' => '624'
       },
-      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'diag' => 'RPM <tt>%patch</tt> macro in comments; this may cause unexpected behavior',
       'code' => 'MacroSurprise'
     },
     {
       'context' => {
         'excerpt' => [
-          '# %patch46'
+          '# <b>%patch</b>46'
         ],
         'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
         'lineno' => '628'
       },
-      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'diag' => 'RPM <tt>%patch</tt> macro in comments; this may cause unexpected behavior',
       'code' => 'MacroSurprise'
     }
   ]
