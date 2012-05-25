@@ -369,7 +369,7 @@ Blah blah blah blah Fedora
 -|    code       => 'FedoraInDescription',
 -|    diag       => 'RPM Description mentions "Fedora"',
 -|    context    => { path => '[RPM metadata]',
--|                    excerpt => ['Blah blah blah blah Fedora<br/>'] },
+-|                    excerpt => ['Blah blah blah blah <b>Fedora</b><br/>'] },
 -|  }
 
 ---------Fedora-no-RedHat-abbreviated----------------------------------------
@@ -395,7 +395,7 @@ something shorter.
 -|    code       => 'FedoraInDescription',
 -|    diag       => 'RPM Description mentions "Fedora"',
 -|    context    => { path => '[RPM metadata]',
--|                    excerpt => ['[...] see if the abbreviation code that shows Fedora in the excerpt<br/>will trigger and shorten [...]'] },
+-|                    excerpt => ['[...] see if the abbreviation code that shows <b>Fedora</b> in the excerpt<br/>will trigger and shorten [...]'] },
 -|  }
 
 ---------Fedora-with-RedHat-1----------------------------------------------
@@ -449,5 +449,67 @@ Blah blah blah blah Fedora or Red Hat
 -|    code       => 'FedoraInSummary',
 -|    diag       => 'RPM Summary mentions "Fedora"',
 -|    context    => { path => '[RPM metadata]',
--|                    excerpt => ['Fedora Git protocol [...]'] },
+-|                    excerpt => ['<b>Fedora</b> Git protocol dæmon'] },
 -|  }
+
+------------Multiple-Fedoras----------------------------------------------
+
+Name        : sgml-common
+Version     : 0.6.3
+Release     : 32.el7
+Architecture: noarch
+Install Date: (not installed)
+Group       : Applications/Text
+Size        : 100923
+License     : GPL+
+Signature   : (none)
+Source RPM  : (none)
+Build Date  : Fri 25 May 2012 02:44:38 AM MDT
+Build Host  : ppc-005.build.bos.redhat.com
+Relocations : (not relocatable)
+Packager    : Red Hat, Inc. <http://bugzilla.redhat.com/bugzilla>
+Vendor      : Red Hat, Inc.
+URL         : http://www.fedorahosted.org/2003/entities/
+Summary     : Common Fedora SGML catalog and DTD files
+Description :
+The sgml-common Fedora package contains a collection of entities and DTDs
+that are useful for processing SGML, but that don't need to be
+included in multiple packages in Fedora or Red Hat Enterprise Linux.
+Sgml-common also includes an up-to-date Open Catalog file for Fedora-like system.
+
+-|    {
+-|      arch => 'src',
+-|      code => 'FedoraInSummary',
+-|      context => {
+-|        excerpt => [
+-|          'Common <b>Fedora</b> SGML catalog and DTD files'
+-|        ],
+-|        path => '[RPM metadata]'
+-|      },
+-|      diag => 'RPM Summary mentions "Fedora"',
+-|      subpackage => 'sgml-common'
+-|    },
+-|    {
+-|      arch => 'src',
+-|      code => 'FedoraInDescription',
+-|      context => {
+-|        excerpt => [
+-|          'The sgml-common <b>Fedora</b> package contains a collection of  [...]'
+-|        ],
+-|        path => '[RPM metadata]'
+-|      },
+-|      diag => 'RPM Description mentions "Fedora"',
+-|      subpackage => 'sgml-common'
+-|    },
+-|    {
+-|      arch => 'src',
+-|      code => 'FedoraInDescription',
+-|      context => {
+-|        excerpt => [
+-|          '[...] includes an up-to-date Open Catalog file for <b>Fedora</b>-like system.<br/>'
+-|        ],
+-|        path => '[RPM metadata]'
+-|      },
+-|      diag => 'RPM Description mentions "Fedora"',
+-|      subpackage => 'sgml-common'
+-|    }

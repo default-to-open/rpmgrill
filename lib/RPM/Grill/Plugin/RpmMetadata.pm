@@ -336,15 +336,19 @@ sub _check_description {
 
         # "Fedora" is OK but _only_ in the context of "Fedora or Red Hat"
         # or vice-versa.
-        if ($s =~ /\bFedora\b/i) {
-            unless ($s =~ /\bRed[\s\n]Hat[\s\n]or[\s\n]Fedora\b/
-                 || $s =~ /\bFedora[\s\n]or[\s\n]Red[\s\n]Hat\b/) {
+        while ($s =~ /(\bFedora\b)/igop) {
+            my ($lhs, $match, $rhs) = (${^PREMATCH}, $1, ${^POSTMATCH});
+
+            unless ($lhs =~ /\bRed[\s\n]Hat[\s\n]+or[\s\n]+$/
+                 || $rhs =~ /^[\s\n]+or[\s\n]+Red[\s\n]Hat\b/) {
 
                 # Provide a helpful excerpt, but no more than 40 characters
                 # to the left or to the right of 'Fedora'. For legibility.
-                my $excerpt = escapeHTML($s);
-                $excerpt =~ s{^.*\s(.{40,}Fedora)}{\[...\] $1}s;
-                $excerpt =~ s{(Fedora.{1,40})\s.*$}{$1 \[...\]}s;
+                $lhs =~ s{^.*\b(.{40,})$}{\[...\] $1}s if length($lhs) > 40;
+                $rhs =~ s{(.{1,40})\b.*$}{$1 \[...\]}s if length($rhs) > 40;
+                my $excerpt = escapeHTML($lhs)
+                            . "<b>" . $match . "</b>"
+                            . escapeHTML($rhs);
                 $excerpt =~ s{\n}{<br/>}g;
 
                 $metadata->gripe({
