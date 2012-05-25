@@ -172,7 +172,7 @@ sub _check_for_other_specfile_problems {
 
         # Look for macros in comments
         # FIXME: also look in %changelog, in %if, ...
-        if ($s =~ /^\s*#.*[^%]%[^%]/o) {
+        if ($s =~ /^\s*#.*[^%]%(patch|if|else|endif|define)/o) {
             $self->gripe(
                 {   code    => "MacroSurprise",
                     diag    => "RPM macros in comments; possible unexpected behavior",
@@ -414,9 +414,13 @@ This may affect someone who downloads your SRPM for viewing.
 Did you know that RPM expands macros even inside comments?
 
 Sometimes this is OK: %{name}, %{version}. But when %{foo} is
-a multi-line macro, this can cause unpleasant surprises.
+a multi-line macro, or %if, or %patch, this can cause unpleasant
+surprises. As of May 2012 this test will only trigger on a
+certain well-defined list of hazardous macros: patch, if, else,
+endif, define. (It used to trigger on %anything, but that gave
+way too much noise). This list may need to be refined over time.
 
-B<Recommendation>: Double-percent them all: %%{name}, etc.
+B<Recommendation>: Double-percent all macros in comments: %%{name}
 
 =item   ChangelogMissing
 
