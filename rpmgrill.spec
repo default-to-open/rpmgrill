@@ -64,6 +64,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 - bz802555 (Fedora/branding), cont'd: also check RPM Summary
+- bz813869 (MacroSurprise verbosity): instead of warning about all macros,
+define an explicit blacklist of potentially-troublesome ones: patch, if, ...
 
 * Mon May 14 2012 Ed Santiago <santiago@redhat.com> 0.09-1
 - bz802555 (Fedora/branding): ignore "fedora" in filenames in srpm
