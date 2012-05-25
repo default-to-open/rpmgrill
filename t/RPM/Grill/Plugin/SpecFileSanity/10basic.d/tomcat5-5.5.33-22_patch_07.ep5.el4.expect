@@ -1,0 +1,60 @@
+# Created: 2012-05-25T11:34:02
+{
+  'SpecFileSanity' => [
+    {
+      'context' => {
+        'excerpt' => [
+          '# %patch36'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '618'
+      },
+      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'code' => 'MacroSurprise'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '# %patch38'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '620'
+      },
+      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'code' => 'MacroSurprise'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '# %patch39'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '621'
+      },
+      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'code' => 'MacroSurprise'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '# %patch42'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '624'
+      },
+      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'code' => 'MacroSurprise'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '# %patch46'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '628'
+      },
+      'diag' => 'RPM macros in comments; possible unexpected behavior',
+      'code' => 'MacroSurprise'
+    }
+  ]
+}
