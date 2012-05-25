@@ -65,6 +65,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 - bz802555 (Fedora/branding), cont'd: also check RPM Summary
 - bz802555, cont'd: check for multiple occurrences of Fedora
+- bz802554, cont'd: include /lib in our gripes
 - bz813869 (MacroSurprise verbosity): instead of warning about all macros,
 define an explicit blacklist of potentially-troublesome ones: patch, if, ...
 

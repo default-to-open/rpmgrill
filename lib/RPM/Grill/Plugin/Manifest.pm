@@ -112,7 +112,7 @@ sub analyze {
                     $non_systemd{$f->arch}{$f->subpackage}{$path} = 1;
                 }
 
-                if ($path =~ m{^(/bin|/sbin|/lib64)/}) {
+                if ($path =~ m{^(/bin|/sbin|/lib|/lib64)/}) {
                     my $where = $1;
                     $self->gripe({
                         code       => 'MoveToUsr',

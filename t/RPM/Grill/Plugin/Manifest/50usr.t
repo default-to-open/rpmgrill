@@ -22,6 +22,11 @@ my $tests = <<'END_TESTS';
   el5 /sbin/foo
   el6 /sbin/foo
 ! el7 /sbin/foo
+
+! el7 /lib/libfoo.so.1
+! el7 /lib/foo/libbar.so.1
+
+! el7 /lib64/libfoo.so.1
 END_TESTS
 
 for my $line (split "\n", $tests) {
