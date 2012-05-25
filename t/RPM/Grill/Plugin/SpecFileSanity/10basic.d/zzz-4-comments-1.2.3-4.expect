@@ -1,15 +1,2 @@
-{
-  SpecFileSanity => [
-    {
-      code => 'MacroSurprise',
-      context => {
-        excerpt => [
-          '# This may not do what you %{think} it does',
-        ],
-        lineno => '9',
-        path => 'zzz-4-comments-1.2.3-4.spec'
-      },
-      diag => 'RPM macros in comments; possible unexpected behavior',
-    }
-  ]
-}
+# Created: 2012-05-25T11:34:02
+undef
