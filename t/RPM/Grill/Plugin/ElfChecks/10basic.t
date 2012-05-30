@@ -51,6 +51,12 @@ my $tests = <<'END_TESTS';
 /usr/lib/subdir/libfoo.so                                        $ORIGIN             -
 /usr/lib/subdir/libfoo.so                                        $ORIGIN/..          -
 /usr/lib/subdir/libfoo.so                                        $ORIGIN/../otherdir -
+
+# bz797428 (SCL awareness)
+/opt/rh/devtoolset-1.0/root/usr/bin/ar                           /opt/rh/devtoolset-1.0/root/usr/lib -
+
+# placeholder for some future day
+/opt/rh/devtoolset-1.0-addon/root/usr/bin/ar                     /opt/rh/devtoolset-1.0/root/usr/lib /opt is not a known trusted path
 END_TESTS
 
 for my $line (split "\n", $tests) {

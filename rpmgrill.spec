@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- bz797428 (SCL awareness): simpleminded first stab at grokking /opt/rh
 - bz802555 (Fedora/branding), cont'd: also check RPM Summary
 - bz802555, cont'd: check for multiple occurrences of Fedora
 - bz802554, cont'd: include /lib in our gripes

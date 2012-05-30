@@ -223,6 +223,17 @@ sub _rpath_element_is_suspect {
         }
     }
 
+    # bz797428 (attempt #1): SCL awareness.
+    #
+    # If a binary lives in /opt/rh/foo/root/bin, allow /opt/rh/foo/root/ as
+    # the root of RPATH. This is a simpleminded first stab, and will not
+    # handle cases such as /opt/rh/foo-extra linking against /opt/rh/foo-base.
+    # But we'll deal with that as the need arises.
+    my $SCL_Prefix = '';
+    if ($file_path =~ m{^(/opt/rh/.*?/root)/}) {
+        $SCL_Prefix = $1;
+    }
+
     # check for crap like '/usr/lib/foo/../../../tmp'. I can't imagine
     # any realistic scenario in which this could happen ... but it
     # doesn't cost to check.
@@ -232,7 +243,7 @@ sub _rpath_element_is_suspect {
 
     # Check if OK path element
     my $re = join('|', @Acceptable_Paths);
-    return if $rpath =~ m{^($re)(/|$)};
+    return if $rpath =~ m{^$SCL_Prefix($re)(/|$)};
 
     # Not in desired path. Try to generate a helpful msg
     my @ok;
