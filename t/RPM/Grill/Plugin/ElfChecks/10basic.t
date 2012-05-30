@@ -56,7 +56,7 @@ my $tests = <<'END_TESTS';
 /opt/rh/devtoolset-1.0/root/usr/bin/ar                           /opt/rh/devtoolset-1.0/root/usr/lib -
 
 # placeholder for some future day
-/opt/rh/devtoolset-1.0-addon/root/usr/bin/ar                     /opt/rh/devtoolset-1.0/root/usr/lib /opt is not a known trusted path
+/opt/rh/devtoolset-1.0-addon/root/usr/bin/ar                     /opt/rh/devtoolset-1.0/root/usr/lib RPATH is in a different SCL package (devtoolset-1.0); I can't deal with this yet.
 END_TESTS
 
 for my $line (split "\n", $tests) {

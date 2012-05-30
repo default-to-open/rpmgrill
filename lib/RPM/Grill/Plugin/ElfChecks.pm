@@ -246,6 +246,13 @@ sub _rpath_element_is_suspect {
     return if $rpath =~ m{^$SCL_Prefix($re)(/|$)};
 
     # Not in desired path. Try to generate a helpful msg
+
+    # Special case for bz797428 (SCL)
+    if ($rpath =~ m{^/opt/rh/([^/]+)/root/}) {
+        return "RPATH is in a different SCL package ($1); I can't deal with this yet.";
+    }
+
+    # Not SCL.
     my @ok;
     for my $rpath_element (split '/', $rpath) {
         push @ok, $rpath_element;
