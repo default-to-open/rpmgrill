@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.09
+Version:        0.10
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Wed May 30 2012 Ed Santiago <santiago@redhat.com> 0.10-1
 - bz797428 (SCL awareness): simpleminded first stab at grokking /opt/rh
 - bz802555 (Fedora/branding), cont'd: also check RPM Summary
 - bz802555, cont'd: check for multiple occurrences of Fedora
