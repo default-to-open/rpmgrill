@@ -1,3 +1,4 @@
+bin/make-tooltips
 bin/rpmgrill
 Build.PL
 Changes
@@ -93,6 +94,8 @@ t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/qpid-cpp-mrg-0.10-5.el5.expect
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/qpid-cpp-mrg-0.10-5.el5.spec
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/rpmdiff-1.4.50-1.expect
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/rpmdiff-1.4.50-1.spec
+t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/tomcat5-5.5.33-22_patch_07.ep5.el4.expect
+t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/tomcat5-5.5.33-22_patch_07.ep5.el4.spec
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/zzz-1-badversion-1.2.3-4.expect
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/zzz-1-badversion-1.2.3-4.spec
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/zzz-2-badrelease-1.2.3-4.expect
@@ -109,6 +112,8 @@ t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/zzz-7-pkgname-in-changelog-1.2.3-4.e
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/zzz-7-pkgname-in-changelog-1.2.3-4.spec
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/zzz-8-cruft-in-changelog-1.2-3.expect
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/zzz-8-cruft-in-changelog-1.2-3.spec
+t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/zzz-9-macrosurprise-1.2.3-4.expect
+t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/zzz-9-macrosurprise-1.2.3-4.spec
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.t
 t/RPM/Grill/Plugin/VirusCheck/01basic.t
 t/RPM/Grill/RPM/10basic.t
