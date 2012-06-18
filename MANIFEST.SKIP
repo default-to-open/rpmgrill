@@ -19,3 +19,4 @@
 ^rpmgrill\.spec$
 ^rpmgrill-.*\.rpm$
 ^sql/
+^scl/
