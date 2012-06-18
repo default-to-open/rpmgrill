@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.10
+Version:        0.11
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Mon Jun 18 2012 Ed Santiago <santiago@redhat.com> 0.11-1
 - new check for C++98/C++11 ABI incompatibility
 
 * Wed May 30 2012 Ed Santiago <santiago@redhat.com> 0.10-1
