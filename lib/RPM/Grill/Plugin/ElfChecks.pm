@@ -86,6 +86,9 @@ sub analyze {
             # FIXME
             $self->_check_relro( $f );
 
+            # 2012-06-18 new check for C++98/C++11 ABI incompatibility
+            $self->_check_cplusplus_abi_201206( $f );
+
             # bz809907: complain if compiled with gstabs
             if ($f->elf_has_stabs) {
                 $self->gripe({
@@ -379,6 +382,53 @@ sub _check_relro {
 
 # END   relro code
 ###############################################################################
+# BEGIN libstdc++ c++98 & c++11 ABI incompatibility (June 2012)
+
+#################################
+#  _check_cplusplus_abi_201206  # Check for C++98/11 ABI incompatibility
+#################################
+#
+# 2012-06-18 Too complicated to explain here. See:
+#
+#  http://post-office.corp.redhat.com/archives/tools/2012-June/msg00012.html
+#
+sub _check_cplusplus_abi_201206 {
+    my $self = shift;
+    my $f    = shift;
+
+    # Only interested in .debug files
+    # FIXME: is this true? Do/will we ever ship debuginfo in a non-.debug file?
+    return unless $f->path =~ /\.debug$/;
+
+    my $found_suspect_dw_at_producer = 0;
+
+    # The regex below is from Jakub Jelinek; see:
+    #  http://post-office.corp.redhat.com/archives/tools/2012-June/msg00023.html
+    my @cmd = ('eu-readelf', '--debug-dump=info', $f->extracted_path);
+    open my $readelf_fh, '-|', @cmd
+        or die "$ME: Could not fork: $!\n";
+    while (my $line = <$readelf_fh>) {
+        if ($line =~ />\s+DW_AT_producer\s*:.*-std=(c|gnu)\+\+(0x|11)/) {
+            ++$found_suspect_dw_at_producer;
+        }
+    }
+    close $readelf_fh;
+    warn "$ME: WARNING: command exited with nonzero status: @cmd\n" if $?;
+
+    # FIXME: improve the diag text
+    if ($found_suspect_dw_at_producer) {
+        $self->gripe({
+            arch       => $f->arch,
+            subpackage => $f->subpackage,
+            code       => 'BadC++ABI',
+            diag       => "C++98/C++11 ABI incompatibility",
+            context    => { path => $f->path },
+        });
+    }
+}
+
+# END   libstdc++ c++98 & c++11 ABI incompatibility (June 2012)
+###############################################################################
 
 1;
 
@@ -500,6 +550,16 @@ false negatives (we fail to identify "bar" as a daemon, and don't check it for R
 
 Executable has been compiled with C<-gstabs>. This can cause strange
 problems. See L<bz809907|https://bugzilla.redhat.com/show_bug.cgi?id=809907>.
+
+=item   BadC++ABI
+
+An incompatibility has appeared between c++98 and c++11 for packages built
+with std::list. If this test triggers, it means your package is affected.
+
+See L<http://post-office.corp.redhat.com/archives/tools/2012-June/msg00012.html>
+for initial analysis and
+L<http://post-office.corp.redhat.com/archives/tools/2012-June/msg00023.html>
+for a technical overview of how rpmgrill detects (or doesn't) this problem.
 
 =back
 

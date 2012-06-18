@@ -63,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- new check for C++98/C++11 ABI incompatibility
+
 * Wed May 30 2012 Ed Santiago <santiago@redhat.com> 0.10-1
 - bz797428 (SCL awareness): simpleminded first stab at grokking /opt/rh
 - bz802555 (Fedora/branding), cont'd: also check RPM Summary
