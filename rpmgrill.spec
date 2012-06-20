@@ -63,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- clamav check: better diagnostics
+
 * Mon Jun 18 2012 Ed Santiago <santiago@redhat.com> 0.11-1
 - new check for C++98/C++11 ABI incompatibility
 
