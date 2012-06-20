@@ -58,8 +58,6 @@ while (my $line = <DATA>) {
     }
 }
 
-plan tests => 2 + @tests;
-
 # Tests 1-2 : load our modules.  If any of these fail, abort.
 use_ok 'RPM::Grill'                       or exit;
 use_ok 'RPM::Grill::Plugin::VirusCheck'   or exit;
@@ -107,6 +105,26 @@ for my $t (@tests) {
             for my $g (@{$expected_gripes->{VirusCheck}}) {
                 $g->{arch}       = 'noarch';
                 $g->{subpackage} = 'mypkg';
+            }
+        }
+
+        # Check for clamscan --version. Remove it from the results (because
+        # we can't possibly hardcode a match for it in our expectations)
+        # but at least perform some sanity checks on it.
+        if ($obj->{gripes}) {
+            if (my $gripes = $obj->{gripes}{VirusCheck}) {
+                for my $g (@$gripes) {
+                    if ($g->{diag} =~ s/\s+\(\ClamAV\s+(.*)\)$//) {
+                        my $v = $1;
+
+                        # e.g. '0.97.3/15064/Wed Jun 20 13:03:45 2012'
+                        $v =~ m|^\d+(\.\d+)+/\d+/[\w\s:]+\s\d+$|
+                            or fail "Suspicious ClamAV version string '$v'";
+                    }
+                    else {
+                        fail "Diag message '$g->{diag}' does not include ClamAV version string";
+                    }
+                }
             }
         }
 

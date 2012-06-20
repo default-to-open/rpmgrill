@@ -16,7 +16,8 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
-use IPC::Run qw(run timeout);
+use CGI                 qw(escapeHTML);
+use IPC::Run            qw(run timeout);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -58,10 +59,10 @@ sub analyze {
     run \@cmd, \undef, \$stdout, \$stderr, timeout(3600);    # 1 hour!
     my $exit_status = $?;
 
+    # FIXME: preserve stdout?
     # FIXME: anything on stderr might mean an error running clamscan.
     # FIXME: develop a way to report this sort of thing to a maintainer
     if ($stderr) {
-
         # gripe
         warn "FIXME: $stderr\n" unless $stderr =~ /LibClamAV Warning:/;
     }
@@ -104,6 +105,8 @@ sub analyze {
     #
     # Any infected files?  Report them.
     #
+    my $clamscan_version_string;
+
 INFECTED_FILE:
     for my $f (@infected_files) {
 
@@ -139,6 +142,22 @@ INFECTED_FILE:
         else {
             $gripe{diag} = "ClamAV <tt>$msg</tt> ????";
         }
+
+        # 'clamscan --version' gives us something like:
+        #     ClamAV 0.97.3/15062/Wed Jun 20 09:31:12 2012
+        # (the date string is probably the database update version).
+        # Include this in our diagnostic; it may come in handy if this
+        # virus alert is hard to reproduce.
+        $clamscan_version_string //= do {
+            my $tmp = qx{clamscan --version};
+            if ($?) {
+                warn "$ME: WARNING: 'clamscan --version' exited with status $?";
+                $tmp = 'clamscan --version unavailable';
+            }
+            chomp $tmp;
+            escapeHTML($tmp);
+        };
+        $gripe{diag} .= " ($clamscan_version_string)";
 
         $gripe{context} = { path => $path, };
 
