@@ -20,6 +20,8 @@ my $delimiter;
 while (my $line = <DATA>) {
     chomp $line;
 
+    next if $line =~ /^\s*#/;           # Skip comment lines
+
     # Line of dashes: new test
     if ($line =~ /^-{10,}$/) {
         push @tests, {
@@ -190,4 +192,28 @@ END
 -|  { code    => 'ClamAV',
 -|    diag    => 'ClamAV <b>Eicar-Test-Signature</b> subtest triggered',
 -|    context => { path => '/usr/bin/myfile' },
+-|  } ] }
+
+-------------------------------------------------------------------------------
+>> name = eicar-multiple
+
+/usr/bin/myfile1 = <<END
+X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+END
+
+/usr/bin/myfile2 = <<END
+X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+END
+
+# FIXME FIXME FIXME: how does clamav do ordering? file2 comes before file1,
+# but can we rely on that?
+
+-| { VirusCheck => [
+-|  { code    => 'ClamAV',
+-|    diag    => 'ClamAV <b>Eicar-Test-Signature</b> subtest triggered',
+-|    context => { path => '/usr/bin/myfile2' },
+-|  },
+-|  { code    => 'ClamAV',
+-|    diag    => 'ClamAV <b>Eicar-Test-Signature</b> subtest triggered',
+-|    context => { path => '/usr/bin/myfile1' },
 -|  } ] }
