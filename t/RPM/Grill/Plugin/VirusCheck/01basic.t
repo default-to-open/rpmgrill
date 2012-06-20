@@ -66,7 +66,7 @@ use_ok 'RPM::Grill::Plugin::VirusCheck'   or exit;
 
 # Create a temporary directory based on our name.
 (my $ME = $0) =~ s|^.*/||;
-my $tempdir = tempdir( "$ME.XXXXXX", CLEANUP => 1 );
+my $tempdir = tempdir( "$ME.XXXXXX", CLEANUP => !$ENV{DEBUG} );
 
 for my $t (@tests) {
     # Create a hierarchy
@@ -156,7 +156,7 @@ END
 
 -| { VirusCheck => [
 -|  { code    => 'ClamAV',
--|    diag    => 'ClamAV-Test-File',
+-|    diag    => 'ClamAV <b>ClamAV-Test-File</b> subtest triggered',
 -|    context => { path => '/usr/bin/myfile' },
 -|  } ] }
 
@@ -170,6 +170,6 @@ END
 
 -| { VirusCheck => [
 -|  { code    => 'ClamAV',
--|    diag    => 'Eicar-Test-Signature',
+-|    diag    => 'ClamAV <b>Eicar-Test-Signature</b> subtest triggered',
 -|    context => { path => '/usr/bin/myfile' },
 -|  } ] }

@@ -134,10 +134,10 @@ INFECTED_FILE:
         }
 
         if ( $msg =~ s/\s+FOUND\s*$// ) {
-            $gripe{diag} = $msg;
+            $gripe{diag} = "ClamAV <b>$msg</b> subtest triggered";
         }
         else {
-            $gripe{diag} = "$msg ????";
+            $gripe{diag} = "ClamAV <tt>$msg</tt> ????";
         }
 
         $gripe{context} = { path => $path, };
