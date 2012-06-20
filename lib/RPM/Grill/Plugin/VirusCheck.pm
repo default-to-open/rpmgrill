@@ -59,12 +59,19 @@ sub analyze {
     run \@cmd, \undef, \$stdout, \$stderr, timeout(3600);    # 1 hour!
     my $exit_status = $?;
 
-    # FIXME: preserve stdout?
     # FIXME: anything on stderr might mean an error running clamscan.
     # FIXME: develop a way to report this sort of thing to a maintainer
     if ($stderr) {
         # gripe
         warn "FIXME: $stderr\n" unless $stderr =~ /LibClamAV Warning:/;
+    }
+
+    # Preserve stdout; this can be helpful when debugging
+    my $stdout_file = "$d/clamscan-results.txt";
+    unlink $stdout_file;
+    if (open OUT, '>', $stdout_file) {
+        print OUT $stdout;
+        close STDOUT;
     }
 
     # A clamscan positive result looks like:
