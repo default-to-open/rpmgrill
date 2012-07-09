@@ -64,6 +64,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 - clamav check: better diagnostics
+- BadC++ABI: rename to BadCppABI
 
 * Mon Jun 18 2012 Ed Santiago <santiago@redhat.com> 0.11-1
 - new check for C++98/C++11 ABI incompatibility

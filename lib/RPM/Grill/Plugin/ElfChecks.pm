@@ -420,7 +420,7 @@ sub _check_cplusplus_abi_201206 {
         $self->gripe({
             arch       => $f->arch,
             subpackage => $f->subpackage,
-            code       => 'BadC++ABI',
+            code       => 'BadCppABI',
             diag       => "C++98/C++11 ABI incompatibility",
             context    => { path => $f->path },
         });
@@ -551,7 +551,7 @@ false negatives (we fail to identify "bar" as a daemon, and don't check it for R
 Executable has been compiled with C<-gstabs>. This can cause strange
 problems. See L<bz809907|https://bugzilla.redhat.com/show_bug.cgi?id=809907>.
 
-=item   BadC++ABI
+=item   BadCppABI
 
 An incompatibility has appeared between c++98 and c++11 for packages built
 with std::list. If this test triggers, it means your package is affected.
