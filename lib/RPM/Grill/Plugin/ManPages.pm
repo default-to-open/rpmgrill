@@ -32,6 +32,13 @@ sub doc {
 FIXME FIXME FIXME
 END_DOC
 
+# List of "important" directories. Used in _check_manpage_presence() to
+# determine whether an executable needs a man page or not.
+# FIXME: should this list be RHEL-dependent?
+# FIXME: what about new RHEL7 init-script style?
+our @Important_Bin_Directories = qw(/bin /sbin /usr/sbin /etc/init.d);
+our $Important_Bin_Directories = join('|', @Important_Bin_Directories);
+
 # END   user-configurable section
 ###############################################################################
 
@@ -48,11 +55,6 @@ END_DOC
 sub analyze {
     my $self = shift;
 
-    # FIXME: use what you need; delete what you don't
-
-    #
-    # Loop over each arch and subpackage
-    #
     for my $rpm ($self->rpms) {
         for my $f ($rpm->files) {
             _check_manpage_correctness($f);
@@ -62,14 +64,22 @@ sub analyze {
 }
 
 
+################################
+#  _check_manpage_correctness  #  Look for man pages; run some checks on them
+################################
 sub _check_manpage_correctness {
-    my $f = shift;
+    my $f = shift;                              # in: RPM::Grill::RPM::Files obj
 
-    # FIXME: return if ! /usr/share/man
+    # We get invoked for all files, but we're only interested in:
+    #   * regular files (not symlinks or directories) that are
+    #   * ...under /usr/share/man
+    # ...that is, man page files.
+    return unless $f->is_reg;
     return unless $f->path =~ m|^/usr/share/man/|;
 
-    # FIXME: return if ! S_ISREG
-    return unless $f->is_reg;
+    # It's a man page. Check it.
+
+
 
     # FIXME: check extension? .[num].gz/bz2/xz ? '*.[0-9n]*.gz'
 
@@ -77,27 +87,59 @@ sub _check_manpage_correctness {
 }
 
 
+#############################
+#  _check_manpage_presence  #  "Important" executables must have a man page
+#############################
 sub _check_manpage_presence {
-    my $bin = shift;
+    my $bin = shift;                            # in: RPM::Grill::RPM::Files obj
 
-    # FIXME: return if ! S_ISREG
-    # FIXME: return if ! S_IXUSR (not executable by owner)
-    # FIXME: return if ! important_directory (/bin, /sbin, /usr/sbin, /etc/init.d, FIXME: what about new init style?)
+    # We get invoked for all files, but we're only interested in:
+    #   * regular files (i.e. not symlinks or directories) that are
+    #   * ...executable and
+    #   * ...in an important directory
     return unless $bin->is_reg;
     return unless $bin->numeric_mode & 0x100;
-    return unless $bin->path =~ m{^(/bin|/sbin|/usr/sbin|/etc/init\.d)/};
+    return unless $bin->path =~ m{^($Important_Bin_Directories)/};
 
-    # If we get here, it's a bin
+    # Got here. File is an executable in an important directory. Let's
+    # make sure it has a corresponding man page.
+    return if _rpm_includes_man_page( $bin->rpm, $bin );
 
+    # No man page in the binary's own RPM. Maybe it's in another RPM?
+    # FIXME FIXME FIXME: only check *subpackages of the same arch!*
+    for my $rpm ($bin->grill->rpms) {
+        for my $f ($rpm->files) {
+            # FIXME: skip self-rpm
+            # FIXME: skip specfile
+            return if _rpm_includes_man_page( $rpm, $bin );
+        }
+    }
 
-    # FIXME: return if has_manpage()
-    #          FIXME: need to check all other arches
+    # No man page anywhere.
+    $bin->gripe({
+        code       => 'ManPageMissing',
+        diag       => "No man page for " . $bin->path,
+        arch       => $bin->arch,
+        subpackage => $bin->subpackage,
+    });
 
-    # FIXME: has_manpage() checks all subpackages in this arch
-
-    for my $
+    return;
 }
 
+sub _rpm_includes_man_page {
+    my $rpm = shift;
+    my $bin = shift;
+
+    my $basename = $bin->basename;
+
+    for my $f ($rpm->files) {
+        if ($f->path =~ m{^/usr/share/man/man.*/$basename\.}) {
+            return 1;
+        }
+    }
+
+    return;
+}
 
 1;
 
