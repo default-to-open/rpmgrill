@@ -25,18 +25,44 @@ use File::Path                  qw(mkpath);
 # RCS id, accessible to our caller via "$<this_package>::VERSION"
 (our $VERSION = '$Revision: 0.0 $ ') =~ tr/[0-9].//cd;
 
-#########
-#  new  #  Constructor.
-#########
+####################
+#  make_fake_tree  #  Convert a string into an unpacked set of directories
+####################
+#
+# Given a directory and a string description of some files, returns
+# an RPM::Grill object corresponding to an unpacked set of directories.
+#
+# Inputs:
+#
+#    $dir    - is a path to a temporary directory. It should be empty.
+#    $layout - is a multiline string describing the layout of files.
+#
+# $layout needs to be described in detail. Here's an example:
+#
+#     >> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
+#     >> -rw-r--r--  root root /x86_64/mypkg-docs/usr/share/man/man1/foo.1
+#     blah blah blah
+#     blah blah blah line 2
+#
+# (please ignore leading whitespace). This describes two files, the
+# first of which is empty and the second has two lines.
+#
+# Leading '>> ' (the space is important) denotes a new file. The fields
+# are, in order: mode, owner, group, path. Note that path includes arch
+# and subpackage name but MUST NOT include the "payload" string which
+# is typically part of an extracted file. We add that ourself.
+#
+# FIXME: should we also interpret the $expected_gripes string?
+#
 sub make_fake_tree {
-    my $dir = shift;                    # in: directory in which to unpack
-    my $foo = shift;                    # in: string
+    my $dir    = shift;                 # in: directory in which to unpack
+    my $layout = shift;                 # in: string describing file layout
 
     # FIXME: make sure dir exists and is empty
 
     my $fh;                     # FIXME: filehandle to latest file
 
-    for my $line (split "\n", $foo) {
+    for my $line (split "\n", $layout) {
         if ($line =~ m{^>>\s+(-\S+)\s+(\w+)\s+(\w+)\s+/?([^/]+)/([^/]+)/(.*)/([^/]+)$}) {
             my ($mode, $user, $group, $arch, $subpackage, $f_dir, $f_base)
                 = ($1, $2, $3, $4, $5, $6, $7);
