@@ -67,9 +67,52 @@ for my $t (@tests) {
 
 __DATA__
 
-------------sdfsdfsdf------------
+------------binary-needs-manpage------------
 
 >> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
+
+...expect:
+
+{
+  ManPages => [
+    {
+      arch => 'i386',
+      code => 'ManPageMissing',
+      context => {
+        path => '/usr/sbin/foo'
+      },
+      diag => 'No man page for /usr/sbin/foo',
+      subpackage => 'mypkg'
+    }
+  ]
+}
+
+
+-------------no-manpage-needed---------------------
+
+>> -rwxr-xr-x  root root /i386/mypkg/usr/bin/foo
+
+...expect:
+
+------------manpage-in-same-package----------------
+
+>> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
+>> -rwxr-xr-x  root root /i386/mypkg/usr/share/man/man1/foo.1
+
+...expect:
+
+
+------------manpage-in-another-subpackage----------------
+
+>> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
+>> -rwxr-xr-x  root root /i386/mypkg-docs/usr/share/man/man1/foo.1
+
+...expect:
+
+------------manpage-in-another-arch----------------
+
+>> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
+>> -rwxr-xr-x  root root /x86_64/mypkg-docs/usr/share/man/man1/foo.1
 
 ...expect:
 
