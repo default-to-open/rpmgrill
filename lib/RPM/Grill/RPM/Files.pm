@@ -142,6 +142,18 @@ LINE:
         $x{rpm}        = $rpm;
         $x{grill}      = $rpm->grill;
 
+        # Directory and basename
+        if ($x{path} =~ m{^(.*)/(.*)}) {
+            $x{dirname}  = $1;
+            $x{basename} = $2;
+        }
+        else {
+            # FIXME: can this happen?
+            warn "$ME: WARNING: Unexpected path '$x{path}' (no slashes)";
+            $x{dirname}  = '/';
+            $x{basename} = $x{path};
+        }
+
         # FIXME: check that {path} isn't a dup?
 
         # Full path to the extracted file.
