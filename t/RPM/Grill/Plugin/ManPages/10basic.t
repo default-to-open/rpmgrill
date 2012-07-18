@@ -134,6 +134,15 @@ __DATA__
   ]
 }
 
+------------manpage-in-noarch----------------
+
+>> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
+>> -rw-r--r--  root root /noarch/mypkg-docs/usr/share/man/man1/foo.1
+.\" blah blah
+.so to make it look like a valid man page
+
+...expect:
+
 ------------bad-gzip-manpage-------------------
 
 >> -rw-r--r--  root root /i386/mypkg-docs/usr/share/man/man1/foo.1.gz
