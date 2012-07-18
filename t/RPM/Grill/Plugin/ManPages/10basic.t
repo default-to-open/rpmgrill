@@ -98,6 +98,7 @@ __DATA__
 
 >> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
 >> -rwxr-xr-x  root root /i386/mypkg/usr/share/man/man1/foo.1
+.SH to make it look like a valid man page
 
 ...expect:
 
@@ -106,6 +107,7 @@ __DATA__
 
 >> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
 >> -rwxr-xr-x  root root /i386/mypkg-docs/usr/share/man/man1/foo.1
+.Dd to make it look like a valid man page
 
 ...expect:
 
@@ -113,6 +115,8 @@ __DATA__
 
 >> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
 >> -rwxr-xr-x  root root /x86_64/mypkg-docs/usr/share/man/man1/foo.1
+.\" blah blah
+.so to make it look like a valid man page
 
 ...expect:
 
