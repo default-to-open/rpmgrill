@@ -160,8 +160,8 @@ sub _check_manpage_correctness {
 
     $content =~ /^\.(SH|Dd|so)/ms or do {
         $manpage->gripe({
-            code => 'ManPageEmpty',
-            diag => "No .SH, .Dd, or .so macros found; is this really a man page?",
+            code => 'ManPageNoContent',
+            diag => "No .SH, .Dd, or .so macros found; is this really a man page? ('file' classifies this file as: " . escapeHTML($manpage->file_type) . ")",
         });
     };
 }
