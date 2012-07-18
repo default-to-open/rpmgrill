@@ -99,7 +99,15 @@ sub make_fake_tree {
             close $fh_rpm;
 
         }
+        elsif (defined $fh) {
+            print { $fh } $line, "\n";
+        }
+        elsif ($line) {
+            warn "$ME: WARNING: Cannot grok '$line'";
+        }
     }
+
+    close $fh                   if defined $fh;
 
     return RPM::Grill->new($dir);
 }
