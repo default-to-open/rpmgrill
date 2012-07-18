@@ -97,7 +97,7 @@ __DATA__
 ------------manpage-in-same-package----------------
 
 >> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
->> -rwxr-xr-x  root root /i386/mypkg/usr/share/man/man1/foo.1
+>> -rw-r--r--  root root /i386/mypkg/usr/share/man/man1/foo.1
 .SH to make it look like a valid man page
 
 ...expect:
@@ -106,7 +106,7 @@ __DATA__
 ------------manpage-in-another-subpackage----------------
 
 >> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
->> -rwxr-xr-x  root root /i386/mypkg-docs/usr/share/man/man1/foo.1
+>> -rw-r--r--  root root /i386/mypkg-docs/usr/share/man/man1/foo.1
 .Dd to make it look like a valid man page
 
 ...expect:
@@ -114,7 +114,7 @@ __DATA__
 ------------manpage-in-another-arch----------------
 
 >> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
->> -rwxr-xr-x  root root /x86_64/mypkg-docs/usr/share/man/man1/foo.1
+>> -rw-r--r--  root root /x86_64/mypkg-docs/usr/share/man/man1/foo.1
 .\" blah blah
 .so to make it look like a valid man page
 
@@ -132,4 +132,42 @@ __DATA__
       subpackage => 'mypkg'
     }
   ]
+}
+
+------------bad-gzip-manpage-------------------
+
+>> -rw-r--r--  root root /i386/mypkg-docs/usr/share/man/man1/foo.1.gz
+sdfsdfsdf
+
+...expect:
+
+{
+    ManPages => [
+        {
+            arch => 'i386',
+            subpackage => 'mypkg-docs',
+            code => 'ManPageBadGzip',
+            context => { path => '/usr/share/man/man1/foo.1.gz' },
+            diag => "gunzip failed: \ngzip: /usr/share/man/man1/foo.1.gz: not in gzip format\n (&#39;file&#39; classifies this file as: ASCII text)",
+        }
+    ]
+}
+
+------------bad-manpage-content-------------------
+
+>> -rwxr-xr-x  root root /i386/mypkg-docs/usr/share/man/man1/foo.1
+#!/bin/nosh
+
+...expect:
+
+{
+    ManPages => [
+        {
+            arch => 'i386',
+            subpackage => 'mypkg-docs',
+            code => 'ManPageNoContent',
+            context => { path => '/usr/share/man/man1/foo.1' },
+            diag => "No .SH, .Dd, or .so macros found; is this really a man page? (\'file\' classifies this file as: a /bin/nosh script, ASCII text executable)",
+        }
+    ]
 }
