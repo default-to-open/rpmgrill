@@ -55,32 +55,44 @@ our $Important_Bin_Directories = join('|', @Important_Bin_Directories);
 sub analyze {
     my $self = shift;
 
+    # Step 1: go through all RPMs, collect manpages into an array
+    $self->_gather_manpages();
+
+    # Step 2: check each of those for correctness
+    $self->_check_manpage_correctness();
+
+    # Step 3: warn about binaries without man pages
     for my $rpm ($self->rpms) {
         for my $f ($rpm->files) {
-            _check_manpage_correctness($f);
-            _check_manpage_presence($f);
+            $self->_check_manpage_presence($f);
         }
     }
 }
 
+######################
+#  _gather_manpages  #  Initializes array of files that are (probably) man pages
+######################
+sub _gather_manpages {
+    my $self = shift;                           # in: grill obj
+
+    $self->{_manpages} = [];
+
+    for my $rpm (grep { $_->arch ne 'src' } $self->rpms) {
+        for my $f ($rpm->files) {
+            if ($f->is_reg && $f->path =~ m|^/usr/share/man/|) {
+                push @{ $self->{_manpages} }, $f;
+            }
+        }
+    }
+}
 
 ################################
 #  _check_manpage_correctness  #  Look for man pages; run some checks on them
 ################################
 sub _check_manpage_correctness {
-    my $f = shift;                              # in: RPM::Grill::RPM::Files obj
+    my $self = shift;                           # in: grill obj
 
-    # We get invoked for all files, but we're only interested in:
-    #   * regular files (not symlinks or directories) that are
-    #   * ...under /usr/share/man
-    # ...that is, man page files.
-    return unless $f->is_reg;
-    return unless $f->path =~ m|^/usr/share/man/|;
-
-    # It's a man page. Check it.
-
-
-
+    # FIXME: for ... @{ $self->{_manpages} }
     # FIXME: check extension? .[num].gz/bz2/xz ? '*.[0-9n]*.gz'
 
     # FIXME: run manchecker
@@ -91,7 +103,8 @@ sub _check_manpage_correctness {
 #  _check_manpage_presence  #  "Important" executables must have a man page
 #############################
 sub _check_manpage_presence {
-    my $bin = shift;                            # in: RPM::Grill::RPM::Files obj
+    my $self = shift;                           # in: Grill obj
+    my $bin  = shift;                           # in: RPM::Grill::RPM::Files obj
 
     # We get invoked for all files, but we're only interested in:
     #   * regular files (i.e. not symlinks or directories) that are
@@ -103,15 +116,11 @@ sub _check_manpage_presence {
 
     # Got here. File is an executable in an important directory. Let's
     # make sure it has a corresponding man page.
-    return if _rpm_includes_man_page( $bin->rpm, $bin );
-
-    # No man page in the binary's own RPM. Maybe it's in another RPM?
-    # FIXME FIXME FIXME: only check *subpackages of the same arch!*
-    for my $rpm ($bin->grill->rpms) {
-        for my $f ($rpm->files) {
-            # FIXME: skip self-rpm
-            # FIXME: skip specfile
-            return if _rpm_includes_man_page( $rpm, $bin );
+    my $basename = $bin->basename;
+    for my $manpage (@{ $self->{_manpages} }) {
+        if ($manpage->path =~ m{/$basename\.[^/]+$}) {
+            return if $manpage->rpm->arch eq $bin->arch
+                   || $manpage->rpm->arch eq 'noarch';
         }
     }
 
@@ -119,8 +128,6 @@ sub _check_manpage_presence {
     $bin->gripe({
         code       => 'ManPageMissing',
         diag       => "No man page for " . $bin->path,
-        arch       => $bin->arch,
-        subpackage => $bin->subpackage,
     });
 
     return;
