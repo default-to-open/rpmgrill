@@ -16,6 +16,8 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use CGI                         qw(escapeHTML);
+use IPC::Run                    qw(run timeout);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -59,7 +61,9 @@ sub analyze {
     $self->_gather_manpages();
 
     # Step 2: check each of those for correctness
-    $self->_check_manpage_correctness();
+    for my $manpage (@{ $self->{_manpages} }) {
+        $self->_check_manpage_correctness($manpage);
+    }
 
     # Step 3: warn about binaries without man pages
     for my $rpm ($self->rpms) {
@@ -90,12 +94,63 @@ sub _gather_manpages {
 #  _check_manpage_correctness  #  Look for man pages; run some checks on them
 ################################
 sub _check_manpage_correctness {
-    my $self = shift;                           # in: grill obj
+    my $self    = shift;                        # in: grill obj
+    my $manpage = shift;                        # in: Files obj
 
-    # FIXME: for ... @{ $self->{_manpages} }
-    # FIXME: check extension? .[num].gz/bz2/xz ? '*.[0-9n]*.gz'
+    # FIXME: can we assume that all manpages will be .gz ?
+    $manpage->path =~ /\.[0-9n]\w*(\.gz)?$/ or do {
+        $manpage->gripe({
+            code => 'ManPageUnknownExtension',
+            diag => "Man pages are expected to end in .[0-9n][a-z]*\.gz",
+        });
+        return;
+    };
 
-    # FIXME: run manchecker
+    my $content;
+
+    if ($manpage->path =~ /\.gz$/) {
+        my @cmd = ('gzip', '-dc', $manpage->extracted_path);
+        my $stderr;
+        run \@cmd, \undef, \$content, \$stderr, timeout(600);    # 10 min.
+        my $exit_status = $?;
+
+        if ($exit_status) {
+            if ($stderr) {
+                $manpage->gripe({
+                    code => 'ManPageBadGzip',
+                    diag => "gunzip failed: " . escapeHTML($stderr),
+                });
+            }
+            else {
+                $manpage->gripe({
+                    code => 'ManPageBadGzip',
+                    diag => "Unknown error trying to gunzip file",
+                });
+            }
+            return;
+        }
+        # No exit status.
+    }
+    else {
+        # Not .gz; read directly. FIXME: can this happen?
+        open my $fh, '<', $manpage->extracted_path or do {
+            $manpage->gripe({
+                code => 'ManPageReadError',
+                diag => "Could not read file contents: $!",
+            });
+            return;
+        };
+
+        $content = do { local $/; <$fh>; };
+        close $fh;
+    }
+
+    $content =~ /^\.(SH|Dd|so)/ms or do {
+        $manpage->gripe({
+            code => 'ManPageEmpty',
+            diag => "No .SH, .Dd, or .so macros found; is this really a man page?",
+        });
+    };
 }
 
 
@@ -129,21 +184,6 @@ sub _check_manpage_presence {
         code       => 'ManPageMissing',
         diag       => "No man page for " . $bin->path,
     });
-
-    return;
-}
-
-sub _rpm_includes_man_page {
-    my $rpm = shift;
-    my $bin = shift;
-
-    my $basename = $bin->basename;
-
-    for my $f ($rpm->files) {
-        if ($f->path =~ m{^/usr/share/man/man.*/$basename\.}) {
-            return 1;
-        }
-    }
 
     return;
 }
