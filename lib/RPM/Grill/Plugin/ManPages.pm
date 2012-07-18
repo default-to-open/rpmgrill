@@ -116,6 +116,19 @@ sub _check_manpage_correctness {
 
         if ($exit_status) {
             if ($stderr) {
+                # gzip may include the file path in its error message.
+                # Normalize it, so end users don't see /arch/payload/etc
+                my $path_extracted = $manpage->extracted_path;
+                my $path_plain     = $manpage->path;
+                $stderr =~ s|\b$path_extracted\b|$path_plain|gs;
+
+                # If the error is 'not in gzip format', invoke file(1)
+                # and report what the file looks like
+                if ($stderr =~ / not in gzip format\b/) {
+                    $stderr .= " ('file' classifies this file as: " .
+                        $manpage->file_type . ")";
+                }
+
                 $manpage->gripe({
                     code => 'ManPageBadGzip',
                     diag => "gunzip failed: " . escapeHTML($stderr),
