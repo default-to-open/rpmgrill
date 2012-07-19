@@ -31,7 +31,8 @@ sub blurb { return "checks for missing or badly-formatted man pages" }
 # FIXME
 sub doc {
     return <<"END_DOC" }
-FIXME FIXME FIXME
+This module checks man pages for validity, and checks that
+man pages are present for all important executables.
 END_DOC
 
 # List of "important" directories. Used in _check_manpage_presence() to
@@ -258,6 +259,47 @@ FIXME document methods
 =head1	EXPORTABLE FUNCTIONS
 
 =head1	FILES
+
+=head1  DIAGNOSTICS
+
+=over   4
+
+=item   ManPageUnknownExtension
+
+The file extension of a man page should be .C<section>.gz, where
+C<section> is a digit or the letter "n" perhaps followed by more
+letters: .1.gz, .0pm.gz, .8.gz
+
+=item   ManPageBadGzip
+
+Although the man page ends in C<.gz>, gzip encountered an error
+trying to decompress it. See diagnostic message for more info.
+This probably means that the file isn't gzip'ed even though it
+ends in .gz.
+
+=item   ManPageReadError
+
+Encountered an error reading the man page file. This error is not
+likely to happen; if it does, the Brewtap maintainer needs to know
+about it.
+
+=item   ManPageNoContent
+
+Brewtap looks for certain key roff macros in the file content; these
+macros are expected in all man pages. This diagnostic means that none
+of those macros appear in the man page file.
+
+=item   ManPageMissing
+
+Certain executable files in "important" directories are expected to
+have corresponding man pages; as of 2012-07-19 any executable regular
+file C<foo> in /bin /sbin /usr/sbin or /etc/init.d should have a
+corresponding C<foo.X> man page in /usr/share/man.
+
+There will be exceptions... there are always exceptions. This test
+is new as of July 2012 and will be fine-tuned as required.
+
+=back
 
 =head1	SEE ALSO
 
