@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- new ManPage plugin, with tests mostly imported from rpmdiff
 - clamav check: better diagnostics
 - BadC++ABI: rename to BadCppABI
 
