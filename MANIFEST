@@ -12,6 +12,7 @@ lib/RPM/Grill/Plugin/DesktopLint.pm
 lib/RPM/Grill/Plugin/ElfChecks.pm
 lib/RPM/Grill/Plugin/LibGather.pm
 lib/RPM/Grill/Plugin/Manifest.pm
+lib/RPM/Grill/Plugin/ManPages.pm
 lib/RPM/Grill/Plugin/Multilib.pm
 lib/RPM/Grill/Plugin/Patches.pm
 lib/RPM/Grill/Plugin/RpmMetadata.pm
@@ -33,6 +34,7 @@ README
 README.about
 README.gripe
 t/00.load.t
+t/lib/FakeTree.pm
 t/perlcritic.t
 t/pod-coverage.t
 t/pod.t
@@ -51,6 +53,7 @@ t/RPM/Grill/Plugin/Manifest/20fhs.t
 t/RPM/Grill/Plugin/Manifest/30systemd.t
 t/RPM/Grill/Plugin/Manifest/40fedora.t
 t/RPM/Grill/Plugin/Manifest/50usr.t
+t/RPM/Grill/Plugin/ManPages/10basic.t
 t/RPM/Grill/Plugin/Multilib/10basic.t
 t/RPM/Grill/Plugin/Patches/01basic.t
 t/RPM/Grill/Plugin/RpmMetadata/10basic.t
