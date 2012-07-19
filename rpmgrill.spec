@@ -63,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- documentation for new ManPage tests
+
 * Thu Jul 19 2012 Ed Santiago <santiago@redhat.com> 0.12-1
 - new ManPage plugin, with tests mostly imported from rpmdiff
 - clamav check: better diagnostics
