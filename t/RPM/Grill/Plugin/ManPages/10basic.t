@@ -180,3 +180,23 @@ sdfsdfsdf
         }
     ]
 }
+
+------------bad-file-extension-------------------
+
+>> -rwxr-xr-x  root root /i386/mypkg-docs/usr/share/man/man1/foo.p
+.\" blah blah
+.so to make it look like a valid man page
+
+...expect:
+
+{
+    ManPages => [
+        {
+            arch => 'i386',
+            subpackage => 'mypkg-docs',
+            code => 'ManPageUnknownExtension',
+            context => { path => '/usr/share/man/man1/foo.p' },
+            diag => "Man pages are expected to end in .[0-9n][a-z]*.gz",
+        }
+    ]
+}
