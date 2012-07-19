@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.11
+Version:        0.12
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Thu Jul 19 2012 Ed Santiago <santiago@redhat.com> 0.12-1
 - new ManPage plugin, with tests mostly imported from rpmdiff
 - clamav check: better diagnostics
 - BadC++ABI: rename to BadCppABI
