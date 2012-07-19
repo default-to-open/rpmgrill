@@ -20,3 +20,4 @@
 ^rpmgrill-.*\.rpm$
 ^sql/
 ^scl/
+^ttt
