@@ -63,6 +63,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- file_type() - invoke libmagic with COMPRESS, to peek inside gzip'ed files.
+- file_type() - add test suite
+
 * Thu Jul 19 2012 Ed Santiago <santiago@redhat.com> 0.13-1
 - documentation for new ManPage tests
 

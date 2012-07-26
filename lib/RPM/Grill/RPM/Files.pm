@@ -12,7 +12,7 @@ our $VERSION = '0.01';
 
 use Carp;
 use Fcntl                       qw(:mode);
-use File::LibMagic              qw(:easy);
+use File::LibMagic              qw(:complete);
 
 ( our $ME = $0 ) =~ s|^.*/||;
 
@@ -101,6 +101,9 @@ our @ReadElf_Flags = sort keys %ReadElf_Flags;
 # See <rpm/rpmfi.h>. This indicates that a file may be listed in
 # the specfile but not actually shipped in the rpm.
 use constant RPMFILE_GHOST      => (1 << 6);
+
+# File::LibMagic object, initialized once, used often
+our $File_Lib_Magic;
 
 # END   user-configurable section
 ###############################################################################
@@ -213,11 +216,19 @@ sub is_daemon {
 sub file_type {
     my $self = shift;
 
+    # First time through? Initialize File::LibMagic. The COMPRESS flag
+    # tells libmagic to peek inside compressed data, e.g. to say
+    # "man page, compressed" instead of just "compressed data"
+    if (! defined $File_Lib_Magic) {
+        $File_Lib_Magic = magic_open(MAGIC_COMPRESS);
+        magic_load($File_Lib_Magic, "");                # Use default magic file
+    }
+
     # FIXME: what if extracted_path doesn't exist??
 
     $self->{_file_type} ||= do {
         my $file_path = $self->extracted_path;
-        my $file_type = eval { MagicFile( $file_path ) };
+        my $file_type = eval { magic_file( $File_Lib_Magic, $file_path ) };
         my $err;
         if ($@) {
             $err = $@;
