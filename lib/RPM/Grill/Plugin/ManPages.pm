@@ -175,13 +175,7 @@ sub _check_manpage_presence {
     my $self = shift;                           # in: Grill obj
     my $bin  = shift;                           # in: RPM::Grill::RPM::Files obj
 
-    # We get invoked for all files, but we're only interested in:
-    #   * regular files (i.e. not symlinks or directories) that are
-    #   * ...executable and
-    #   * ...in an important directory
-    return unless $bin->is_reg;
-    return unless $bin->numeric_mode & 0x100;
-    return unless $bin->path =~ m{^($Important_Bin_Directories)/};
+    return unless _file_needs_manpage( $bin );
 
     # Got here. File is an executable in an important directory. Let's
     # make sure it has a corresponding man page.
@@ -201,6 +195,28 @@ sub _check_manpage_presence {
 
     return;
 }
+
+#########################
+#  _file_needs_manpage  #  Helper. Does this file need a man page?
+#########################
+sub _file_needs_manpage {
+    my $bin  = shift;                           # in: RPM::Grill::RPM::Files obj
+
+    # We get invoked for all files, but we're only interested in:
+    #   * regular files (i.e. not symlinks or directories) that are:
+    return 0 if ! $bin->is_reg;
+
+    #      * executable and in an important directory, or
+    return 1 if $bin->numeric_mode & 0x100
+             && $bin->path =~ m{^($Important_Bin_Directories)/};
+
+    #      * marked (in rpm) as config files (bz647369)
+    return 1 if $bin->is_config;
+
+    # Not one of the above. File does not need a man page.
+    return;
+}
+
 
 1;
 

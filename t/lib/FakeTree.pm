@@ -63,9 +63,9 @@ sub make_fake_tree {
     my $fh;                     # FIXME: filehandle to latest file
 
     for my $line (split "\n", $layout) {
-        if ($line =~ m{^>>\s+(-\S+)\s+(\w+)\s+(\w+)\s+/?([^/]+)/([^/]+)/(.*)/([^/]+)$}) {
-            my ($mode, $user, $group, $arch, $subpackage, $f_dir, $f_base)
-                = ($1, $2, $3, $4, $5, $6, $7);
+        if ($line =~ m{^>>\s+(-\S+)\s+(\w+)\s+(\w+)\s+(\d+)\s+/?([^/]+)/([^/]+)/(.*)/([^/]+)$}) {
+            my ($mode, $user, $group, $flags, $arch, $subpackage, $f_dir, $f_base)
+                = ($1, $2, $3, $4, $5, $6, $7, $8);
 
             my $subdir = "$dir/$arch/$subpackage/payload/$f_dir";
             mkpath $subdir, 0, 02755;
@@ -86,7 +86,7 @@ sub make_fake_tree {
                                     $mode,
                                     $user,
                                     $group,
-                                    "0",               # ?
+                                    $flags,
                                     "(none)",          # color
                                     "/$f_dir/$f_base",
                                 ), "\n";

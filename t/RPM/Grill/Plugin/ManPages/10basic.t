@@ -69,7 +69,7 @@ __DATA__
 
 ------------binary-needs-manpage------------
 
->> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
+>> -rwxr-xr-x  root root 0 /i386/mypkg/usr/sbin/foo
 
 ...expect:
 
@@ -90,14 +90,14 @@ __DATA__
 
 -------------no-manpage-needed---------------------
 
->> -rwxr-xr-x  root root /i386/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root root 0 /i386/mypkg/usr/bin/foo
 
 ...expect:
 
 ------------manpage-in-same-package----------------
 
->> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
->> -rw-r--r--  root root /i386/mypkg/usr/share/man/man1/foo.1
+>> -rwxr-xr-x  root root 0 /i386/mypkg/usr/sbin/foo
+>> -rw-r--r--  root root 0 /i386/mypkg/usr/share/man/man1/foo.1
 .SH to make it look like a valid man page
 
 ...expect:
@@ -105,16 +105,16 @@ __DATA__
 
 ------------manpage-in-another-subpackage----------------
 
->> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
->> -rw-r--r--  root root /i386/mypkg-docs/usr/share/man/man1/foo.1
+>> -rwxr-xr-x  root root 0 /i386/mypkg/usr/sbin/foo
+>> -rw-r--r--  root root 0 /i386/mypkg-docs/usr/share/man/man1/foo.1
 .Dd to make it look like a valid man page
 
 ...expect:
 
 ------------manpage-in-another-arch----------------
 
->> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
->> -rw-r--r--  root root /x86_64/mypkg-docs/usr/share/man/man1/foo.1
+>> -rwxr-xr-x  root root 0 /i386/mypkg/usr/sbin/foo
+>> -rw-r--r--  root root 0 /x86_64/mypkg-docs/usr/share/man/man1/foo.1
 .\" blah blah
 .so to make it look like a valid man page
 
@@ -136,8 +136,8 @@ __DATA__
 
 ------------manpage-in-noarch----------------
 
->> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
->> -rw-r--r--  root root /noarch/mypkg-docs/usr/share/man/man1/foo.1
+>> -rwxr-xr-x  root root 0 /i386/mypkg/usr/sbin/foo
+>> -rw-r--r--  root root 0 /noarch/mypkg-docs/usr/share/man/man1/foo.1
 .\" blah blah
 .so to make it look like a valid man page
 
@@ -145,7 +145,7 @@ __DATA__
 
 ------------bad-gzip-manpage-------------------
 
->> -rw-r--r--  root root /i386/mypkg-docs/usr/share/man/man1/foo.1.gz
+>> -rw-r--r--  root root 0 /i386/mypkg-docs/usr/share/man/man1/foo.1.gz
 sdfsdfsdf
 
 ...expect:
@@ -164,7 +164,7 @@ sdfsdfsdf
 
 ------------bad-manpage-content-------------------
 
->> -rwxr-xr-x  root root /i386/mypkg-docs/usr/share/man/man1/foo.1
+>> -rwxr-xr-x  root root 0 /i386/mypkg-docs/usr/share/man/man1/foo.1
 #!/bin/nosh
 
 ...expect:
@@ -183,7 +183,7 @@ sdfsdfsdf
 
 ------------bad-file-extension-------------------
 
->> -rwxr-xr-x  root root /i386/mypkg-docs/usr/share/man/man1/foo.p
+>> -rwxr-xr-x  root root 0 /i386/mypkg-docs/usr/share/man/man1/foo.p
 .\" blah blah
 .so to make it look like a valid man page
 
@@ -199,4 +199,24 @@ sdfsdfsdf
             diag => "Man pages are expected to end in .[0-9n][a-z]*.gz",
         }
     ]
+}
+
+--------------config-file-missing-manpage------------------
+
+>> -rw-r--r--   root root 1 /noarch/mypkg/etc/foo.rc
+
+...expect:
+
+{
+  ManPages => [
+    {
+      arch => 'noarch',
+      code => 'ManPageMissing',
+      context => {
+        path => '/etc/foo.rc'
+      },
+      diag => 'No man page for /etc/foo.rc',
+      subpackage => 'mypkg'
+    }
+  ]
 }
