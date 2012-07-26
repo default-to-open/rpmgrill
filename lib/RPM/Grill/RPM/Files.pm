@@ -98,8 +98,12 @@ our $ReadElf_Section_RE = qr/^($ReadElf_Sections).*:\s*$/;
 
 our @ReadElf_Flags = sort keys %ReadElf_Flags;
 
-# See <rpm/rpmfi.h>. This indicates that a file may be listed in
-# the specfile but not actually shipped in the rpm.
+#
+# Constant values obtained from <rpm/rpmfi.h>. We use only a subset.
+#
+use constant RPMFILE_CONFIG     => (1 << 0);
+use constant RPMFILE_DOC        => (1 << 1);
+use constant RPMFILE_ICON       => (1 << 2);
 use constant RPMFILE_GHOST      => (1 << 6);
 
 # File::LibMagic object, initialized once, used often
@@ -169,7 +173,9 @@ LINE:
         # Check that extracted file is present. We don't like to see
         # files listed in the specfile but not actually shipped.
         unless (-e $x{extracted_path} || -l $x{extracted_path}) {
-            # (unless it's flagged as %ghost. Then it's OK.)
+            # (unless it's flagged as %ghost. Then it's OK. "Ghost"
+            # indicates that a file may be listed in the specfile but
+            # not actually shipped in the rpm.)
             if ($x{flags} & RPMFILE_GHOST) {
                 next LINE;              # it's OK
             }
@@ -189,6 +195,12 @@ sub is_dir     { substr( $_[0]->{mode}, 0, 1 ) eq 'd' }    # eg drwxr-xr-x
 sub is_reg     { substr( $_[0]->{mode}, 0, 1 ) eq '-' }    # eg -rwxr-xr-x
 sub is_suid    { $_[0]->numeric_mode & S_ISUID }
 sub is_sgid    { $_[0]->numeric_mode & S_ISGID }
+
+# RPM flags
+sub is_config  { $_[0]->{flags} & RPMFILE_CONFIG }
+sub is_doc     { $_[0]->{flags} & RPMFILE_DOC    }
+sub is_icon    { $_[0]->{flags} & RPMFILE_ICON   }
+sub is_ghost   { $_[0]->{flags} & RPMFILE_GHOST  }
 
 ############
 #  is_elf  #  Determines file type; returns true if /ELF/
