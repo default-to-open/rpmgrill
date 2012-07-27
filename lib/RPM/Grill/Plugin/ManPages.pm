@@ -190,7 +190,7 @@ sub _check_manpage_presence {
     # No man page anywhere.
     $bin->gripe({
         code       => 'ManPageMissing',
-        diag       => "No man page for " . $bin->path,
+        diag       => "No man page for <tt>" . escapeHTML($bin->path) . "</tt>",
         context    => undef,
     });
 
