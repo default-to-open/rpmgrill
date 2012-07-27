@@ -78,9 +78,6 @@ __DATA__
     {
       arch => 'i386',
       code => 'ManPageMissing',
-      context => {
-        path => '/usr/sbin/foo'
-      },
       diag => 'No man page for /usr/sbin/foo',
       subpackage => 'mypkg'
     }
@@ -125,9 +122,6 @@ __DATA__
     {
       arch => 'i386',
       code => 'ManPageMissing',
-      context => {
-        path => '/usr/sbin/foo'
-      },
       diag => 'No man page for /usr/sbin/foo',
       subpackage => 'mypkg'
     }
@@ -212,9 +206,6 @@ sdfsdfsdf
     {
       arch => 'noarch',
       code => 'ManPageMissing',
-      context => {
-        path => '/etc/foo.rc'
-      },
       diag => 'No man page for /etc/foo.rc',
       subpackage => 'mypkg'
     }

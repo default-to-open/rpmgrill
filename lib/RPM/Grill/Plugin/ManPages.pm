@@ -191,6 +191,7 @@ sub _check_manpage_presence {
     $bin->gripe({
         code       => 'ManPageMissing',
         diag       => "No man page for " . $bin->path,
+        context    => undef,
     });
 
     return;

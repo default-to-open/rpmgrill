@@ -66,6 +66,7 @@ rm -rf $RPM_BUILD_ROOT
 - file_type() - invoke libmagic with COMPRESS, to peek inside gzip'ed files.
 - file_type() - add test suite
 - bz647369: also warn about manpage-less CONFIG files
+- ManPages gripes: improved diagnostics (remove "context")
 
 * Thu Jul 19 2012 Ed Santiago <santiago@redhat.com> 0.13-1
 - documentation for new ManPage tests
