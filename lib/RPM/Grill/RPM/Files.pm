@@ -280,12 +280,20 @@ sub gripe {
     croak "$ME: ->gripe() called with a non-hashref"  if ref($gripe) ne 'HASH';
 
     my %gripe = (
+        # Defaults ...
         arch       => $self->arch,
         subpackage => $self->subpackage,
         context    => $self->context,
 
+        # ... overridden by our caller.
         %$gripe,
     );
+
+    # If our caller said 'context => undef', delete context entirely.
+    # This is useful when doing $file->gripe() to *mention* the file,
+    # but the problem isn't *in* the file. It will prevent brewtap from
+    # adding a download link for the file.
+    delete $gripe{context}              if ! defined $gripe{context};
 
     $self->rpm->grill->gripe( \%gripe );
 }
