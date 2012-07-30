@@ -126,12 +126,9 @@ sub analyze {
             # bz802555: check for "Fedora" in filenames (but not in srpms)
             unless ($f->arch eq 'src') {
                 if ($path =~ /fedora/i) {
-                    $self->gripe({
+                    $f->gripe({
                         code       => 'FedoraInFilename',
-                        arch       => $f->arch,
-                        subpackage => $f->subpackage,
                         diag       => "Filenames should not include 'Fedora'",
-                        context    => { path => $path },
                     });
                 }
             }
