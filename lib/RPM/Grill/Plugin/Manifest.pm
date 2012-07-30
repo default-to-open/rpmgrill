@@ -118,7 +118,7 @@ sub analyze {
                         code       => 'MoveToUsr',
                         arch       => $f->arch,
                         subpackage => $f->subpackage,
-                        diag       => "$where no longer exists; please move <tt>$path</tt> to <b>/usr</b>",
+                        diag       => "$where no longer exists; please move <tt>$path</tt> to <tt><b>/usr</b>$where</tt>",
                     });
                 }
             }

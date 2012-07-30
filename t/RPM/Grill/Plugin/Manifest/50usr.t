@@ -79,7 +79,7 @@ for my $t (@tests) {
 
         if (@paths == 1) {
             $paths[0] =~ m{^(/[^/]+)};
-            $g->{diag} = "$1 no longer exists; please move <tt>$paths[0]</tt> to <b>/usr</b>";
+            $g->{diag} = "$1 no longer exists; please move <tt>$paths[0]</tt> to <tt><b>/usr</b>$1</tt>";
         }
         else {
             die;
