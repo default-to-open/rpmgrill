@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.13
+Version:        0.14
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Thu Aug  2 2012 Ed Santiago <santiago@redhat.com> 0.14-1
 - file_type() - invoke libmagic with COMPRESS, to peek inside gzip'ed files.
 - file_type() - add test suite
 - bz647369: also warn about manpage-less CONFIG files
