@@ -132,14 +132,12 @@ sub _read_whitelist {
 
     return if exists $self->{_whitelist};
 
-    # FIXME: get brew tags?
-    # FIXME: get cpe?  How the heck do we get cpe?
-
     #printf "got here: %s -- %s -- %s\n", $self->nvr;
 
     # Whitelist is based on major, eg RHEL6, F15
     # FIXME: should we be more specific, eg RHEL6.1?
-    # FIXME: should we use cpe? brew tags?
+    # FIXME: should we use cpe?  How the heck do we get cpe?
+    # FIXME: get brew tags?
     my $whitelist = $Whitelist_Dir . '/' . $self->major_release;
     open my $whitelist_fh, '<', $whitelist
         or do {
@@ -148,20 +146,51 @@ sub _read_whitelist {
         return;
         };
 
-    # FIXME: read
+    #
+    # Until August 2012, the format of the whitelist file was:
+    #
+    #         <path>         <owner> <group> <mode>   [separated by 1 tab]
+    #  e.g.   /usr/bin/sudo  root    root    ---s--x--x
+    #
+    # As of August 2012, we now allow a saner format:
+    #
+    #         # <comments prefixed by octothorpe>
+    #         <mode>       <owner> <group>  <path> [separated by whitespace]
+    #  e.g.   ---s--x--x   root    root     /usr/bin/sudo
+    #
+    # Note that this is closer to 'ls' format; also note that it's much
+    # more readable, because the most variable element is at the end.
+    #
+    # To ease the transition, this code can handle either format.
+    # We assume that (1) all paths will include a slash; (2) no
+    # other element can include a slash; and (3) no element can
+    # contain whitespace.
+    #
+  LINE:
     while ( my $line = <$whitelist_fh> ) {
         chomp $line;
-        my @x = split "\t", $line;
-        my @f = qw(path user group mode);
-        my %x = map { $f[$_] => $x[$_] } ( 0 .. $#f );
-        $x{_lineno} = $.;
 
-        my $path = $x{path};
+        next LINE       if $line =~ /^\s*$/;    # Skip blank lines
+        next LINE       if $line =~ /^\s*#/;    # Skip comment-only lines
+
+        my @values = split /\s+/, $line;
+
+        # Assume the new format...
+        my @fields = qw(mode user group path);
+        # ...but if the first element includes a slash, switch to old-style.
+        if ($values[0] =~ m|/|) {
+            @fields = qw(path user group mode);
+        }
+
+        my %value = map { $fields[$_] => $values[$_] } ( 0 .. $#fields );
+        $value{_lineno} = $.;
+
+        my $path = $value{path};
         if ( my $first = $self->{_whitelist}->{$path} ) {
             warn
                 "$ME: $whitelist:$.: WARNING: Duplicate entry for $path (overrides previous entry on line $first->{_lineno})\n";
         }
-        $self->{_whitelist}->{$path} = \%x;
+        $self->{_whitelist}->{$path} = \%value;
     }
     close $whitelist_fh;
 }

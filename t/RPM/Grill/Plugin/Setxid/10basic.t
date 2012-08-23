@@ -17,21 +17,23 @@ use File::Basename              qw(basename);
 our $Arch;
 our $Pkg;
 
-our @wl;
+# Whitelist file.  This is written to a dummy (test) WL file
+our $whitelist_contents = <<'END_WL';
+-rwsr-xr-x  root  root  /usr/bin/setuid-root-4755
+-r-s--x--x  root  root  /usr/bin/setuid-root-4511
+---s--x--x  root  root  /usr/bin/setuid-root-4111
+-rwxr-sr-x  root  root  /usr/bin/setgid-root-2755
+-rwxr-sr-x  root  foo   /usr/bin/setgid-foo-2755
+
+# Test that we can skip blank and comment-only lines.
+# Test that we can handle the old-style file format
+/var/lib/setgid-dir root ggg  drwxr-sr-x
+END_WL
+
 our @tests;
 BEGIN {
     $Arch = 'noarch';
     $Pkg  = 'mypkg';
-
-    # Whitelist file.  This is written to a dummy (test) WL file
-    my $wl = <<'END_WL';
--rwsr-xr-x root root /usr/bin/setuid-root-4755
--r-s--x--x root root /usr/bin/setuid-root-4511
----s--x--x root root /usr/bin/setuid-root-4111
--rwxr-sr-x root root /usr/bin/setgid-root-2755
--rwxr-sr-x root foo  /usr/bin/setgid-foo-2755
-drwxr-sr-x root ggg  /var/lib/setgid-dir
-END_WL
 
     # Actual tests.
     my $tests = <<'END_TESTS';
@@ -66,17 +68,6 @@ drwxr-sr-x  root ggg /var/lib/non-wl-sgid-dir
 drwsr-xr-x  root ggg /var/lib/suid-dir
     SetuidDirectory Directory <var>/var/lib/suid-dir</var> is setuid root.  This is almost certainly a mistake.
 END_TESTS
-
-    # Parse the whitelist file
-    for my $line (split "\n", $wl) {
-        # Start with '*' = new whitelist entry
-        if ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/) {
-            push @wl, [ $1, $2, $3, $4 ];
-        }
-        else {
-            die "Cannot grok whitelist line '$line'";
-        }
-    }
 
     # Parse the tests
     for my $line (split "\n", $tests) {
@@ -126,15 +117,7 @@ mkdir "$tempdir/wl", 02755
     or die "mkdir $tempdir/wl: $!";
 open WL, '>', "$tempdir/wl/RHEL5"
     or die "cannot create $tempdir/wl/RHEL5: $!\n";
-for my $aref (@wl) {
-    # Note that the file format is horrible: path first,
-    # which prevents us from having properly-aligned columns
-    # because path is variable length.  A better format is
-    # mode-user-group-path, but it'll take some effort to
-    # make that change.
-    my ($mode, $user, $group, $path) = @$aref;
-    print WL join("\t", $path, $user, $group, $mode), "\n";
-}
+print WL $whitelist_contents;
 close WL
     or die "error writing $tempdir/wl/RHEL5: $!";
 

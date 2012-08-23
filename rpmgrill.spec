@@ -63,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- Setxid test: handle new-style (bz479283#c13) whitelist file format.
+
 * Thu Aug  2 2012 Ed Santiago <santiago@redhat.com> 0.14-1
 - file_type() - invoke libmagic with COMPRESS, to peek inside gzip'ed files.
 - file_type() - add test suite
