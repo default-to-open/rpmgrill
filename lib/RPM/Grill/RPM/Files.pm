@@ -154,6 +154,11 @@ LINE:
             $x{dirname}  = $1;
             $x{basename} = $2;
         }
+        elsif ($arch eq 'src') {
+            # e.g. 'foo.patch' in SRPM
+            $x{dirname}  = '.';
+            $x{basename} = $x{path};
+        }
         else {
             # FIXME: can this happen?
             warn "$ME: WARNING: Unexpected path '$x{path}' (no slashes)";
