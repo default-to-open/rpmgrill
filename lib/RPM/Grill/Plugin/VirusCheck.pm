@@ -71,7 +71,7 @@ sub analyze {
     unlink $stdout_file;
     if (open OUT, '>', $stdout_file) {
         print OUT $stdout;
-        close STDOUT;
+        close OUT;
     }
 
     # A clamscan positive result looks like:
