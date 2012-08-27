@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.14
+Version:        0.15
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Mon Aug 27 2012 Ed Santiago <santiago@redhat.com> 0.15-1
 - Setxid test: handle new-style (bz479283#c13) whitelist file format.
 
 * Thu Aug  2 2012 Ed Santiago <santiago@redhat.com> 0.14-1
