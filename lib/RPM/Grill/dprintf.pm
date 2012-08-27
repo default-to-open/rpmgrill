@@ -72,6 +72,7 @@ sub dprintf {
         return unless $debug{$package};
     }
 
+    CORE::printf("[%02d:%02d:%02d] ",(CORE::localtime)[2,1,0]); # timestamp
     CORE::printf(@_);
 }
 
