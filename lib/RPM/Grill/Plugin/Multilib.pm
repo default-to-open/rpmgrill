@@ -53,6 +53,7 @@ END_DOC
 sub analyze {
     my $self = shift;
 
+    # Main loop: iterate over all 64-bit RPMs
   RPM64:
     for my $rpm64 (grep { $_->is_64bit } $self->rpms ) {
         # Never check -debuginfo or kernel-headers packages
@@ -61,14 +62,23 @@ sub analyze {
 
         my @files64 = $rpm64->files;
 
+        # Optimization: cache those files into a hash keyed on path.
+        # On a large package such as conga-0.12.2-63.el5 (20,000+ files)
+        # this reduces the inner loop time from 3 hours to ~few seconds.
+        my %by_path;
+        for my $f (@files64) {
+            push @{ $by_path{ $f->path } }, $f;
+        }
+
+        # Secondary loop: iterate over all 32-bit peers of our 64-bit rpm
         for my $rpm32 ($rpm64->multilib_peers) {
             my @files32 = $rpm32->files;
 
-            # FIXME: compare files
-            # FIXME: in which directories?
-            for my $file64 (@files64) {
-                if (my @match = grep { $_->path eq $file64->path } @files32) {
-                    $self->_compare( $file64, $_ )          for @match;
+            # Tertiary loop: for each 32-bit file that has a match (same path)
+            # in the 64-bit rpm, see if there's a multilib conflict.
+            for my $file32 (@files32) {
+                if (my $files64 = $by_path{ $file32->path }) {
+                    $self->_compare( $_, $file32 )          for @$files64;
                 }
             }
         }
