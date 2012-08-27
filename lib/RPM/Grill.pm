@@ -870,6 +870,11 @@ sub _gripe_validate {
 ######################
 #  aggregate_gripes  #  Collapse commonalities among gripes
 ######################
+#
+# FIXME FIXME FIXME! This takes 50 minutes(!) on conga-0.12.2-63.el5
+# because of all the warnings. Optimize. In fact, get rid of this
+# entirely, and add the logic to gripe() using hashes.
+#
 sub aggregate_gripes {
     my $self = shift;
 
