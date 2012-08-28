@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.15
+Version:        0.16
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Tue Aug 28 2012 Ed Santiago <santiago@redhat.com> 0.16-1
 - optimization: near-infinite speedup of Multilib test, gripe aggregation.
 
 * Mon Aug 27 2012 Ed Santiago <santiago@redhat.com> 0.15-1
