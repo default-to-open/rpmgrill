@@ -63,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- optimization: near-infinite speedup of Multilib test, gripe aggregation.
+
 * Mon Aug 27 2012 Ed Santiago <santiago@redhat.com> 0.15-1
 - Setxid test: handle new-style (bz479283#c13) whitelist file format.
 

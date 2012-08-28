@@ -296,7 +296,11 @@ sub invoke_plugin {
         # No error
         $self->{results}->{$module}->{status} = 'completed';
     }
-    $self->aggregate_gripes();    # FIXME?
+
+    # Done with this module; we can clean up our signature cache
+    # FIXME: refactor this
+    delete $self->{gripes_by_signature}{$module};
+
     dprintf "^^^^^: $plugin\n";
 
     # FIXME change gripe() so it goes into results->plugin->gripes
@@ -802,10 +806,79 @@ sub gripe {
         }
     }
 
-    # Push onto an ordered list, keyed on the caller module.
-    push @{ $self->{gripes}->{$module} }, \%actual_gripe;
+    # Usability: aggregate similar gripes. For instance, if we get two or
+    # more gripes that are identical except for the arch (i686,x86_64,...)
+    # we combine them into one.
+    my $sig = gripe_signature(\%actual_gripe);
+    if (my $g = $self->{gripes_by_signature}{$module}{$sig}) {
+        my $found = 0;
+
+        # If this is a new arch or subpackage, append to that field in
+        # the existing gripe. E.g. 'i686' becomes 'i686,x86_64'
+        for my $k (qw(arch subpackage)) {
+            if (my $new = $actual_gripe{$k}) {
+                if (defined $g->{$k}) {
+                    unless ($g->{$k} =~ /(^|,)$new(,|$)/) {
+                        $g->{$k} .= ',' . $new;
+                        $found++;
+                        # FIXME: signal, somehow?
+                    }
+                }
+            }
+        }
+
+        # Same gripe about a different file path? Append to existing one.
+        #
+        # FIXME FIXME FIXME! 2012-08-28 This is currently disabled because
+        # I'm not entirely happy with the newline-separated results. To
+        # reenable, remove 'path' from the qw() in gripe_signature() and
+        # remove this comment. You will also need to fix the selftests,
+        # and possibly change the database schema.
+        if ($actual_gripe{context} && $g->{context}) {
+            if (my $new_path = $actual_gripe{context}{path}) {
+                $g->{context}{path} .= "\n" . $new_path;
+                $found++;
+            }
+        }
+
+        $found
+            or warn "$ME: WARNING: Could not aggregate '$sig'";
+    }
+    else {
+        # We haven't seen this gripe (or a similar one) before.
+        # Push it onto an ordered list, keyed on the caller module.
+        push @{ $self->{gripes}->{$module} }, \%actual_gripe;
+
+        # Preserve signature in case we get a similar gripe later.
+        $self->{gripes_by_signature}{$module}{$sig} = \%actual_gripe;
+    }
 
     return;
+}
+
+#####################
+#  gripe_signature  #  Returns a lookup key for detecting semi-identical gripes
+#####################
+sub gripe_signature {
+    my $gripe = shift;
+    my $sig   = '';
+
+    # If two gripes have different codes or diags, they cannot be identical
+    for my $k (qw(code diag)) {
+        $sig .= "[$k:$gripe->{$k}]"             if $gripe->{$k};
+    }
+
+    # Same for context excerpts / line numbers
+    if (exists $gripe->{context}) {
+#        for my $k (qw(lineno sub excerpt)) {
+        for my $k (qw(lineno sub excerpt path)) {
+            if (my $v = $gripe->{context}{$k}) {
+                $sig .= "[context:$k:$v]";
+            }
+        }
+    }
+
+    return $sig;
 }
 
 #################
@@ -861,68 +934,6 @@ sub _gripe_validate {
         for my $k ( sort keys %$ctx ) {
             $Is_Gripe_Context_Field{$k}
                 or carp "$ME: '$k' is not a valid gripe context field";
-        }
-    }
-
-    return;
-}
-
-######################
-#  aggregate_gripes  #  Collapse commonalities among gripes
-######################
-#
-# FIXME FIXME FIXME! This takes 50 minutes(!) on conga-0.12.2-63.el5
-# because of all the warnings. Optimize. In fact, get rid of this
-# entirely, and add the logic to gripe() using hashes.
-#
-sub aggregate_gripes {
-    my $self = shift;
-
-    ref($self) =~ m{^.*::Plugin::(.*)$}
-        or croak "$ME: Internal error: unexpected caller '$self'";
-    my $module = $1;
-
-    my $gripes = $self->{gripes}->{$module}
-        or return;
-
-    use Clone                   qw(clone);
-    use Test::Deep::NoTest      qw(eq_deeply ignore);
-
-    # Aggregate by arch.  If we have the same message differing
-    # only in arch, consolidate them together.
-    #
-    # Outer loop: iterate over all gripes except for the last one.
-    # Inner loop: iterate over all subsequent gripes.  Compare all but arch.
-    #
-    # If we find two gripes that are identical except for arch, add
-    # the latter's arch to the earlier one and delete the latter.
-    for ( my $i = 0; $i < @$gripes - 1; $i++ ) {
-        my $g0 = $gripes->[$i];
-
-       # Make a copy of this gripe, changing 'arch' to a magic dont-care value
-        my $g0_re = clone($g0);
-        if ( exists $g0_re->{arch} ) {
-            $g0_re->{arch} = ignore();
-        }
-
-        # Inner loop.  Compare all subsequent gripes to our baseline
-    INNER:
-        for ( my $j = $i + 1; $j < @$gripes; $j++ ) {
-            my $g1 = $gripes->[$j];
-            if ( eq_deeply( $g1, $g0_re ) ) {
-
-                # It's a match!  Add arch to the baseline...
-                unless ( $g0->{arch} =~ /\b$g1->{arch}\b/ ) {
-                    $g0->{arch} .= "," . $g1->{arch};
-                    dprintf "arch = $g0->{arch}\n";
-                }
-
-                # ...and delete the current one being examined.
-                splice @$gripes, $j, 1;
-                dprintf "spliced at $j; now have %d\n", scalar(@$gripes);
-
-                redo INNER;
-            }
         }
     }
 
