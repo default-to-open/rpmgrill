@@ -1,0 +1,71 @@
+<!-- To convert to html: pandoc -o foo.html README.AAA_FIRST -->
+
+Overview
+========
+
+This is rpmgrill, the actually-do-the-tests part of
+[Brewtap](https://home.corp.redhat.com/wiki/brewtap). It's a set of analysis
+tests that run against a particular RPM build, checking for common
+problems. Or, TL;DR, rpmdiff without the "diff".
+
+For example, rpmgrill can warn about missing man pages; "make" errors
+or warnings buried in the build logs; or common spec file mistakes.
+rpmgrill does not know about baselines or previous builds; it does
+no comparisons, only isolated analysis of one build.
+
+Terminology
+===========
+
+Although rpmgrill was written and intended to be independent of
+Red Hat's internal build system, that hasn't actually happened
+and may not happen. Therefore I will speak freely here of Brew,
+instead of using convoluted terms like "rpm builds" and "sets of
+binary + noarch RPMs built from one SRPM." I will also speak
+freely of internal tools such as rpmdiff and Package Wrangler.
+
+Context
+=======
+
+Input: one fully-unpacked brew build; see the
+[brew-unpack](http://git.engineering.redhat.com/?p=users/esantiag/brew-unpack.git;a=summary) tool for an overview of how a full brew build gets extracted. Be sure to read the script comments.
+
+Output: Three data files, two of which are pretty much the same:
+
+    foo.xml        \
+    foo.yaml        - Test results (same thing, different formats)
+
+    foo-linkage.txt - Library linkage results, used by Package Wrangler
+
+Invoking
+========
+
+Assuming you have all the dependencies installed (see specfile)
+and `/mnt/redhat` mounted, you should be able to:
+
+    $ brew-unpack $nvr my-$nvr
+    $ perl -I$(pwd)/lib ./bin/rpmgrill my-$nvr
+
+...where `$nvr` is anything built under Brew. (`brew-unpack`
+also groks scratch builds; use `--help` for more info). E.g.:
+
+    $ brew-unpack coreutils-8.4-9.el6  my-coreutils-8.4-9.el6
+      (unpacks into a new subdirectory my-coreutils-8.4-9.el6.
+       Yes, you could call this anything. But come on.)
+    $ perl -I$(pwd)/lib ./bin/rpmgrill my-coreutils-8.4-9.el6
+      (Results files will be under the my-* subdirectory)
+
+rpmgrill runs silently, although there may be occasional output
+during development of tests. This output is not preserved anywhere;
+it's only useful for development. For more visibility, do:
+
+    $ RPMGRILL_DEBUG=all perl .....
+
+See `lib/RPM/Grill/dprintf.pm` for a description of this envariable.
+
+Developing
+==========
+
+To add, extend, or fix individual rpmgrill tests see README.devel-tests
+
+For deeper development, such as ongoing maintenance or infrastructure
+development (or perhaps infrastructure bug fixes), see README.devel-deep

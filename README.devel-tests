@@ -1,0 +1,70 @@
+<!-- To convert to html: pandoc -o foo.html README.devel-test -->
+
+About This README
+=================
+
+This document describes how to add, extend, or fix individual
+rpmgrill test plugins. It is targeted to commando developers:
+those who simply want to jump in, write some test code, dash
+back out, nobody gets hurt. You must be familiar with Red Hat
+build processes, with RPM and specfile development (to a degree;
+you don't need to be Panu), and be willing to dabble in Perl.
+No Perl expertise needed, just the ability to learn by example.
+
+You will need some basic familiarity with rpmgrill and its
+invocation; see README.AAA_FIRST.
+
+Overview
+========
+
+All plugins live under the `lib/RPM/Grill/Plugin/` subdirectory.
+All plugins work the same way:
+
+1. Someone (rpmgrill) invokes the plugin's **->analyze()** method. No args.
+   `$self` will be an `RPM::Grill::Plugin::Xxxxx` object, where `Xxxxx`
+   is the plugin package name.
+2. `analyze()` examines RPMs and invokes **`->gripe()`** when it
+   detects a problem.
+
+That's it. `analyze()` then returns; as of this writing (Sept 2012)
+its return values is ignored. `analyze()` can even die: the calling code
+will trap it and mark the test as failed.
+
+First Decision: What to Analyze
+-------------------------------
+
+To date, most plugins work in one of two ways:
+
+a) check something in the SRPM, e.g. the specfile
+b) check something in all (or possibly a subset of) built RPMs.
+
+(there are some exceptions: `BuildLog.pm`, which examines log files
+outside of the built RPMs; `VirusCheck.pm` which simply checks files
+without knowing or caring about their RPMness. If that's what you need,
+go peruse them and skip this section.)
+
+If you're checking the specfile, you'll probably want a loop like:
+
+    for my $line ($self->specfile->lines) { ... }
+
+See `Patches.pm` and `SpecFileEncoding.pm` for examples.
+
+For almost anything else, you'll want to start with a loop such as:
+
+     for my $rpm ($self->rpms) {
+         for my $f ($rpm->files) {
+             $self->_do_something_with( $f );
+         }
+     }
+
+See `Setxid.pm` for a simple example of this type of test;
+or `Manifest.pm` for a more complex one.
+
+Testing
+=======
+
+The test scaffolding is clunky. I'm sorry. But you're going to write
+regression tests anyway, because that's the kind of person you are.
+
+Each plugin `Xxxxx` has a corresponding subdirectory `t/RPM/Grill/Plugin/Xxxxx`
+containing one or more `NNfoo.t` scripts.
