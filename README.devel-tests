@@ -30,6 +30,14 @@ That's it. `analyze()` then returns; as of this writing (Sept 2012)
 its return values is ignored. `analyze()` can even die: the calling code
 will trap it and mark the test as failed.
 
+Zeroth Decision: Can You Piggyback?
+-----------------------------------
+
+Before you start writing code: does your test fit into any of the
+existing plugins? You can save development effort as well as run time
+by adding your logic to one of the existing tests. Keep reading, but
+keep in mind the possibility of adding on to an existing test.
+
 First Decision: What to Analyze
 -------------------------------
 
@@ -60,6 +68,44 @@ For almost anything else, you'll want to start with a loop such as:
 See `Setxid.pm` for a simple example of this type of test;
 or `Manifest.pm` for a more complex one.
 
+Second Decision: How/What to Gripe
+----------------------------------
+
+The heart of rpmgrill is the gripe messages. These are collected
+by rpmgrill, and preserved in such a way that Brewtap can store
+into a database for presenting to developers. A minimal call looks like:
+
+      $self->gripe({
+          code => 'MyGripeCode',
+          diag => "This is a human-readable message complaining about $file",
+      });
+
+Those are the crucial elements: `code` is a StudlyCaps error code
+unique to this gripe (or, in some special cases, shared among a
+very few gripes); `diag` is a human-readable string explaining
+the warning and perhaps giving context (e.g. filename).
+
+When applicable, you might want to include `arch` and/or `subpackage`.
+These will be included automatically if you use `$rpm->gripe()` or
+`$f->gripe()` (instead of `$self`).
+
+Context ... well, I didn't really get it right. I'm sorry. The gist
+is that you can use it to specify a filename, or an excerpt from a file
+(such as a log file or a bad config entry), and/or a line number:
+
+    $self->gripe({
+                  code    => '...', diag => '...',
+                  context => {
+                       path => '/path/to/file',
+                       excerpt => $excerpt,
+                  } });
+
+The problem is that sometimes 'path' is a specfile; and that
+sometimes you're complaining *about* a path (e.g. 'Fedora in Filename')
+and sometimes about something *in* the file. And sometimes you
+want to aggregate files together into one message ('The following
+files have such-and-such a problem: ...'), sometimes you don't.
+
 Testing
 =======
 
@@ -67,4 +113,13 @@ The test scaffolding is clunky. I'm sorry. But you're going to write
 regression tests anyway, because that's the kind of person you are.
 
 Each plugin `Xxxxx` has a corresponding subdirectory `t/RPM/Grill/Plugin/Xxxxx`
-containing one or more `NNfoo.t` scripts.
+containing one or more `NNfoo.t` scripts. Each of those does some setup,
+invokes the plugin (or perhaps a function inside the plugin), then
+checks results. This is complicated because of all the setup needed
+by each plugin (populated RPM::Grill object) and because of the
+structure of the gripes.
+
+I recommend starting with `t/RPM/Grill/Plugin/ManPages/10basic.t`.
+At this writing (September 2012) it's the cleanest test script and
+the only one using `t/lib/FakeTree.pm`, a reusable library for
+doing the RPM::Grill setup work.
