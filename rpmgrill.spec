@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.16
+Version:        0.16.1
 Release:        1%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
