@@ -51,13 +51,13 @@ sub analyze {
     my $self = shift;
 
     #
-    # Main loop.  Finds .desktop and .directory files in all arches & pkgs.
-    # For each one, we invoke TWO checking functions:
+    # Main loop.  Finds .desktop and .directory files in all arches & pkgs
+    # (except for src). For each one, we invoke TWO checking functions:
     #
     #   _desktop_file_validate()  - invokes external checker
     #   _check_desktop_file()     - internal checks
     #
-    for my $rpm ( $self->rpms ) {
+    for my $rpm ( grep { $_->arch ne 'src' } $self->rpms ) {
         for my $f ( $rpm->files ) {
             if ( $f->is_reg && $f->{path} =~ m{[^/]\.(desktop|directory)$} ) {
                 # Note that $f has _arch and _subpackage already

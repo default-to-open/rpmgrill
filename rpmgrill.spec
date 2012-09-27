@@ -63,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- DesktopLint test: bug fix: don't look in srpms
+
 * Tue Aug 28 2012 Ed Santiago <santiago@redhat.com> 0.16-1
 - optimization: near-infinite speedup of Multilib test, gripe aggregation.
 

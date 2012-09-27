@@ -248,6 +248,19 @@ Type=Application
                    lineno=>'4' },
  }
 
+-------exec-missing-(src)------------------------------------------------------
+# See e.g. http://brewtap.app.eng.bos.redhat.com/nvr/git/1.7.12/2.el7
+# in which we complain about a .desktop file in the srpm
+
+>> -rw-r--r--  root  root 0 /src/mypkg/subdir/foo.desktop
+[Desktop Entry]
+Name=Foo
+Comment=Bar
+Exec=foo
+Icon=no-icon
+Terminal=false
+Type=Application
+
 -------exec-is-in-another-arch-------------------------------------------------
 # desktop file is in noarch, executable is in i386
 >> -rw-r--r--  root  root 0 /noarch/mypkg/usr/share/applications/foo.desktop
