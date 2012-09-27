@@ -315,6 +315,9 @@ sub _check_icon {
             $icon_re = qr{\Q/$icon\E$};         # Look in any directory
         }
     }
+    elsif ($icon =~ m{^/}) {    # Already an explicit path?
+        $icon_re = qr{^\Q$icon\E$};
+    }
     else {
         $icon_re = qr{^/usr/share/(icons|pixmaps)/.*\Q/$icon\E\.(png|xpm|svg)$};
     }
