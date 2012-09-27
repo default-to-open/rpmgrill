@@ -39,8 +39,8 @@ use File::Path                  qw(mkpath);
 #
 # $layout needs to be described in detail. Here's an example:
 #
-#     >> -rwxr-xr-x  root root /i386/mypkg/usr/sbin/foo
-#     >> -rw-r--r--  root root /x86_64/mypkg-docs/usr/share/man/man1/foo.1
+#     >> -rwxr-xr-x  root root 0 /i386/mypkg/usr/sbin/foo
+#     >> -rw-r--r--  root root 0 /x86_64/mypkg-docs/usr/share/man/man1/foo.1
 #     blah blah blah
 #     blah blah blah line 2
 #
@@ -48,8 +48,8 @@ use File::Path                  qw(mkpath);
 # first of which is empty and the second has two lines.
 #
 # Leading '>> ' (the space is important) denotes a new file. The fields
-# are, in order: mode, owner, group, path. Note that path includes arch
-# and subpackage name but MUST NOT include the "payload" string which
+# are, in order: mode, owner, group, flags, path. Note that path includes
+# arch and subpackage name but MUST NOT include the "payload" string which
 # is typically part of an extracted file. We add that ourself.
 #
 # FIXME: should we also interpret the $expected_gripes string?
