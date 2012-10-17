@@ -44,9 +44,9 @@ our @NVR_Fields = qw(name version release);
 # 32- and 64-bit architectures. Left-hand side of this table
 # lists 32-bit ones, right-hand side 64.
 our $Arch_Map = <<'END_ARCH_MAP';
-i386 i686 athlon  | x86_64 ia64
-ppc               | ppc64
-s390              | s390x
+i386 i586 i686 athlon  | x86_64 ia64
+ppc                    | ppc64
+s390                   | s390x
 END_ARCH_MAP
 
 our %Multilib_Peers;
