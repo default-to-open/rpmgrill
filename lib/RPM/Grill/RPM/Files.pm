@@ -500,6 +500,37 @@ sub elf_has_stabs {
     return $self->{_eu_readelf}{stabs};
 }
 
+####################
+#  dw_at_producer  #  "producer" string for DWARF files; only RHEL7+
+####################
+sub dw_at_producer {
+    my $self = shift;
+
+    # Only interested in .debug files
+    # FIXME: is this true? Do/will we ever ship debuginfo in a non-.debug file?
+    return unless $self->path =~ /\.debug$/;
+
+    return unless $self->is_elf;
+
+    if (! exists $self->{_dw_at_producer}) {
+        # Initialize to a sane default; this avoids rerunning eu-readelf
+        $self->{_dw_at_producer} = "";
+
+        my @cmd = ('eu-readelf', '--debug-dump=info', $self->extracted_path);
+        open my $readelf_fh, '-|', @cmd
+            or die "$ME: Could not fork: $!\n";
+        while (my $line = <$readelf_fh>) {
+            if ($line =~ /^\s+producer\s+\(strp\)\s+\"(.*)\"/) {
+                $self->{_dw_at_producer} = $1;
+            }
+        }
+        close $readelf_fh;
+        warn "$ME: WARNING: command exited with nonzero status: @cmd\n" if $?;
+    }
+
+    return $self->{_dw_at_producer};
+}
+
 # END   code and helpers for running eu-readelf
 ###############################################################################
 # BEGIN Code and helpers for converting string (ls) mode to octal

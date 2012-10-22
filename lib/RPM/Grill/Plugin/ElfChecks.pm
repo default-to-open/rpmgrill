@@ -396,35 +396,20 @@ sub _check_cplusplus_abi_201206 {
     my $self = shift;
     my $f    = shift;
 
-    # Only interested in .debug files
-    # FIXME: is this true? Do/will we ever ship debuginfo in a non-.debug file?
-    return unless $f->path =~ /\.debug$/;
+    my $producer = $f->dw_at_producer
+        or return;
 
-    my $found_suspect_dw_at_producer = 0;
-
-    # The regex below is from Jakub Jelinek; see:
+    # This regex is from Jakub Jelinek; see:
     #  http://post-office.corp.redhat.com/archives/tools/2012-June/msg00023.html
-    my @cmd = ('eu-readelf', '--debug-dump=info', $f->extracted_path);
-    open my $readelf_fh, '-|', @cmd
-        or die "$ME: Could not fork: $!\n";
-    while (my $line = <$readelf_fh>) {
-        if ($line =~ />\s+producer\s+\(strp\)\s+\".*-std=(c|gnu)\+\+(0x|11)/) {
-            ++$found_suspect_dw_at_producer;
-        }
-    }
-    close $readelf_fh;
-    warn "$ME: WARNING: command exited with nonzero status: @cmd\n" if $?;
+    return unless $producer =~ /-std=(c|gnu)\+\+(0x|11)/;
+
+    # Uh-oh.
 
     # FIXME: improve the diag text
-    if ($found_suspect_dw_at_producer) {
-        $self->gripe({
-            arch       => $f->arch,
-            subpackage => $f->subpackage,
-            code       => 'BadCppABI',
-            diag       => "C++98/C++11 ABI incompatibility",
-            context    => { path => $f->path },
-        });
-    }
+    $f->gripe({
+        code       => 'BadCppABI',
+        diag       => "C++98/C++11 ABI incompatibility",
+    });
 }
 
 # END   libstdc++ c++98 & c++11 ABI incompatibility (June 2012)
