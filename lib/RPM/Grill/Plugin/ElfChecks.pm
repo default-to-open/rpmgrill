@@ -408,7 +408,7 @@ sub _check_cplusplus_abi_201206 {
     open my $readelf_fh, '-|', @cmd
         or die "$ME: Could not fork: $!\n";
     while (my $line = <$readelf_fh>) {
-        if ($line =~ />\s+DW_AT_producer\s*:.*-std=(c|gnu)\+\+(0x|11)/) {
+        if ($line =~ />\s+producer\s+\(strp\)\s+\".*-std=(c|gnu)\+\+(0x|11)/) {
             ++$found_suspect_dw_at_producer;
         }
     }
