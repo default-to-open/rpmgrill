@@ -65,6 +65,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 - DesktopLint test: bug fix: don't look in srpms
 - ElfChecks: AUGH. New BadC++ test has been a NOP for all these months.
+- VirusCheck: evaluate BitDefender (bdscan)
 
 * Tue Aug 28 2012 Ed Santiago <santiago@redhat.com> 0.16-1
 - optimization: near-infinite speedup of Multilib test, gripe aggregation.
