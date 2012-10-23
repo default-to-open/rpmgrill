@@ -54,6 +54,16 @@ sub analyze {
     # and pick out the arch/subpkg components
     my $d = $self->path;
 
+    $self->_analyze_clamscan();
+}
+
+#######################
+#  _analyze_clamscan  #  Analyze using ClamAV
+#######################
+sub _analyze_clamscan {
+    my $self = shift;
+
+    my $d = $self->path;
     my @cmd = ( 'clamscan', '--recursive', '--infected', '--stdout', $d );
     my ( $stdout, $stderr );
     run \@cmd, \undef, \$stdout, \$stderr, timeout(3600);    # 1 hour!
