@@ -30,7 +30,6 @@ Makefile
 MANIFEST
 META.json
 META.yml
-README
 README.about
 README.gripe
 t/00.load.t
