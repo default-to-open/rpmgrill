@@ -1,6 +1,6 @@
 Name:           rpmgrill
 Version:        0.16.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
 License:        Red Hat internal.  Do not redistribute.
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Tue Oct 23 2012 Ed Santiago <santiago@redhat.com> 0.16.1-2
 - DesktopLint test: bug fix: don't look in srpms
 - ElfChecks: AUGH. New BadC++ test has been a NOP for all these months.
 - VirusCheck: evaluate BitDefender (bdscan)
