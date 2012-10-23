@@ -17,6 +17,7 @@ our $VERSION = '0.01';
 
 use Carp;
 use CGI                 qw(escapeHTML);
+use File::Temp          qw(tempfile);
 use IPC::Run            qw(run timeout);
 
 ###############################################################################
@@ -52,9 +53,8 @@ sub analyze {
     # has a horrible startup cost, O(1-2 seconds), which adds up
     # over (e.g.) 5 arches * 3 subpackages.  Let's just run it once,
     # and pick out the arch/subpkg components
-    my $d = $self->path;
-
     $self->_analyze_clamscan();
+    $self->_analyze_bdscan();
 }
 
 #######################
@@ -132,7 +132,7 @@ INFECTED_FILE:
 
         $f =~ m{^(.*?):\s+(.*)}
             or die;
-        my ( $path, $msg ) = ( $1, $2 );
+        my ( $path, $msg ) = ( $1, escapeHTML($2) );
 
         # FIXME - this can't happen?
         $path =~ s{^$d/}{}
@@ -180,6 +180,94 @@ INFECTED_FILE:
 
         $self->gripe( \%gripe );
     }
+}
+
+
+#####################
+#  _analyze_bdscan  #  Analyze using BitDefender
+#####################
+sub _analyze_bdscan {
+    my $self = shift;
+
+    # bdscan is a commercial product, and is not available everywhere.
+    return unless -e '/usr/bin/bdscan';
+
+    my $d = $self->path;
+
+    # We need to force bdscan to write to a file. Although bdscan does
+    # write to stdout, it compresses long paths:
+    #
+    #    /home/esm ... n/myfile1  infected: EICAR-Test-File (not a virus)
+    #
+    # ...which makes it unusable for our purposes. When writing to log file,
+    # bdscan writes the full path.
+    my (undef, $tmpfile) = tempfile("$ME.bdscan.XXXXXX", TMPDIR=>1,OPEN=>0);
+
+    my @cmd = ( 'bdscan', '--no-list', "--log=$tmpfile", '--verbose', $d );
+    my ( $stdout, $stderr );
+    run \@cmd, \undef, \$stdout, \$stderr, timeout(3600);    # 1 hour!
+    my $exit_status = $?;
+
+    # First: check to see if bdscan found anything.
+    open my $bdscan_fh, '<', $tmpfile
+        or do {
+            my %gripe;
+            if ($exit_status) {
+                $gripe{code} = 'BdScanFailed';
+                $gripe{diag} = "bdscan exited with error status $exit_status";
+
+                if ($stderr) {
+                    $gripe{context} = { excerpt => $stderr };
+                }
+            }
+            else {                      # Normal (non-error) exit
+                %gripe = (
+                    code => 'BdScanMissingResults',
+                    diag => 'bdscan failed to write output file',
+                );
+            }
+
+            $self->gripe(\%gripe);
+            return;
+        };
+
+    # Output file exists. Read it.
+    my $bdscan_version_string = 'bdscan version unavailable';
+    while (my $line = <$bdscan_fh>) {
+        if ($line =~ m{^//\s+Core\s*:\s+(.*)}) {        # bdscan version
+            $bdscan_version_string = $1;
+        }
+        elsif ($line =~ m{^//\s}) {                     # Comment
+            next;
+        }
+        elsif ($line =~ m{^(/\S+)\t(.*)$}) {
+            my ($path, $status) = ($1, escapeHTML($2));
+            if ($status ne 'ok') {
+                my %gripe = (
+                    code => 'BitDefender',
+                );
+
+                if ( $path =~ s{(^/.*)?$d/([^/]+)/([^/]+)/(payload|nested)/}{/} ) {
+                    $gripe{arch}       = $2;
+                    $gripe{subpackage} = $3;
+                }
+                else {
+                    warn "WEIRD: VirusCheck: Unknown path '$path'";
+                }
+
+                $gripe{context}{path} = escapeHTML($path);
+                $gripe{diag} = "$status ($bdscan_version_string)";
+
+
+                $self->gripe(\%gripe);
+            }
+        }
+    }
+
+#    print "status: $?\n\nstdout: $stdout\n\nstderr: $stderr\n\n";
+
+    # FIXME: unlink $tmpfile;
+
 }
 
 # FIXME: aggregator?
