@@ -203,7 +203,7 @@ sub _analyze_bdscan {
     # bdscan writes the full path.
     my (undef, $tmpfile) = tempfile("$ME.bdscan.XXXXXX", TMPDIR=>1,OPEN=>0);
 
-    my @cmd = ( 'bdscan', '--no-list', "--log=$tmpfile", '--verbose', $d );
+    my @cmd = ( 'bdscan', '--exclude-ext=rpm', '--no-list', "--log=$tmpfile", '--verbose', $d );
     my ( $stdout, $stderr );
     run \@cmd, \undef, \$stdout, \$stderr, timeout(3600);    # 1 hour!
     my $exit_status = $?;
@@ -240,7 +240,7 @@ sub _analyze_bdscan {
         elsif ($line =~ m{^//\s}) {                     # Comment
             next;
         }
-        elsif ($line =~ m{^(/\S+)\t(.*)$}) {
+        elsif ($line =~ m{^(/\S+)\t(.*)$}) {            # File status
             my ($path, $status) = ($1, escapeHTML($2));
             # FIXME: bdscan will say things like 'ok <- gzip.xmd'
             if ($status !~ /^ok(\s+.*)?$/) {
@@ -265,10 +265,8 @@ sub _analyze_bdscan {
         }
     }
 
-#    print "status: $?\n\nstdout: $stdout\n\nstderr: $stderr\n\n";
-
-    # FIXME: unlink $tmpfile;
-
+    # Clean up.
+    unlink $tmpfile;
 }
 
 # FIXME: aggregator?
