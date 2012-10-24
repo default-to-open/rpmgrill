@@ -1,6 +1,6 @@
 Name:           rpmgrill
-Version:        0.16.1
-Release:        2%{?dist}
+Version:        0.16
+Release:        3%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
 License:        Red Hat internal.  Do not redistribute.
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Wed Oct 24 2012 Ed Santiago <santiago@redhat.com> 0.16-3
 - BitDefender cleanup
 - Major speed optimization on eu-readelf processing
 
