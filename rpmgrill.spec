@@ -63,6 +63,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- BitDefender cleanup
+- Major speed optimization on eu-readelf processing
+
 * Tue Oct 23 2012 Ed Santiago <santiago@redhat.com> 0.16.1-2
 - DesktopLint test: bug fix: don't look in srpms
 - ElfChecks: AUGH. New BadC++ test has been a NOP for all these months.
