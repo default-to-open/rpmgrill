@@ -335,16 +335,26 @@ FIXME document methods
 
 =item   ClamAV
 
-The ClamAV "antivirus" tool has found something suspicious in
-your package. This is so unlikely, so rare, so exceptional, that
-it's gotta be worth looking into.
+The L<ClamAV|http://www.clamav.net/> antivirus tool has found
+something suspicious in your package. This is so unlikely, so
+rare, so exceptional, that it's gotta be worth looking into.
+
+A warning from this test needs investigating. First, because there are
+customers who run automated virus scans on incoming software and might
+not appreciate having to investigate a trigger coming from Red Hat
+software. Second, and much less likely (but not impossible) because
+it might be a real problem.
 
 =item   BitDefender
 
-The BitDefender antivirus tool has
+The L<BitDefender antivirus tool|http://www.bitdefender.com/> has
 claimed to have found a problem. As of 2012-10-23 this is EXPERIMENTAL.
 
-http://www.bitdefender.com/
+A warning from this test needs investigating. First, because there are
+customers who run automated virus scans on incoming software and might
+not appreciate having to investigate a trigger coming from Red Hat
+software. Second, and much less likely (but not impossible) because
+it might be a real problem.
 
 =back
 
