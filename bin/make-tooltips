@@ -230,6 +230,15 @@ sub view_seq_link {
         return "<a href=\"$1\">$1</a>";
     }
 
+    # ARGH! I can't figure this out, but somehow this:
+    #    The L<BitDefender antivirus tool|http://www.bitdefender.com/> has
+    # ...gets passed to us as:
+    #    'BitDefender|<a href="http://.../">http://www.bitdefender.com/</a>'
+    if ($link =~ m{^(.*)\|<a href="(.*)">\2</a>}) {
+        return "<a href=\"$2\">$1</a>";
+    }
+
+
     die "FIXME: Cannot grok '$link'";
 }
 
