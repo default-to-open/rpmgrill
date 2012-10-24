@@ -522,10 +522,23 @@ sub dw_at_producer {
         while (my $line = <$readelf_fh>) {
             if ($line =~ /^\s+producer\s+\(strp\)\s+\"(.*)\"/) {
                 $self->{_dw_at_producer} = $1;
+                # Done. Don't waste time looking at the rest of eu-readelf
+                # results. Yes, this is kind of rude, but seriously eu-readelf
+                # can take *minutes* on a large file and we're just ignoring
+                # all of it anyway.
+                last;
+            }
+            elsif ($. > 30) {
+                # Simulate 'head -30'. If we haven't seen a producer by now,
+                # it's probably because we're looking at a RHEL5 binary.
+                # As above, avoid the cost of a complete eu-readelf.
+                last;
             }
         }
         close $readelf_fh;
-        warn "$ME: WARNING: command exited with nonzero status: @cmd\n" if $?;
+        # FIXME: we don't check for error status, because we're expecting
+        # the child to SIGPIPE. But should we check for other errors?
+#        warn "$ME: WARNING: command exited with nonzero status: @cmd\n" if $?;
     }
 
     return $self->{_dw_at_producer};
