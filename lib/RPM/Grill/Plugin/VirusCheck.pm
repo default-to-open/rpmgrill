@@ -242,7 +242,8 @@ sub _analyze_bdscan {
         }
         elsif ($line =~ m{^(/\S+)\t(.*)$}) {
             my ($path, $status) = ($1, escapeHTML($2));
-            if ($status ne 'ok') {
+            # FIXME: bdscan will say things like 'ok <- gzip.xmd'
+            if ($status !~ /^ok(\s+.*)?$/) {
                 my %gripe = (
                     code => 'BitDefender',
                 );
@@ -340,7 +341,12 @@ The ClamAV "antivirus" tool has found something suspicious in
 your package. This is so unlikely, so rare, so exceptional, that
 it's gotta be worth looking into.
 
-FIXME
+=item   BitDefender
+
+The BitDefender antivirus tool has
+claimed to have found a problem. As of 2012-10-23 this is EXPERIMENTAL.
+
+http://www.bitdefender.com/
 
 =back
 
