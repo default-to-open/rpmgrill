@@ -516,8 +516,9 @@ sub dw_at_producer {
         # Initialize to a sane default; this avoids rerunning eu-readelf
         $self->{_dw_at_producer} = "";
 
+        local $SIG{PIPE} = 'DEFAULT';   # FIXME, do we need this??
         my @cmd = ('eu-readelf', '--debug-dump=info', $self->extracted_path);
-        open my $readelf_fh, '-|', @cmd
+        my $kidpid = open my $readelf_fh, '-|', @cmd
             or die "$ME: Could not fork: $!\n";
         while (my $line = <$readelf_fh>) {
             if ($line =~ /^\s+producer\s+\(strp\)\s+\"(.*)\"/) {
@@ -535,6 +536,17 @@ sub dw_at_producer {
                 last;
             }
         }
+
+        # FIXME, how can we get rid of this? In theory, just closing the
+        # filehandle should cause the child process to die with SIGPIPE
+        # as soon as it tries output (which will be very soon). In reality
+        # it doesn't, and strace shows the eu-readelf child streaming a
+        # seemingly unending series of statements, getting SIGPIPE/EPIPE,
+        # and going on. I don't have time to play with this, but I really
+        # can't afford to have brewtap spend 4 hours on xulrunner and then
+        # time out and die... so this kill is a kludgy workaround.
+        kill -2, $kidpid;
+
         close $readelf_fh;
         # FIXME: we don't check for error status, because we're expecting
         # the child to SIGPIPE. But should we check for other errors?
