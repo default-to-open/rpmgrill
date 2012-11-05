@@ -36,7 +36,7 @@ use_ok 'RPM::Grill::RPM::Files'           or exit;
 # override open(), so we can feed fake eu-readelf data to the script
 #
 package RPM::Grill::RPM::Files;
-use subs qw(open);
+use subs qw(open kill);
 package main;
 
 our $EU_READELF_FAKE = '';
@@ -57,6 +57,10 @@ our $EU_READELF_FAKE = '';
     # e.g. 20gripes.d/10-basic/eu-readelf
     return CORE::open($_[0], '<', \$EU_READELF_FAKE);
 };
+
+# Eeeek! Files.pm performs a kill on the forked process. If we don't
+# override kill(), we end up losing our entire login session.
+*RPM::Grill::RPM::Files::kill = sub { };
 
 
 for my $t (@tests) {
