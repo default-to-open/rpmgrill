@@ -279,8 +279,8 @@ sub _analyze_bdscan {
 sub _analyze_avira {
     my $self = shift;
 
-    # bdscan is a commercial product, and is not available everywhere.
-    my $avscan = '/usr/lib/AntiVir/guard/avscan';
+    # avscan is a commercial product, and is not available everywhere.
+    my $avscan = '/usr/bin/avscan';
     return unless -e $avscan;
 
     my $d = $self->path;
