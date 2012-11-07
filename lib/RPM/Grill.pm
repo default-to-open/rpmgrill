@@ -937,6 +937,12 @@ sub _gripe_validate {
         }
     }
 
+    # FIXME: the following gripe fields are required
+    for my $required (qw(code diag)) {
+        exists $gripe->{$required}
+            or croak "$ME: gripe missing required '$required' field";
+    }
+
     return;
 }
 
