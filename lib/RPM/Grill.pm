@@ -27,12 +27,19 @@ use RPM::Grill::RPM;
 ###############################################################################
 # BEGIN user-configurable section
 
-# When a plugin calls ->gripe, these are the fields it can set.
-# FIXME: make '*' mean 'required'?
-# FIXME: add severity
-# FIXME: add 'package'?  Or should that be automatic?
-our @Gripe_Fields         = qw(code arch subpackage context diag);
+# When a plugin calls ->gripe, these are the fields it can set. A '*'
+# next to the name means 'this is a required field'.
+our @Gripe_Fields = qw(code* arch subpackage context diag* severity confidence);
+
+# Which of these are mandatory? DO NOT MOVE THIS LINE. Aside from defining
+# the list of required fields, this also has the side effect of stripping
+# the '*' (asterisk) from the field names. Failure to do this early will
+# result in a very-much-not-what-you-want definition of %Is_Gripe_Field
+our @Required_Gripe_Fields = grep { s/\*// } @Gripe_Fields;
+
+# 'Context' is a subhash inside a gripe.
 our @Gripe_Context_Fields = qw(path lineno sub excerpt);
+
 
 # Convert that to a usable hash form
 our %Is_Gripe_Field         = map { $_ => 1 } @Gripe_Fields;
@@ -938,7 +945,7 @@ sub _gripe_validate {
     }
 
     # FIXME: the following gripe fields are required
-    for my $required (qw(code diag)) {
+    for my $required (@Required_Gripe_Fields) {
         exists $gripe->{$required}
             or croak "$ME: gripe missing required '$required' field";
     }
