@@ -55,6 +55,7 @@ sub analyze {
     # and pick out the arch/subpkg components
     $self->_analyze_clamscan();
     $self->_analyze_bdscan();
+    $self->_analyze_avira();
 }
 
 #######################
@@ -265,9 +266,87 @@ sub _analyze_bdscan {
         }
     }
 
+    close $bdscan_fh;
+
     # Clean up.
     unlink $tmpfile;
 }
+
+
+####################
+#  _analyze_avida  #  Analyze using Avira
+####################
+sub _analyze_avira {
+    my $self = shift;
+
+    # bdscan is a commercial product, and is not available everywhere.
+    my $avscan = '/usr/lib/AntiVir/guard/avscan';
+    return unless -e $avscan;
+
+    my $d = $self->path;
+
+    # We need to force avscan to write to a file.    #
+    my (undef, $tmpfile) = tempfile("$ME.avscan.XXXXXX", TMPDIR=>1,OPEN=>0);
+
+    my @cmd = ($avscan, '--scan-mode=all',
+               '--detect-prefixes=alltypes',
+               '-s',
+               '--scan-in-archive',
+               '--batch',
+               "--log-file=$tmpfile",
+               $d);
+    my ( $stdout, $stderr );
+    run \@cmd, \undef, \$stdout, \$stderr, timeout(3600);    # 1 hour!
+    my $exit_status = $?;
+
+    # First: check to see if bdscan found anything.
+    open my $avscan_fh, '<', $tmpfile
+        or do {
+            my %gripe;
+            if ($exit_status) {
+                $gripe{code} = 'AvScanFailed';
+                $gripe{diag} = "avscan exited with error status $exit_status";
+
+                if ($stderr) {
+                    $gripe{context} = { excerpt => $stderr };
+                }
+            }
+            else {                      # Normal (non-error) exit
+                %gripe = (
+                    code => 'AvScanMissingResults',
+                    diag => 'avscan failed to write output file',
+                );
+            }
+
+            $self->gripe(\%gripe);
+            return;
+        };
+
+    my $avscan_version_string = 'bdscan version unavailable';
+    while (my $line = <$avscan_fh>) {
+        next unless $line =~ s/^.*: (ALERT|WARNING)\s+//;
+        my $type = $1;
+
+        chomp $line;
+
+        my %gripe = (
+            code => 'AvScan',
+        );
+        if ($line =~ s/^"(.*?)"/file/) {
+            $gripe{context}{path} = $1;
+            # FIXME: get arch, subpackage
+        }
+
+        $gripe{diag} = $line;
+        $self->gripe(\%gripe);
+    }
+
+    close $avscan_fh;
+
+    # Clean up
+    #unlink $tmpfile;
+}
+
 
 # FIXME: aggregator?
 
