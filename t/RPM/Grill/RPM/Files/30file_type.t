@@ -83,7 +83,7 @@ __DATA__
 empty.c: empty
 
 --------------------------------------------------------------------------------
-foo.c: ASCII C program text
+foo.c: C source, ASCII text
 /*
 ** foo.c
 */
@@ -97,19 +97,19 @@ foo.sh: POSIX shell script, ASCII text executable
 echo hi
 
 --------------------------------------------------------------------------------
-foo.pl: a /usr/bin/perl script, ASCII text executable
+foo.pl: Perl script, ASCII text executable
 #!/usr/bin/perl
 #
 # This one invokes perl directly
 
 --------------------------------------------------------------------------------
-foo2.pl: a perl script, ASCII text executable
+foo2.pl: Perl script, ASCII text executable
 #!/usr/bin/env perl
 #
 # This one invokes perl via env
 
 --------------------------------------------------------------------------------
-foo.pl.gz*: a /usr/bin/perl script, ASCII text executable (gzip compressed data, was "foo.pl", from Unix, last modified: Thu Jul 26 13:33:23 2012, max compression)
+foo.pl.gz*: Perl script, ASCII text executable (gzip compressed data, was "foo.pl", from Unix, last modified: Thu Jul 26 13:33:23 2012, max compression)
 H4sICGN/EVACA2Zvby5wbABTVtQvLS7ST8rM0y9ILcrhUuZSVgjJyCxWyM9LVcjMK8vPTi1WAMko
 pGQWpSaX5FRyAQBWpq1nMwAAAA==
 
