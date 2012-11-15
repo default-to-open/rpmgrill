@@ -5,7 +5,7 @@
       code => 'UseraddBadShell',
       context => {
         excerpt => [
-          'useradd -r -s /bin/bash -G mock -d /builddir -M kojibuilder  ||:'
+          'useradd -r -s /bin/bash -G mock -d /builddir -M kojibuilder'
         ],
         lineno => '204',
         path => 'koji-1.7.0-10.el6.spec',
@@ -17,7 +17,7 @@
       'arch' => 'src',
       'context' => {
         'excerpt' => [
-          'useradd -r -s /bin/bash -G mock -d /builddir -M kojibuilder  ||:'
+          'useradd -r -s /bin/bash -G mock -d /builddir -M kojibuilder'
         ],
         'sub' => '%pre builder',
         'path' => 'koji-1.7.0-10.el6.spec',

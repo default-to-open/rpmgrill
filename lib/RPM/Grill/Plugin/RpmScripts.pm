@@ -221,7 +221,7 @@ sub analyze {
         $s .= $lines[++$i]->content       while $s =~ s{\s*\\$}{ };
 
         # Split by actual command, eg 'useradd abc || useradd def'
-        my @cmds = split /\s+\|\|\s+/, $s;
+        my @cmds = split /\s+\|\|\s*/, $s;
 
         for my $x (@cmds) {
             if ($x =~ /\b((fedora-)?(user|group)add\b.*)/) {
