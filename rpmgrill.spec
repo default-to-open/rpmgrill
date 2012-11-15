@@ -22,6 +22,9 @@ Requires: /usr/bin/desktop-file-validate
 # For LibGather, Rpath : need eu-readelf
 Requires: elfutils
 
+# For bz876281 (polkit)
+Requires: libxslt
+
 # Optional module, allows RpmMetadata plugin to check https URLs
 Requires: perl-IO-Socket-SSL
 
@@ -63,6 +66,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- bz876281: test for detecting dangerous polkit constructions
+
 * Wed Oct 24 2012 Ed Santiago <santiago@redhat.com> 0.16-3
 - BitDefender cleanup
 - Major speed optimization on eu-readelf processing
