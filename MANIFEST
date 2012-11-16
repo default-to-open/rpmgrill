@@ -18,6 +18,7 @@ lib/RPM/Grill/Plugin/Patches.pm
 lib/RPM/Grill/Plugin/RpmMetadata.pm
 lib/RPM/Grill/Plugin/RpmRequires.pm
 lib/RPM/Grill/Plugin/RpmScripts.pm
+lib/RPM/Grill/Plugin/SecurityPolicy.pm
 lib/RPM/Grill/Plugin/Setxid.pm
 lib/RPM/Grill/Plugin/SpecFileEncoding.pm
 lib/RPM/Grill/Plugin/SpecFileSanity.pm
@@ -62,6 +63,8 @@ t/RPM/Grill/Plugin/RpmScripts/10basic.d/amanda-3.3.0-5.el7.expect
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/amanda-3.3.0-5.el7.spec
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/bacula-5.0.3-19.el7.expect
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/bacula-5.0.3-19.el7.spec
+t/RPM/Grill/Plugin/RpmScripts/10basic.d/koji-1.7.0-10.el6.expect
+t/RPM/Grill/Plugin/RpmScripts/10basic.d/koji-1.7.0-10.el6.spec
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/luci-0.22.2-14.el6_0.2.spec
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/sesame-0.10-1.el6.expect
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/sesame-0.10-1.el6.spec
@@ -88,6 +91,7 @@ t/RPM/Grill/Plugin/RpmScripts/10basic.d/zzz-007-uid-missing-exists.spec
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/zzz-008-uid-missing-nonexistent.expect
 t/RPM/Grill/Plugin/RpmScripts/10basic.d/zzz-008-uid-missing-nonexistent.spec
 t/RPM/Grill/Plugin/RpmScripts/10basic.t
+t/RPM/Grill/Plugin/SecurityPolicy/10basic.t
 t/RPM/Grill/Plugin/Setxid/10basic.t
 t/RPM/Grill/Plugin/SpecFileEncoding/01basic.t
 t/RPM/Grill/Plugin/SpecFileSanity/10basic.d/beaker-0.6.9-1.git.64.e340fc9.el5.expect
@@ -133,5 +137,7 @@ t/RPM/Grill/RPM/Files/20eu-readelf.d/40-partialrelro-pie/expect
 t/RPM/Grill/RPM/Files/20eu-readelf.d/50-stabs/eu-readelf
 t/RPM/Grill/RPM/Files/20eu-readelf.d/50-stabs/expect
 t/RPM/Grill/RPM/Files/20eu-readelf.t
+t/RPM/Grill/RPM/Files/30file_type.t
+t/RPM/Grill/RPM/Files/40dw_at_producer.t
 t/RPM/Grill/RPM/Specfile/01basic.t
 TODO
