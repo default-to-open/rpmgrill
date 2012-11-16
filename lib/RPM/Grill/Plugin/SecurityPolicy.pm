@@ -88,24 +88,37 @@ sub _check_polkit_file {
     my $self = shift;
     my $f    = shift;                           # in: file obj
 
+    # Invoke magic xsltproc validation command provided by Miloslav Trmač.
+    # Under normal circumstances this will exit 0 (success) with no output.
     my $xslt = _polkit_self_xslt();
-
     my $cmd     = "xsltproc --novalid $xslt " . $f->extracted_path;
     my $results = qx{$cmd 2>&1};
+
+    # Nonzero exit status indicates an unexpected error. Diagnose it with
+    # a unique error code, and include the error output.
     if ($?) {
         $f->gripe({
             code => 'PolkitError',
             diag => "Unexpected error running command: $cmd",
-            context => { excerpt => escapeHTML($results) },
+            context => { path => $f->path, excerpt => escapeHTML($results) },
         });
         return;
     }
 
+    # Successful run. If there was any output, it means we need to gripe.
     if ($results) {
+        # The full output from xsltproc is a very long multi-line XML string.
+        # The end user doesn't want to see all that. But if the string
+        # includes '<action id="org.foo.bar.etc.etc">', excerpt it.
+        my $context = { path => $f->path };
+        if ($results =~ /(<action\s+id=.*>)/) {
+            $context->{excerpt} = escapeHTML($1);
+        }
+
         $f->gripe({
             code => 'PolkitSelf',
-            diag => "Suspicious polkit action",
-            context => { excerpt => escapeHTML($results) },
+            diag => "Suspicious polkit authorization result (any user accepted)",
+            context => $context,
         });
     }
 }
@@ -194,7 +207,18 @@ indicates that we got nonzero (error) status.
 
 =item   PolkitSelf
 
-FIXME: please describe this error.
+The policy shipped in your package contains a default result
+<tt>auth_self</tt> or <tt>auth_self_keep</tt>.  These will allow <b>any</b>
+user to perform the action by supplying their own password, which they
+presumably know because they were able to log in and invoke the action
+in the first place.  The <tt>auth_self*</tt> results are therefore
+inappropriate for any actions that could affect the
+system-wide behavior or other users.
+
+Usually, a more appropriate default result is <tt><b>auth_admin</b></tt>
+or <tt><b>auth_admin_keep</b></tt>; these protect the system against
+unprivileged users.  (Single-user desktops can still be configured
+to only use the user's password by adding the user to the "wheel" group.)
 
 See L<bz876281|https://bugzilla.redhat.com/show_bug.cgi?id=876281>
 
