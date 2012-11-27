@@ -66,6 +66,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- bz853078: /bin (and other) files should be owned by root
 - bz876281: test for detecting dangerous polkit constructions
 
 * Wed Oct 24 2012 Ed Santiago <santiago@redhat.com> 0.16-3

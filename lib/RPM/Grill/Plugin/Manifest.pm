@@ -132,6 +132,9 @@ sub analyze {
                     });
                 }
             }
+
+            # bz853078: owner and group of (non-sxid) bin files must be root
+            _check_bin_permissions($f);
         }
     }
 
@@ -216,6 +219,42 @@ sub analyze {
         }
     }
 }
+
+
+############################
+#  _check_bin_permissions  #
+############################
+sub _check_bin_permissions {
+    my $f = shift;                              # in: file obj
+
+    # Not interested in SRPM files
+    return if $f->arch eq 'src';
+
+    # Only interested in files installed under certain bin directories
+    return unless $f->path =~ m{^(/bin|/usr/bin|/sbin|/usr/sbin)/};
+    my $parent_dir = $1;
+
+    # Check User
+    unless ($f->is_suid) {
+        if ((my $u = $f->user) ne 'root') {
+            $f->gripe({
+                code => 'BinfileBadOwner',
+                diag => "Owned by '<tt>$u</tt>'; files in $parent_dir must be owned by root",
+            });
+        }
+    }
+
+    # Check Group
+    unless ($f->is_sgid) {
+        if ((my $g = $f->group) ne 'root') {
+            $f->gripe({
+                code => 'BinfileBadGroup',
+                diag => "Owned by group '<tt>$g</tt>'; files in $parent_dir must be group 'root'",
+            });
+        }
+    }
+}
+
 
 1;
 
