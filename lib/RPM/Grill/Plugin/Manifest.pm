@@ -230,16 +230,23 @@ sub _check_bin_permissions {
     # Not interested in SRPM files
     return if $f->arch eq 'src';
 
-    # Only interested in files installed under certain bin directories
-    return unless $f->path =~ m{^(/bin|/usr/bin|/sbin|/usr/sbin)/};
-    my $parent_dir = $1;
+    # Only interested in files installed under certain bin directories,
+    # and in ELF .so libraries
+    my $what;
+    if ($f->path =~ m{^(/bin|/usr/bin|/sbin|/usr/sbin)/}) {
+        $what = "files in $1";
+    }
+    elsif ($f->is_elf && $f->basename =~ /\.so/) {
+        $what = "ELF libraries";
+    }
+    return if !$what;
 
     # Check User
     unless ($f->is_suid) {
         if ((my $u = $f->user) ne 'root') {
             $f->gripe({
                 code => 'BinfileBadOwner',
-                diag => "Owned by '<tt>$u</tt>'; files in $parent_dir must be owned by root",
+                diag => "Owned by '<tt>$u</tt>'; $what must be owned by root",
             });
         }
     }
@@ -249,7 +256,7 @@ sub _check_bin_permissions {
         if ((my $g = $f->group) ne 'root') {
             $f->gripe({
                 code => 'BinfileBadGroup',
-                diag => "Owned by group '<tt>$g</tt>'; files in $parent_dir must be group 'root'",
+                diag => "Owned by group '<tt>$g</tt>'; $what must be group 'root'",
             });
         }
     }
