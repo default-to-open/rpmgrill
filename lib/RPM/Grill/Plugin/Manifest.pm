@@ -357,6 +357,19 @@ for RHEL. See L<bz802555|https://bugzilla.redhat.com/show_bug.cgi?id=802555>
 that should be whitelisted. Ed is trying to figure out a way to
 whitelist these).
 
+=item   BinfileBadOwner
+
+Non-setuid files under C</bin>, C</usr/bin>, C</sbin>, or C</usr/sbin> must
+be owned by user root.
+
+See L<bz853078|https://bugzilla.redhat.com/show_bug.cgi?id=853078>
+
+=item   BinfileBadGroup
+
+Non-setgid files under C</bin>, C</usr/bin>, C</sbin>, or C</usr/sbin> must
+be owned by group root.
+
+See L<bz853078|https://bugzilla.redhat.com/show_bug.cgi?id=853078>
 
 =back
 
