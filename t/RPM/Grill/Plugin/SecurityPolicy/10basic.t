@@ -11,33 +11,14 @@ use Test::Differences;
 use File::Path                  qw(mkpath rmtree);
 use File::Temp                  qw(tempdir);
 
-# pass 1: read DATA
-my @tests;
-while (my $line = <DATA>) {
-    next if $line =~ /^\s*\#/;                  # Skip comment lines
+require 't/lib/FakeTree.pm' or die "Could not require FakeTree.pm: $!";
 
-    if ($line =~ /^-{5,}([^-].*[^-])-+$/) {
-        push @tests, { name => $1 };
-    }
-    elsif (@tests) {
-        if (exists $tests[-1]->{expect}) {
-            $tests[-1]->{expect} .= $line;
-        }
-        elsif ($line =~ /^\.\.+expect:$/) {
-            $tests[-1]->{expect} = '';
-        }
-        else {
-            $tests[-1]->{setup} .= $line;
-        }
-    }
-    elsif ($line =~ /\S/) {
-        die "Cannot grok '$line'";
-    }
-}
+# pass 1: read DATA
+my @tests = FakeTree::read_tests();
 
 #use Data::Dumper;print Dumper(\@tests);exit 0;
 
-plan tests => 4 + @tests;
+plan tests => 3 + @tests;
 
 # Pass 2: do the tests
 my $tempdir = tempdir("t-SecurityPolicy.XXXXXX", CLEANUP => !$ENV{DEBUG});
@@ -46,7 +27,6 @@ my $tempdir = tempdir("t-SecurityPolicy.XXXXXX", CLEANUP => !$ENV{DEBUG});
 use_ok 'RPM::Grill'                          or exit;
 use_ok 'RPM::Grill::RPM'                     or exit;
 use_ok 'RPM::Grill::Plugin::SecurityPolicy'  or exit;
-ok(require("t/lib/FakeTree.pm"), "loaded FakeTree.pm") or exit;
 
 for my $i (0 .. $#tests) {
     my $t = $tests[$i];

@@ -112,6 +112,49 @@ sub make_fake_tree {
     return RPM::Grill->new($dir);
 }
 
+################
+#  read_tests  #  reads test setup and expectations from __END__ of script
+################
+sub read_tests {
+    my @tests;
+
+    while (my $line = <DATA>) {
+        next if $line =~ /^\s*\#/;                  # Skip comment lines
+
+        # eg '----------my-test-name-------------------'
+        if ($line =~ /^-{5,}([^-].*[^-])-+$/) {
+            push @tests, { name => $1 };
+        }
+
+        elsif (@tests) {
+            # If we're in the 'expect' section
+            if (exists $tests[-1]->{expect}) {
+                $tests[-1]->{expect} .= $line;
+            }
+
+            # This begins the 'expect' section
+            elsif ($line =~ /^\.\.+expect:$/) {
+                $tests[-1]->{expect} = '';
+            }
+
+            else {
+                $tests[-1]->{setup} .= $line;
+            }
+        }
+        elsif ($line =~ /\S/) {
+            die "Cannot grok '$line'";
+        }
+    }
+
+    # FIXME: for {expect}, figure out plugin name & run eval?
+    #     if ($t->{expect}) {
+    #        $expected_gripes = eval "{ SecurityPolicy => [ $t->{expect} ] }";
+    #        die "eval failed:\n\n $t->{gripe_string} \n\n  $@\n"     if $@;
+    #
+
+    return @tests;
+}
+
 
 1;
 
