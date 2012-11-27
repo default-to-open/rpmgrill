@@ -14,7 +14,7 @@ use File::Temp                  qw(tempdir);
 require 't/lib/FakeTree.pm' or die "Could not require FakeTree.pm: $!";
 
 # pass 1: read DATA
-my @tests = FakeTree::read_tests();
+my @tests = FakeTree::read_tests(*DATA);
 
 #use Data::Dumper;print Dumper(\@tests);exit 0;
 

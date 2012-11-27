@@ -116,9 +116,11 @@ sub make_fake_tree {
 #  read_tests  #  reads test setup and expectations from __END__ of script
 ################
 sub read_tests {
+    my $fh = shift;                             # in: input filehandle (*DATA)
+
     my @tests;
 
-    while (my $line = <DATA>) {
+    while (my $line = <$fh>) {
         next if $line =~ /^\s*\#/;                  # Skip comment lines
 
         # eg '----------my-test-name-------------------'
