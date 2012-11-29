@@ -308,13 +308,14 @@ of those macros appear in the man page file.
 
 =item   ManPageMissing
 
-Certain executable files in "important" directories are expected to
-have corresponding man pages; as of 2012-07-19 any executable regular
-file C<foo> in /bin /sbin /usr/sbin or /etc/init.d should have a
-corresponding C<foo.X> man page in /usr/share/man.
+Certain files are expected to have corresponding man pages; as
+of 2012-11-28 the rule is that: (a) any executable regular
+file C<foo> in C</bin> C</sbin> C</usr/sbin> or C</etc/init.d>;
+or (b) any file marked as C<%config> in the specfile; should have a
+corresponding man page in C</usr/share/man>.
 
 There will be exceptions... there are always exceptions. This test
-is new as of July 2012 and will be fine-tuned as required.
+is new as of July 2012 and is being fine-tuned as required.
 
 =back
 
