@@ -187,124 +187,137 @@ sub _check_for_other_specfile_problems {
         }
     }
 
+    $self->_check_changelog_version();
+}
+
+
+##############################
+#  _check_changelog_version  #  Check version in first %changelog line
+##############################
+sub _check_changelog_version {
+    my $self = shift;
+
+    my $spec  = $self->specfile;
+    my $specfile_basename = basename($spec->path);
+
+    my @changelog = $spec->lines('%changelog')
+        or do {
+            # No %changelog??
+            $self->gripe({
+                code => 'ChangelogMissing',
+                diag => 'No <b>%changelog</b> section in specfile',
+                context => { path => $specfile_basename },
+            });
+            return;
+        };
+
     #
     # Check changelog. In particular, look for mismatch
     # between the reported version and the actual NVR
     #
-    if (my @changelog = $spec->lines('%changelog')) {
-        my $cl_lineno = $changelog[0]->lineno;
+    my $cl_lineno = $changelog[0]->lineno;
 
-        # Get the first non-blank line
-        shift @changelog;               # (first one is '%changelog')
-        while (@changelog && ! $changelog[0]->content) {
-            shift @changelog;
-        }
-        if (! @changelog) {
+    # Get the first non-blank line
+    shift @changelog;               # (first one is '%changelog')
+    while (@changelog && ! $changelog[0]->content) {
+        shift @changelog;
+    }
+    if (! @changelog) {
+        $self->gripe({
+            code    => 'ChangelogEmpty',
+            diag    => 'Empty %changelog section in spec file',
+            context => {
+                path   => $specfile_basename,
+                lineno => $cl_lineno,
+            },
+        });
+        return;
+    }
+
+    my $cl_first  = $changelog[0]->content; # [0] is %changelog
+
+    # Gripe context
+    my $context = {
+        path   => $specfile_basename,
+        lineno => $cl_lineno,
+        excerpt => escapeHTML($cl_first),
+    };
+
+    # Parse out the V-R, eg "* <date> <author> 1.2-4"
+    if ($cl_first =~ /^\*\s+.*\s(\S+)\s*$/) {
+        my $vr = $1;                # eg 1.2-4
+        my @nvr = $self->nvr;       # eg foo, 1.2, 4.el5
+
+        # Some people include package name, e.g. qemu-kvm-0.12.1.2
+        if ($vr =~ s{^(\d+:)?$nvr[0]-}{$1 || ''}e) {
             $self->gripe({
-                code    => 'ChangelogEmpty',
-                diag    => 'Empty %changelog section in spec file',
-                context => {
-                    path   => $specfile_basename,
-                    lineno => $cl_lineno,
-                },
-            });
-            return;
-        }
-
-        my $cl_first  = $changelog[0]->content; # [0] is %changelog
-
-        # Gripe context
-        my $context = {
-            path   => $specfile_basename,
-            lineno => $cl_lineno,
-            excerpt => escapeHTML($cl_first),
-        };
-
-        # Parse out the V-R, eg "* <date> <author> 1.2-4"
-        if ($cl_first =~ /^\*\s+.*\s(\S+)\s*$/) {
-            my $vr = $1;                # eg 1.2-4
-            my @nvr = $self->nvr;       # eg foo, 1.2, 4.el5
-
-            # Some people include package name, e.g. qemu-kvm-0.12.1.2
-            if ($vr =~ s{^(\d+:)?$nvr[0]-}{$1 || ''}e) {
-                $self->gripe({
-                    code => 'ChangelogOnlyNeedsVR',
-                    diag => "%changelog entries should only include Version-Release, not package name; try just <var>$vr</var>",
-                    context => $context,
-                });
-            }
-
-            # FIXME FIXME FIXME: handle epoch
-            if ($vr =~ s/^(\d+)://) {
-                my $epoch_cl = $1;              # epoch in changelog
-                if (defined (my $epoch_spec = $spec->epoch)) {
-                    if ($epoch_cl != $epoch_spec) {
-                        $self->gripe({
-                            code => 'ChangelogWrongEpoch',
-                            diag => "Wrong epoch <var>$epoch_cl</var> in first %changelog entry; expected <var>$epoch_spec</var>",
-                            context => $context,
-                        });
-                    }
-                }
-                else {                          # no epoch in specfile
-                    $self->gripe({
-                            code => 'ChangelogUnexpectedEpoch',
-                            diag => "First %changelog entry specifies epoch <var>$epoch_cl</var>, but specfile defines no Epoch",
-                            context => $context,
-                        });
-                }
-            }
-
-            # FIXME: explain
-            if ($vr =~ m{^(.*)-(.*)$}) {
-                my ($v, $r) = ($1, $2);
-                if ($v ne $nvr[1]) {
-                    # Version does not match. But can we match partially?
-                    if ($v =~ /^(.+)\b$nvr[1]$/) {
-                        # Yes: there's a prefix before the version.
-                        $self->gripe({
-                            code => 'ChangelogCruftInVersion',
-                            diag => "First %changelog entry includes unnecessary cruft (<var>$1</var>) in the version string; You only need <var>$nvr[1]</var>.",
-                            context => $context,
-                        });
-                    }
-                    else {
-                        # No. Something completely unexpected
-                        $self->gripe({
-                            code => 'ChangelogBadVersion',
-                            diag => "First %changelog entry is for <var>$v-$r</var>; I was expecting <var>$nvr[1]</var> as the version, not $v",
-                            context => $context,
-                        });
-                    }
-                }
-                elsif ($nvr[2] !~ /^$r\b/) {
-                    $self->gripe({
-                        code => 'ChangelogBadRelease',
-                        diag => "First %changelog entry is for <var>$v-<u>$r</u></var>; I was expecting <var>$nvr[1]-<u>$nvr[2]</u></var>",
-                        context => $context,
-                    });
-
-                }
-            }
-            else {
-                # FIXME: %changelog only has version, no -release?
-            }
-        }
-        else {
-            # First changelog line does not match our expectation
-            $self->gripe({
-                code => 'ChangelogWeirdLine',
-                diag => 'Unexpected first line in <b>%changelog</b> section',
+                code => 'ChangelogOnlyNeedsVR',
+                diag => "%changelog entries should only include Version-Release, not package name; try just <var>$vr</var>",
                 context => $context,
             });
         }
+
+        # FIXME FIXME FIXME: handle epoch
+        if ($vr =~ s/^(\d+)://) {
+            my $epoch_cl = $1;              # epoch in changelog
+            if (defined (my $epoch_spec = $spec->epoch)) {
+                if ($epoch_cl != $epoch_spec) {
+                    $self->gripe({
+                        code => 'ChangelogWrongEpoch',
+                        diag => "Wrong epoch <var>$epoch_cl</var> in first %changelog entry; expected <var>$epoch_spec</var>",
+                        context => $context,
+                    });
+                }
+            }
+            else {                          # no epoch in specfile
+                $self->gripe({
+                    code => 'ChangelogUnexpectedEpoch',
+                    diag => "First %changelog entry specifies epoch <var>$epoch_cl</var>, but specfile defines no Epoch",
+                    context => $context,
+                });
+            }
+        }
+
+        # FIXME: explain
+        if ($vr =~ m{^(.*)-(.*)$}) {
+            my ($v, $r) = ($1, $2);
+            if ($v ne $nvr[1]) {
+                # Version does not match. But can we match partially?
+                if ($v =~ /^(.+)\b$nvr[1]$/) {
+                    # Yes: there's a prefix before the version.
+                    $self->gripe({
+                        code => 'ChangelogCruftInVersion',
+                        diag => "First %changelog entry includes unnecessary cruft (<var>$1</var>) in the version string; You only need <var>$nvr[1]</var>.",
+                        context => $context,
+                    });
+                }
+                else {
+                    # No. Something completely unexpected
+                    $self->gripe({
+                        code => 'ChangelogBadVersion',
+                        diag => "First %changelog entry is for <var>$v-$r</var>; I was expecting <var>$nvr[1]</var> as the version, not $v",
+                        context => $context,
+                    });
+                }
+            }
+            elsif ($nvr[2] !~ /^$r\b/) {
+                $self->gripe({
+                    code => 'ChangelogBadRelease',
+                    diag => "First %changelog entry is for <var>$v-<u>$r</u></var>; I was expecting <var>$nvr[1]-<u>$nvr[2]</u></var>",
+                    context => $context,
+                });
+            }
+        }
+        else {
+            # FIXME: %changelog only has version, no -release?
+        }
     }
     else {
-        # No %changelog??
+        # First changelog line does not match our expectation
         $self->gripe({
-            code => 'ChangelogMissing',
-            diag => 'No <b>%changelog</b> section in specfile',
-            context => { path => $specfile_basename },
+            code => 'ChangelogWeirdLine',
+            diag => 'Unexpected first line in <b>%changelog</b> section',
+            context => $context,
         });
     }
 }
