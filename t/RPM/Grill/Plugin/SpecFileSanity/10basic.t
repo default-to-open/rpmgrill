@@ -53,7 +53,7 @@ use_ok 'RPM::Grill::Plugin::SpecFileSanity'   or exit;
 
 # FIXME: override ->nvr()
 package RPM::Grill;
-use subs qw(nvr);
+use subs qw(nvr srpm);
 package main;
 
 # Run the tests
@@ -68,6 +68,9 @@ for my $t (@tests) {
         no warnings 'redefine';
         *RPM::Grill::nvr = sub {
             return ($n, $v, $r)
+        };
+        *RPM::Grill::srpm = sub {
+            return bless { changelog => [ ''] }, 'RPM::Grill::RPM';
         };
     }
 

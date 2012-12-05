@@ -18,6 +18,7 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use Algorithm::Diff                     qw(sdiff);
 use CGI                                 qw(escapeHTML);
 use File::Basename;
 use IPC::Run                            qw(run timeout);
@@ -188,6 +189,7 @@ sub _check_for_other_specfile_problems {
     }
 
     $self->_check_changelog_version();
+    $self->_check_changelog_macros();
 }
 
 
@@ -320,6 +322,27 @@ sub _check_changelog_version {
             context => $context,
         });
     }
+}
+
+
+#############################
+#  _check_changelog_macros  #  Check for macros in %changelog
+#############################
+sub _check_changelog_macros {
+    my $self = shift;
+
+    my $spec  = $self->specfile;
+    my $specfile_basename = basename($spec->path);
+
+    # (assume that previous code has already barfed if there's no changelog)
+    my @changelog = $spec->lines('%changelog')
+        or return;
+
+    my @cl_orig = map { $_->content } @changelog;
+    my @cl_post = $self->srpm->changelog;
+
+    my @diffs = sdiff( \@cl_orig, \@cl_post );
+    use Data::Dumper; print Dumper(\@diffs);
 }
 
 1;
