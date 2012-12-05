@@ -70,7 +70,9 @@ for my $t (@tests) {
             return ($n, $v, $r)
         };
         *RPM::Grill::srpm = sub {
-            return bless { changelog => [ ''] }, 'RPM::Grill::RPM';
+            return bless {
+                _capability_cache => { changelog => [ ''] }
+            }, 'RPM::Grill::RPM';
         };
     }
 
