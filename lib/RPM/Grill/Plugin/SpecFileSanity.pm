@@ -342,6 +342,7 @@ sub _check_changelog_macros {
 
     # First line is just '%changelog'. Remove it.
     shift @changelog;
+    return if !@changelog;
 
     my @cl_orig = map { $_->content } @changelog;
     my @cl_post = $self->srpm->changelog;
@@ -449,8 +450,28 @@ sub _check_changelog_macros {
         ++$lineno;
     }
 
+    $lineno = $changelog[0]->lineno;
     my @diffs = diff( \@cl_orig, \@cl_post );
-    use Data::Dumper; print STDERR Dumper(\@diffs);
+#    use Data::Dumper; print STDERR Dumper(\@diffs);
+    for my $diff (@diffs) {
+        if (@$diff == 2) {
+            if ($diff->[0][0] eq '-' && $diff->[1][0] eq '+') {
+                if ($diff->[0][2] =~ /%/) {
+                    $self->gripe({
+                        code => 'ChangelogMacros',
+                        # FIXME: better diagnostic!
+                        # FIXME: "Unescaped percent signs (%) in specfiles may be expanded unexpectedly"
+                        diag => "Percent signs (%) in specfile changelog should be escaped",
+                        context => {
+                            path    => $specfile_basename,
+                            lineno  => $lineno + $diff->[0][1],
+                            excerpt => escapeHTML("- $diff->[0][2]\n+ $diff->[1][2]\n"),
+                        },
+                    });
+                }
+            }
+        }
+    }
 }
 
 ######################
