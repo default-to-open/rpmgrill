@@ -372,18 +372,17 @@ sub _check_changelog_macros {
     #
     my $lineno = $changelog[0]->lineno;
     for (my $i=1; $i <= $#cl_orig; $i++) {
-    for my $line (@cl_orig) {
-        if ($line[$i-1] =~ /^\*\s/) {
-            if ($line[$i] =~ s/^(\s+)//) {
+        if ($cl_orig[$i-1] =~ /^\*\s/) {
+            if ($cl_orig[$i] =~ s/^(\s+)//) {
                 my $whitespace = $1;
                 # FIXME: should we warn the user? Make it INFO somehow?
                 $self->gripe({
                     code => 'ChangelogLeadingWhitespace',
-                    diag => "Leading whitespace in this %changelog entry will be los",
+                    diag => "Leading whitespace in this %changelog entry will be lost",
                     context => {
                         path    => $specfile_basename,
                         lineno  => $lineno + $i,
-                        excerpt => $whitespace . escapeHTML($line[$i]),
+                        excerpt => $whitespace . escapeHTML($cl_orig[$i]),
                     },
                 });
             }
@@ -477,7 +476,7 @@ sub _date_suggestion {
             $hint .= "<b>"                      if $same_mon;
             $hint .= $lt2->mday;
             $hint .= " " . $lt2->year           if !$same_year;
-            $hint .= "</b>";
+            $hint .= "</b>?";
         }
     }
 
