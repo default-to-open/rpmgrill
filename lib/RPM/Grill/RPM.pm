@@ -182,7 +182,7 @@ sub capability {
         }
         close $cap_fh;
 
-        @results;
+        \@results;
     };
 
     return @{ $self->{_capability_cache}{$cap} };
