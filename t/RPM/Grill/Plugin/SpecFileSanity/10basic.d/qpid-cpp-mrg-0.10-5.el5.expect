@@ -1,6 +1,114 @@
+# Created: 2012-12-14T09:28:50
 {
-  'SpecFileSanity' => [ {
-  code => 'RpmParseDependency',
-  diag => "Possible macro expansion failure running 'rpm -q --specfile qpid-cpp-mrg-0.10-5.el5.spec'",
-  context => { excerpt => [ "sh: /usr/bin/rubyXXX: No such file or directory (6 instances)" ], path => "qpid-cpp-mrg-0.10-5.el5.spec" },
-}]}
+  'SpecFileSanity' => [
+    {
+      'context' => {
+        'excerpt' => [
+          'sh: /usr/bin/rubyXXX: No such file or directory (6 instances)'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec'
+      },
+      'diag' => 'Possible macro expansion failure running \'rpm -q --specfile qpid-cpp-mrg-0.10-5.el5.spec\'',
+      'code' => 'RpmParseDependency'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          ' - Fix home dir permissions'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
+        'lineno' => '1233'
+      },
+      'diag' => 'Leading whitespace in this %changelog entry will be lost',
+      'code' => 'ChangelogLeadingWhitespace'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Mon</u> Feb 23 2011 Mike Cressman &lt;mcressman@redhat.com&gt; - 0.9.1073306-1'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
+        'lineno' => 830
+      },
+      'diag' => 'Feb 23 2011 is actually a Wednesday. Did you mean <b>Wed</b>? Or Feb <b>21</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Fri</u> Sep 19 2009 Nuno Santos &lt;nsantos@redhat.com&gt; - 0.5.817349'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
+        'lineno' => 1052
+      },
+      'diag' => 'Sep 19 2009 is actually a Saturday. Did you mean <b>Sat</b>? Or Sep <b>18</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Wed</u> Aug 21 2008 Justin Ross &lt;jross@redhat.com&gt; - 0.2.687156-1'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
+        'lineno' => 1169
+      },
+      'diag' => 'Aug 21 2008 is actually a Thursday. Did you mean <b>Thu</b>? Or Aug <b>20</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Wed</u> Aug 14 2008 Justin Ross &lt;jross@redhat.com&gt; - 0.2.685273-1'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
+        'lineno' => 1172
+      },
+      'diag' => 'Aug 14 2008 is actually a Thursday. Did you mean <b>Thu</b>? Or Aug <b>13</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Thu</u> Jul 15 2008 Justin Ross &lt;jross@redhat.com&gt; - 0.2.676581-1'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
+        'lineno' => 1178
+      },
+      'diag' => 'Jul 15 2008 is actually a Tuesday. Did you mean <b>Tue</b>? Or Jul <b>17</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Thu</u> Jun 13 2008 Justin Ross &lt;jross@redhat.com&gt; - 0.2.667603-1'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
+        'lineno' => 1186
+      },
+      'diag' => 'Jun 13 2008 is actually a Friday. Did you mean <b>Fri</b>? Or Jun <b>12</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Thu</u> Oct 9 2007 Alan Conway &lt;aconway@redhat.com&gt; - 0.2-9'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
+        'lineno' => 1276
+      },
+      'diag' => 'Oct 9 2007 is actually a Tuesday. Did you mean <b>Tue</b>? Or Oct <b>11</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Mon</u> Dec 22 2006 Alan Conway &lt;aconway@redhat.com&gt; - 0.1-1'
+        ],
+        'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
+        'lineno' => 1315
+      },
+      'diag' => 'Dec 22 2006 is actually a Friday. Did you mean <b>Fri</b>? Or Dec <b>25</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    }
+  ]
+}
