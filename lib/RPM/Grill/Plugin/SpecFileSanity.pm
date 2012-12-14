@@ -465,7 +465,7 @@ sub _check_changelog_macros {
                         context => {
                             path    => $specfile_basename,
                             lineno  => $lineno + $diff->[0][1],
-                            excerpt => escapeHTML("- $diff->[0][2]\n+ $diff->[1][2]\n"),
+                            excerpt => _friendly_excerpt($diff),
                         },
                     });
                 }
@@ -502,6 +502,70 @@ sub _date_suggestion {
     }
 
     return $hint;
+}
+
+
+sub _friendly_excerpt {
+    my $diff = shift;                           # in: Algorithm::Diff entry
+
+    # Split into two arrays, each divided into its component words.
+    my @ante = map {escapeHTML($_)} grep($_ ne '',split(/(\W)/,$diff->[0][2]));
+    my @post = map {escapeHTML($_)} grep($_ ne '',split(/(\W)/,$diff->[1][2]));
+
+    my @expansions;
+    for my $d (diff( \@ante, \@post )) {
+        for my $delta (@$d) {
+            # Removing a char? Highlight it on the left
+            if ($delta->[0] eq '-') {
+                $ante[$delta->[1]] =
+                    "<var>$ante[$delta->[1]]</var>";
+            }
+            # Adding a char?  Highlight on the right
+            elsif ($delta->[0] eq '+') {
+                $post[$delta->[1]] =
+                    "<var>$post[$delta->[1]]</var>";
+            }
+
+            # Anything else?  Should never happen.
+            else {
+                warn "$.: Unknown delta char '$delta->[0]'\n";
+            }
+        }
+    }
+
+    # FIXME
+    (my $ante = join('', @ante)) =~ s|</var><var>||g;
+    (my $post = join('', @post)) =~ s|</var><var>||g;
+
+    my @expanded;
+    while ($ante =~ m|<var>(.*?)</var>|g) {
+        my $lhs = $1;
+        if ($lhs =~ /^%/) {
+            if ($post =~ s|<var>(.*?)</var>||) {
+                push @expanded, [ $lhs, $1 ];
+            }
+            else {
+                warn "$ME: Weird: no matching right-hand expansion for '$lhs' in '$ante'";
+            }
+        }
+        else {
+            warn "$ME: Weird: changelog delta is not a macro: '$lhs' in '$ante'";
+        }
+    }
+
+    if (@expanded) {
+        my $retval = $ante;
+        $retval .= "\n   (<var>$expanded[0][0]</var> got expanded to <var>$expanded[0][1]</var>";
+        shift @expanded;
+        for my $more (@expanded) {
+            $retval .= "; <var>$more->[0]</var> to <var>$more->[1]</var>";
+        }
+        $retval .= ")";
+        return $retval;
+    }
+
+    warn "$ME: Weird: no expanded macros in '$ante' / '$post'\n";
+    return escapeHTML("- $diff->[0][2]\n+ $diff->[1][2]\n");
 }
 
 
