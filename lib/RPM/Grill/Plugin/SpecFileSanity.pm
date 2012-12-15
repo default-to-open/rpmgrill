@@ -512,7 +512,6 @@ sub _friendly_excerpt {
     my @ante = map {escapeHTML($_)} grep($_ ne '',split(/(\W)/,$diff->[0][2]));
     my @post = map {escapeHTML($_)} grep($_ ne '',split(/(\W)/,$diff->[1][2]));
 
-    my @expansions;
     for my $d (diff( \@ante, \@post )) {
         for my $delta (@$d) {
             # Removing a char? Highlight it on the left
@@ -537,35 +536,7 @@ sub _friendly_excerpt {
     (my $ante = join('', @ante)) =~ s|</var><var>||g;
     (my $post = join('', @post)) =~ s|</var><var>||g;
 
-    my @expanded;
-    while ($ante =~ m|<var>(.*?)</var>|g) {
-        my $lhs = $1;
-        if ($lhs =~ /^%/) {
-            if ($post =~ s|<var>(.*?)</var>||) {
-                push @expanded, [ $lhs, $1 ];
-            }
-            else {
-                warn "$ME: Weird: no matching right-hand expansion for '$lhs' in '$ante'";
-            }
-        }
-        else {
-            warn "$ME: Weird: changelog delta is not a macro: '$lhs' in '$ante'";
-        }
-    }
-
-    if (@expanded) {
-        my $retval = $ante;
-        $retval .= "\n   (<var>$expanded[0][0]</var> got expanded to <var>$expanded[0][1]</var>";
-        shift @expanded;
-        for my $more (@expanded) {
-            $retval .= "; <var>$more->[0]</var> to <var>$more->[1]</var>";
-        }
-        $retval .= ")";
-        return $retval;
-    }
-
-    warn "$ME: Weird: no expanded macros in '$ante' / '$post'\n";
-    return escapeHTML("- $diff->[0][2]\n+ $diff->[1][2]\n");
+    return "spec: $ante\nrpm:  $post";
 }
 
 
