@@ -1,4 +1,4 @@
-# Created: 2012-12-14T09:28:51
+# Created: 2012-12-17T10:23:14
 {
   'SpecFileSanity' => [
     {
@@ -136,9 +136,8 @@
     {
       'context' => {
         'excerpt' => [
-          '-   servlet-%{servletspec}-api, jsp-%{jspspec}-api-javadoc and
-+   servlet-2.4-api, jsp-2.0-api-javadoc and
-'
+          'spec:   servlet-<var>%{servletspec}</var>-api, jsp-<var>%{jspspec}</var>-api-javadoc and
+rpm:    servlet-<var>2.4</var>-api, jsp-<var>2.0</var>-api-javadoc and'
         ],
         'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
         'lineno' => '2378'
@@ -149,9 +148,8 @@
     {
       'context' => {
         'excerpt' => [
-          '-   %{_bindir}/rebuild-gcj-db in their post and/or postun sections.
-+   /usr/bin/rebuild-gcj-db in their post and/or postun sections.
-'
+          'spec:   <var>%{_bindir}</var>/rebuild-gcj-db in their post and/or postun sections.
+rpm:    <var>/usr/bin</var>/rebuild-gcj-db in their post and/or postun sections.'
         ],
         'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
         'lineno' => '2380'

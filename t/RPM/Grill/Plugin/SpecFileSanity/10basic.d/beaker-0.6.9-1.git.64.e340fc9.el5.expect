@@ -1,4 +1,4 @@
-# Created: 2012-12-14T09:28:50
+# Created: 2012-12-17T10:23:13
 {
   'SpecFileSanity' => [
     {
@@ -80,9 +80,8 @@
     {
       'context' => {
         'excerpt' => [
-          '- - use %(package_dir)s for static locations, so that we can run from a working
-+ - use s for static locations, so that we can run from a working
-'
+          'spec: - use <var>%(package_dir)</var>s for static locations, so that we can run from a working
+rpm:  - use s for static locations, so that we can run from a working'
         ],
         'path' => 'beaker-0.6.9-1.git.64.e340fc9.el5.spec',
         'lineno' => '765'
