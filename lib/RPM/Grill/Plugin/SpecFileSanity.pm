@@ -504,7 +504,9 @@ sub _date_suggestion {
     return $hint;
 }
 
-
+#######################
+#  _friendly_excerpt  #  Returns the change between two specfile lines
+#######################
 sub _friendly_excerpt {
     my $diff = shift;                           # in: Algorithm::Diff entry
 
@@ -698,6 +700,16 @@ one defined in the package specfile.
 
 I could not parse the first line of the %changelog section in your specfile.
 See L<http://fedoraproject.org/wiki/Packaging:Guidelines#Changelogs>
+
+=item   ChangelogLeadingWhitespace
+
+FIXME
+
+=item   ChangelogWrongWeekday
+
+A specfile %changelog entry has a mismatch between the weekday
+and the date. There is no automated way to know which is correct.
+This needs human intervention.
 
 =back
 
