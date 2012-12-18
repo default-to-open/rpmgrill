@@ -538,7 +538,7 @@ sub _friendly_excerpt {
     (my $ante = join('', @ante)) =~ s|</var><var>||g;
     (my $post = join('', @post)) =~ s|</var><var>||g;
 
-    return "spec: $ante\nrpm:  $post";
+    return "spec: $ante\nrpm : $post";
 }
 
 
@@ -703,7 +703,20 @@ See L<http://fedoraproject.org/wiki/Packaging:Guidelines#Changelogs>
 
 =item   ChangelogLeadingWhitespace
 
-FIXME
+You've indented a line in a changelog message, perhaps for clarity,
+but that indentation will not survive rpmbuild. Customers who run
+C<rpm -q --changelog> will see that line without any leading whitespace.
+This is probably not a cataclysmic source of confusion, but please
+check anyway.
+
+=item   ChangelogMacros
+
+Percent signs in .spec files get expanded as macros. When you
+write "Replaced /bin with %{bindir}", C<rpm -q --changelog> will
+show "Replaced /bin with /bin". Confusing. The excerpt in the
+gripe message shows you what you wrote and what customers will see.
+
+Solution: B<double up percent signs: %%{foo}>.
 
 =item   ChangelogWrongWeekday
 
