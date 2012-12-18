@@ -73,6 +73,18 @@ our $Non_FHS = join('|', @Non_FHS);
 sub analyze {
     my $self = shift;
 
+    # Some of these tests are only applicable to RHEL7 and above.
+    # Try to figure out our RHEL, but keep going even if we can't.
+    # (major_release barfs on, e.g., tps-2.40.2-2 because it has no .elX)
+    my $check_non_systemd = 0;
+    my $check_move_to_usr = 0;
+    eval {
+        if ($self->major_release =~ /^RHEL(\d+)/ && $1 >= 7) {
+            $check_non_systemd = $check_move_to_usr = 1;
+        }
+    };
+    warn "$ME: $@\n"            if $@;
+
     # FHS = Filesystem Hierarchy Standard, eg the spec that says we
     # shouldn't install into /usr/local : See http://www.pathname.com/fhs/
     #
@@ -106,12 +118,14 @@ sub analyze {
             }
 
             # bz802557: check for non-systemd files
-            # bz802554: check for files that should be in /usr
-            if ($self->major_release =~ /^RHEL(\d+)/ && $1 >= 7) {
+            if ($check_non_systemd) {
                 if ( $path =~ m{^/etc/(xinetd\.d|init\.d)/}) {
                     $non_systemd{$f->arch}{$f->subpackage}{$path} = 1;
                 }
+            }
 
+            # bz802554: check for files that should be in /usr
+            if ($check_move_to_usr) {
                 if ($path =~ m{^(/bin|/sbin|/lib|/lib64)/}) {
                     my $where = $1;
                     $self->gripe({
