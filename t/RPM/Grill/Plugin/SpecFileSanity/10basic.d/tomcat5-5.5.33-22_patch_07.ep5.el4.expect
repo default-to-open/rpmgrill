@@ -137,7 +137,7 @@
       'context' => {
         'excerpt' => [
           'spec:   servlet-<var>%{servletspec}</var>-api, jsp-<var>%{jspspec}</var>-api-javadoc and
-rpm:    servlet-<var>2.4</var>-api, jsp-<var>2.0</var>-api-javadoc and'
+rpm :   servlet-<var>2.4</var>-api, jsp-<var>2.0</var>-api-javadoc and'
         ],
         'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
         'lineno' => '2378'
@@ -149,7 +149,7 @@ rpm:    servlet-<var>2.4</var>-api, jsp-<var>2.0</var>-api-javadoc and'
       'context' => {
         'excerpt' => [
           'spec:   <var>%{_bindir}</var>/rebuild-gcj-db in their post and/or postun sections.
-rpm:    <var>/usr/bin</var>/rebuild-gcj-db in their post and/or postun sections.'
+rpm :   <var>/usr/bin</var>/rebuild-gcj-db in their post and/or postun sections.'
         ],
         'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
         'lineno' => '2380'
