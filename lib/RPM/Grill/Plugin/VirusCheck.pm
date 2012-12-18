@@ -435,6 +435,12 @@ not appreciate having to investigate a trigger coming from Red Hat
 software. Second, and much less likely (but not impossible) because
 it might be a real problem.
 
+=item   BdScanFailed
+
+The L<BitDefender antivirus tool|http://www.bitdefender.com/>
+failed to run. As of December 2012 this is because we don't have
+a license. Ignore this.
+
 =back
 
 =head1	SEE ALSO
