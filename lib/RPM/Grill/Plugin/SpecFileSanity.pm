@@ -18,9 +18,12 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use Algorithm::Diff                     qw(diff sdiff);
 use CGI                                 qw(escapeHTML);
 use File::Basename;
 use IPC::Run                            qw(run timeout);
+use Time::ParseDate;
+use Time::Piece;
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -188,6 +191,7 @@ sub _check_for_other_specfile_problems {
     }
 
     $self->_check_changelog_version();
+    $self->_check_changelog_macros();
 }
 
 
@@ -321,6 +325,222 @@ sub _check_changelog_version {
         });
     }
 }
+
+
+#############################
+#  _check_changelog_macros  #  Check for macros in %changelog
+#############################
+sub _check_changelog_macros {
+    my $self = shift;
+
+    my $spec  = $self->specfile;
+    my $specfile_basename = basename($spec->path);
+
+    # (assume that previous code has already barfed if there's no changelog)
+    my @changelog = $spec->lines('%changelog')
+        or return;
+
+    # First line is just '%changelog'. Remove it.
+    shift @changelog;
+    return if !@changelog;
+
+    my @cl_orig = map { $_->content } @changelog;
+    my @cl_post = $self->srpm->changelog;
+
+    # rpm -q --changelog usually adds a trailing blank line. Remove it.
+    # (from specfile, too, just in case).
+    for my $aref (\@cl_orig, \@cl_post) {
+        while (@$aref && $aref->[-1] =~ /^\s*$/) {
+            pop @$aref;
+        }
+
+        # And, sigh, remove trailing spaces from both.
+        s/\s+$//                    for @$aref;
+    }
+
+    # AUGH. rpm strips leading spaces, but only on the first line
+    # after a '*' line. This specfile entry:
+    #
+    #   * Mon Aug 21 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-5jpp
+    #     From Andrew Overholt <overholt@redhat.com>:
+    #   - Silence post common-lib and server-lib.
+    #
+    # ...will become:
+    #
+    #   * Mon Aug 21 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-5jpp
+    #   From Andrew Overholt <overholt@redhat.com>:
+    #   - Silence post common-lib and server-lib.
+    #
+    my $lineno = $changelog[0]->lineno;
+    for (my $i=1; $i <= $#cl_orig; $i++) {
+        if ($cl_orig[$i-1] =~ /^\*\s/) {
+            if ($cl_orig[$i] =~ s/^(\s+)//) {
+                my $whitespace = $1;
+                # FIXME: should we warn the user? Make it INFO somehow?
+                $self->gripe({
+                    code => 'ChangelogLeadingWhitespace',
+                    diag => "Leading whitespace in this %changelog entry will be lost",
+                    context => {
+                        path    => $specfile_basename,
+                        lineno  => $lineno + $i,
+                        excerpt => $whitespace . escapeHTML($cl_orig[$i]),
+                    },
+                });
+            }
+        }
+    }
+
+    # rpm converts double-percent to single. Let's do the same to
+    # our input, on the assumption that a developer who writes '%%'
+    # understands rpm specfile parsing.
+    s/%%/%/g                    for @cl_orig;
+
+    # Normalize dates in the input specfile. 'rpm -q --changelog' always
+    # shows dates with a leading zero (Wed Dec 05 2012), even if the
+    # specfile input has none. Let's fix those up in our copy of the
+    # specfile lines, so they won't trigger as false diffs.
+    #
+    # While we're at it, gripe about weekdays. 'rpm -q --changelog' always
+    # displays the correct weekday for a given date. Human developers are
+    # less accurate.
+    $lineno = $changelog[0]->lineno;
+  LINE:
+    for my $line (@cl_orig) {
+        # Changelog lines begin with asterisk, then a date, then more.
+        # eg '* Fri Oct 15 2010 Ed Santiago <santiago@redhat.com> 1.4.50-1'
+        #
+        #              1     12   2   3               34    4
+        if ($line =~ /^(\*\s+)(\w+)\s+(\w+\s+\d+\s+\d+)(\s.*)$/) {
+            my ($lhs, $wday, $date, $rhs) = ($1, $2, $3, $4);
+
+            # If we can't grok $date as a date, skip this line.
+            my ($t, $err) = parsedate($date);
+            if (! defined $t) {
+                warn "$ME: WARNING: $specfile_basename:$lineno: Error parsing '$date' as date: $err\n";
+                ++$lineno;
+                next LINE;
+            }
+
+            # It's a valid date. Now check that the date & weekday match.
+            my $lt = localtime($t);
+            if (lc($lt->wdayname) ne lc($wday)) {
+                # Try to offer a helpful message. The likely correction is
+                # the weekday, but it could also be the date that's wrong.
+                my $diag = "$date is actually a ".$lt->fullday . ".";
+                $diag .= _date_suggestion($lt, $wday);
+
+                $self->gripe({
+                    code => 'ChangelogWrongWeekday',
+                    diag => $diag,
+                    context => {
+                        path    => $specfile_basename,
+                        lineno  => $lineno,
+                        excerpt => escapeHTML($lhs)
+                            . "<u>" . escapeHTML($wday) . "</u> "
+                            . escapeHTML($date . $rhs),
+                    },
+                });
+            }
+
+            # Normalize it
+            local $ENV{LC_ALL} = 'C';
+            $line = $lhs . $lt->strftime("%a %b %d %Y") . $rhs;
+        }
+
+        ++$lineno;
+    }
+
+    $lineno = $changelog[0]->lineno;
+    my @diffs = diff( \@cl_orig, \@cl_post );
+#    use Data::Dumper; print STDERR Dumper(\@diffs);
+    for my $diff (@diffs) {
+        if (@$diff == 2) {
+            if ($diff->[0][0] eq '-' && $diff->[1][0] eq '+') {
+                if ($diff->[0][2] =~ /%/) {
+                    $self->gripe({
+                        code => 'ChangelogMacros',
+                        # FIXME: better diagnostic!
+                        # FIXME: "Unescaped percent signs (%) in specfiles may be expanded unexpectedly"
+                        diag => "Percent signs (%) in specfile changelog should be escaped",
+                        context => {
+                            path    => $specfile_basename,
+                            lineno  => $lineno + $diff->[0][1],
+                            excerpt => _friendly_excerpt($diff),
+                        },
+                    });
+                }
+            }
+        }
+    }
+}
+
+######################
+#  _date_suggestion  #  Offer ideas for fixing a date/weekday mismatch
+######################
+sub _date_suggestion {
+    my $lt   = shift;                           # in: Time::Piece
+    my $wday = shift;                           # in: what the user wrote
+
+    # Eg "Did you mean <b>Fri</b>?"
+    my $hint .= " Did you mean <b>" . $lt->wdayname . "</b>?";
+
+    # Eg " Or Mar <b>29</b>?", or " Or <b>Apr 1</b>?"
+    for my $i (-3 .. 3) {
+        my $lt2 = $lt + $i * 86400;
+        if ($lt2->wdayname eq $wday) {
+            $hint .= " Or ";
+            my $same_mon  = ($lt2->mon  == $lt->mon);
+            my $same_year = ($lt2->year == $lt->year);
+            $hint .= "<b>"                      if !$same_mon;
+            $hint .= $lt2->monname;
+            $hint .= " ";
+            $hint .= "<b>"                      if $same_mon;
+            $hint .= $lt2->mday;
+            $hint .= " " . $lt2->year           if !$same_year;
+            $hint .= "</b>?";
+        }
+    }
+
+    return $hint;
+}
+
+#######################
+#  _friendly_excerpt  #  Returns the change between two specfile lines
+#######################
+sub _friendly_excerpt {
+    my $diff = shift;                           # in: Algorithm::Diff entry
+
+    # Split into two arrays, each divided into its component words.
+    my @ante = map {escapeHTML($_)} grep($_ ne '',split(/(\W)/,$diff->[0][2]));
+    my @post = map {escapeHTML($_)} grep($_ ne '',split(/(\W)/,$diff->[1][2]));
+
+    for my $d (diff( \@ante, \@post )) {
+        for my $delta (@$d) {
+            # Removing a char? Highlight it on the left
+            if ($delta->[0] eq '-') {
+                $ante[$delta->[1]] =
+                    "<var>$ante[$delta->[1]]</var>";
+            }
+            # Adding a char?  Highlight on the right
+            elsif ($delta->[0] eq '+') {
+                $post[$delta->[1]] =
+                    "<var>$post[$delta->[1]]</var>";
+            }
+
+            # Anything else?  Should never happen.
+            else {
+                warn "$.: Unknown delta char '$delta->[0]'\n";
+            }
+        }
+    }
+
+    # FIXME
+    (my $ante = join('', @ante)) =~ s|</var><var>||g;
+    (my $post = join('', @post)) =~ s|</var><var>||g;
+
+    return "spec: $ante\nrpm : $post";
+}
+
 
 1;
 
@@ -480,6 +700,29 @@ one defined in the package specfile.
 
 I could not parse the first line of the %changelog section in your specfile.
 See L<http://fedoraproject.org/wiki/Packaging:Guidelines#Changelogs>
+
+=item   ChangelogLeadingWhitespace
+
+You've indented a line in a changelog message, perhaps for clarity,
+but that indentation will not survive rpmbuild. Customers who run
+C<rpm -q --changelog> will see that line without any leading whitespace.
+This is probably not a cataclysmic source of confusion, but please
+check anyway.
+
+=item   ChangelogMacros
+
+Percent signs in .spec files get expanded as macros. When you
+write "Replaced /bin with %{bindir}", C<rpm -q --changelog> will
+show "Replaced /bin with /bin". Confusing. The excerpt in the
+gripe message shows you what you wrote and what customers will see.
+
+Solution: B<double up percent signs: %%{foo}>.
+
+=item   ChangelogWrongWeekday
+
+A specfile %changelog entry has a mismatch between the weekday
+and the date. There is no automated way to know which is correct.
+This needs human intervention.
 
 =back
 

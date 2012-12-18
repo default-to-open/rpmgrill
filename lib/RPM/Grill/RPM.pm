@@ -165,22 +165,27 @@ sub capability {
     my $self = shift;
     my $cap  = shift;           # in: 'requires', 'provides', etc
 
-    # eg ..../arch/subpackage/RPM.requires
-    my $cap_file = $self->dir . '/RPM.' . $cap;
-    -e $cap_file
-        or croak "$ME: Capability file $cap_file does not exist";
+    # memoize
+    $self->{_capability_cache}{$cap} //= do {
+        # eg ..../arch/subpackage/RPM.requires
+        my $cap_file = $self->dir . '/RPM.' . $cap;
+        -e $cap_file
+            or croak "$ME: Capability file $cap_file does not exist";
 
-    my @results;
-    open my $cap_fh, '<', $cap_file
-        or die "$ME: Internal error: Cannot read $cap_file: $!";
-    while (<$cap_fh>) {
-        chomp;
-        s/\s+$//;                       # Remove trailing whitespace
-        push @results, $_;
-    }
-    close $cap_fh;
+        my @results;
+        open my $cap_fh, '<', $cap_file
+            or die "$ME: Internal error: Cannot read $cap_file: $!";
+        while (<$cap_fh>) {
+            chomp;
+            s/\s+$//;                       # Remove trailing whitespace
+            push @results, $_;
+        }
+        close $cap_fh;
 
-    return @results;
+        \@results;
+    };
+
+    return @{ $self->{_capability_cache}{$cap} };
 }
 
 # Direct shortcut methods for the above capabilities files
@@ -188,7 +193,7 @@ sub requires  { push @_, 'requires';  goto &capability; }
 sub provides  { push @_, 'provides';  goto &capability; }
 sub obsoletes { push @_, 'obsoletes'; goto &capability; }
 sub conflicts { push @_, 'conflicts'; goto &capability; }
-
+sub changelog { push @_, 'changelog'; goto &capability; }
 
 ###########
 #  files  #  Returns a list of RPM::Grill::RPM::File objects, from manifest

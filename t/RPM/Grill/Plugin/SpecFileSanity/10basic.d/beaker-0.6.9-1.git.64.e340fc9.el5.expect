@@ -1,6 +1,93 @@
+# Created: 2012-12-17T10:23:13
 {
-  'SpecFileSanity' => [ {
-  code => 'RpmParseDependency',
-  diag => "Possible macro expansion failure running 'rpm -q --specfile beaker-0.6.9-1.git.64.e340fc9.el5.spec'",
-  context => { excerpt => [ "sh: package_dir: command not found" ], path => "beaker-0.6.9-1.git.64.e340fc9.el5.spec" },
-}]}
+  'SpecFileSanity' => [
+    {
+      'context' => {
+        'excerpt' => [
+          'sh: package_dir: command not found'
+        ],
+        'path' => 'beaker-0.6.9-1.git.64.e340fc9.el5.spec'
+      },
+      'diag' => 'Possible macro expansion failure running \'rpm -q --specfile beaker-0.6.9-1.git.64.e340fc9.el5.spec\'',
+      'code' => 'RpmParseDependency'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Thu</u> Mar 23 2011 Raymond Mancy &lt;rmancy@redhat.com&gt; 0.6.7-1'
+        ],
+        'path' => 'beaker-0.6.9-1.git.64.e340fc9.el5.spec',
+        'lineno' => 316
+      },
+      'diag' => 'Mar 23 2011 is actually a Wednesday. Did you mean <b>Wed</b>? Or Mar <b>24</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Sat</u> Feb 09 2011 Dan Callaghan &lt;dcallagh@redhat.com&gt; 0.6.4-2'
+        ],
+        'path' => 'beaker-0.6.9-1.git.64.e340fc9.el5.spec',
+        'lineno' => 402
+      },
+      'diag' => 'Feb 09 2011 is actually a Wednesday. Did you mean <b>Wed</b>? Or Feb <b>12</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Tue</u> Dec 09 2010 Raymond Mancy &lt;rmancy@redhat.com&gt; 0.6.0-1'
+        ],
+        'path' => 'beaker-0.6.9-1.git.64.e340fc9.el5.spec',
+        'lineno' => 506
+      },
+      'diag' => 'Dec 09 2010 is actually a Thursday. Did you mean <b>Thu</b>? Or Dec <b>7</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Wed</u> Jun 22 2010 Bill Peck &lt;bpeck@redhat.com&gt; - 0.5.45-1'
+        ],
+        'path' => 'beaker-0.6.9-1.git.64.e340fc9.el5.spec',
+        'lineno' => 1108
+      },
+      'diag' => 'Jun 22 2010 is actually a Tuesday. Did you mean <b>Tue</b>? Or Jun <b>23</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Tue</u> Jun 21 2010 Bill Peck &lt;bpeck@redhat.com&gt; - 0.5.45-0'
+        ],
+        'path' => 'beaker-0.6.9-1.git.64.e340fc9.el5.spec',
+        'lineno' => 1111
+      },
+      'diag' => 'Jun 21 2010 is actually a Monday. Did you mean <b>Mon</b>? Or Jun <b>22</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Wed</u> Sep 29 2009 Bill Peck &lt;bpeck@redhat.com&gt; - 0.4.45-0'
+        ],
+        'path' => 'beaker-0.6.9-1.git.64.e340fc9.el5.spec',
+        'lineno' => 1459
+      },
+      'diag' => 'Sep 29 2009 is actually a Tuesday. Did you mean <b>Tue</b>? Or Sep <b>30</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          'spec: - use <var>%(package_dir)</var>s for static locations, so that we can run from a working
+rpm:  - use s for static locations, so that we can run from a working'
+        ],
+        'path' => 'beaker-0.6.9-1.git.64.e340fc9.el5.spec',
+        'lineno' => '765'
+      },
+      'diag' => 'Percent signs (%) in specfile changelog should be escaped',
+      'code' => 'ChangelogMacros'
+    }
+  ]
+}

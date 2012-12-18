@@ -1,4 +1,4 @@
-# Created: 2012-05-25T12:31:31
+# Created: 2012-12-17T10:23:14
 {
   'SpecFileSanity' => [
     {
@@ -55,6 +55,107 @@
       },
       'diag' => 'RPM <tt>%patch</tt> macro in comments; this may cause unexpected behavior',
       'code' => 'MacroSurprise'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '  From jean-frederic clere &lt;jclere@redhat.com&gt;:'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '2245'
+      },
+      'diag' => 'Leading whitespace in this %changelog entry will be lost',
+      'code' => 'ChangelogLeadingWhitespace'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '  From Andrew Overholt &lt;overholt@redhat.com&gt;:'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '2298'
+      },
+      'diag' => 'Leading whitespace in this %changelog entry will be lost',
+      'code' => 'ChangelogLeadingWhitespace'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Thu</u> Feb 17 2012 David Knox &lt;dknox@redhat.com&gt; 0:5.5.33-22_patch_07'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '1979'
+      },
+      'diag' => 'Feb 17 2012 is actually a Friday. Did you mean <b>Fri</b>? Or Feb <b>16</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Thu</u> May 20 2011 David Knox &lt;dknox@redhat.com&gt; 0:5.5.33-14_patch_04'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => 2011
+      },
+      'diag' => 'May 20 2011 is actually a Friday. Did you mean <b>Fri</b>? Or May <b>19</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Wed</u> Sep 22 2009 Marc Schoenefeld &lt;mschoene@redhat.com&gt; - 0:5.5.23-1.patch07.19'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => 2134
+      },
+      'diag' => 'Sep 22 2009 is actually a Tuesday. Did you mean <b>Tue</b>? Or Sep <b>23</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Wed</u> Sep 15 2009 David Knox &lt;dknox@redhat.com&gt; - 0:5.5.23-1.patch07.1'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => 2137
+      },
+      'diag' => 'Sep 15 2009 is actually a Tuesday. Did you mean <b>Tue</b>? Or Sep <b>16</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Fri</u> Jan 31 2005 Jason Corley 0:5.5.4-17jpp'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => 2428
+      },
+      'diag' => 'Jan 31 2005 is actually a Monday. Did you mean <b>Mon</b>? Or Jan <b>28</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          'spec:   servlet-<var>%{servletspec}</var>-api, jsp-<var>%{jspspec}</var>-api-javadoc and
+rpm:    servlet-<var>2.4</var>-api, jsp-<var>2.0</var>-api-javadoc and'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '2378'
+      },
+      'diag' => 'Percent signs (%) in specfile changelog should be escaped',
+      'code' => 'ChangelogMacros'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          'spec:   <var>%{_bindir}</var>/rebuild-gcj-db in their post and/or postun sections.
+rpm:    <var>/usr/bin</var>/rebuild-gcj-db in their post and/or postun sections.'
+        ],
+        'path' => 'tomcat5-5.5.33-22_patch_07.ep5.el4.spec',
+        'lineno' => '2380'
+      },
+      'diag' => 'Percent signs (%) in specfile changelog should be escaped',
+      'code' => 'ChangelogMacros'
     }
   ]
 }

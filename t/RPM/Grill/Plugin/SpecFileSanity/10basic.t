@@ -35,6 +35,10 @@ BEGIN {
 
         $t->{expect_path} = "$test_subdir/$expect";
 
+        (my $cl = $spec)     =~ s/\.spec/\.changelog/;
+        $t->{changelog_path} = "$test_subdir/$cl";
+        $t->{changelog}      = [ read_file($t->{changelog_path}, {chomp=>1}) ];
+
         # Useful when adding new tests: this will be true if the .expect file
         # is nonzero size. When false (empty file), special-case code below
         # will trigger and will fill in the file.
@@ -53,7 +57,7 @@ use_ok 'RPM::Grill::Plugin::SpecFileSanity'   or exit;
 
 # FIXME: override ->nvr()
 package RPM::Grill;
-use subs qw(nvr);
+use subs qw(nvr srpm);
 package main;
 
 # Run the tests
@@ -68,6 +72,11 @@ for my $t (@tests) {
         no warnings 'redefine';
         *RPM::Grill::nvr = sub {
             return ($n, $v, $r)
+        };
+        *RPM::Grill::srpm = sub {
+            return bless {
+                _capability_cache => { changelog => $t->{changelog} }
+            }, 'RPM::Grill::RPM';
         };
     }
 

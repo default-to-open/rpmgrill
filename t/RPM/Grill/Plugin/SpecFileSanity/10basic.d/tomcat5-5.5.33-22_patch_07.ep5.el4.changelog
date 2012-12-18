@@ -1,0 +1,591 @@
+* Fri Feb 17 2012 David Knox <dknox@redhat.com> 0:5.5.33-22_patch_07
+- Resolves CVE-2012-0022
+
+* Mon Dec 19 2011 David Knox <dknox@redhat.com> 0:5.5.33-21_patch_06
+- Resolves: ownership of files in zip changed to root:root to 
+- tomcat:tomcat to avoid permission problems
+
+* Thu Dec 15 2011 David Knox <dknox@redhat.com> 0:5.5.33-20_patch_06
+- Resolves: Copy commons-chain and commons-fileupload instead of linking
+- in b-j-r to avoid "file not found" errors during install. 
+- Symlinks in post need to stay for now
+
+* Fri Dec 02 2011 David Knox  <dknox@redhat.com> 0:5.5.33-19_patch_06
+- Resolves: CVE-2011-1184
+- Resolves: CVE-2011-3190
+
+* Thu Sep 15 2011 David Knox <dknox@redhat.com> 0:5.5.33-18_patch_05
+- Resolves: JBPAPP-4873,JBPAPP-6133,JBPAPP-3630 Security manager issues
+
+* Mon Jul 18 2011 David Knox <dknox@redhat.com> 0:5.5.33-17_patch_05
+- Resolves CVE-2011-2526
+- Resolves CVE-2011-2204 - Makes changes that affect the admin webapp.
+- During testing it was found that access to the admin webapp results
+- in a invalid path /login. For more info see https://issues.apache.org/bugzilla/show_bug.cgi?id=38484
+
+* Thu Jun 23 2011 David Knox <dknox@redhat.com> 0:5.5.33-16_patch_04
+- jbpapp-4873 can't start with default catalina.policy
+
+* Wed Jun 08 2011 David Knox <dknox@redhat.com> 0:5.5.33-15_patch_04
+- jbpapp-3900 library inconsistancies
+
+* Fri May 20 2011 David Knox <dknox@redhat.com> 0:5.5.33-14_patch_04
+- jbpapp-6553 - jasper-[compiler,runtime].jar, catalina-ant
+
+* Fri May 13 2011 David Knox <dknox@redhat.com> 0:5.5.33-13_patch_04
+- jbpapp-6464 unsigned i18n jars
+
+* Mon May 09 2011 David Knox <dknox@redhat.com> 0:5.5.33-12_patch_04
+- jbpapp-3669 stable log name for initscript
+- jbpapp-3654 orig files in archives
+- jbpapp-6437 NoClassDefFoundError looking for datasource
+
+* Tue Apr 05 2011 David Knox <dknox@redhat.com> 0:5.5.33-11_patch_04
+- Directory permission, TOMCAT_LOG, and initd.log
+
+* Tue Mar 29 2011 David Knox <dknox@redhat.com> 0:5.5.33-10_patch_4
+- JBPAPP-6122 conf hints for JON
+
+* Thu Mar 24 2011 David Knox <dknox@redhat.com> 0:5.5.33-9_patch_3
+- JBPAPP-3654 remove orig files from src distribution too
+
+* Thu Mar 24 2011 David Knox <dknox@redhat.com> 0:5.5.33-8_patch_3
+- JBPAPP-3669 initd scripts ouput to catalina.out
+- JBPAPP-3654 remove orig files from distribution
+
+* Tue Mar 22 2011 David Knox <dknox@redhat.com> 0:5.5.33-7_patch_3
+- JBPAPP-3644 - tomcat enable security manager in sysconfig
+
+* Wed Mar 16 2011 David Knox <dknox@redhat.com> 0:5.5.33-6_patch_2
+- JBPAPP-3749 - cannot resolve user database
+- EWS zip package requires the javax.sql property also. The zip package 
+- doesn't use the tomcat5.conf file (only the rpm install does). Rather than 
+- two places, this setting can be found in (zip) catalina.sh;
+- (rpm) /usr/sbin/dtomcat5 which is a copy of catalina.sh
+
+* Mon Mar 14 2011 David Knox <dknox@redhat.com> 0:5.5.33-5_patch_2
+- Resolves JBPAPP-3749 for zip package
+
+* Tue Mar 08 2011 David Knox <dknox@redhat.com> 0:5.5.33-4_patch_1
+- Fix R: to include first bit of release tag
+- Run sign-unsigned-jars before zips are created
+
+* Tue Mar 01 2011 David Knox <dknox@redhat.com> 0:5.5.33-3_patch_1
+- Resolves: JBPAPP-3749 - cannot resolve user database, found
+- typo in conf.
+
+* Wed Feb 23 2011 David Knox <dknox@redhat.com> 0:5.5.33-2_patch_1
+- Required additional patch for failonerror copyig tomcat-native
+
+* Thu Feb 10 2011 David Knox <dknox@redhat.com> 0:5.5.33-1_patch_1
+- update to tomcat 5.5.33
+
+* Tue Feb 01 2011 David Knox <dknox@redhat.com> 0:5.5.32-1
+- update to tomcat 5.5.32
+
+* Fri Jan 07 2011 David Knox <dknox@redhat.com> 0:5.5.31-0
+- Update to tomcat5.5.31
+- JBPAPP-3749 cannot resolve user database
+- JBPAPP-3878 verified tomcat5 init.d script sets ownership
+
+* Thu Jan 06 2011 David Knox <dknox@redhat.com> 0:5.5.28-12
+- Fixed Buildrequires typo
+- Added BR for zip package for consistancy with packaging 
+  guidelines
+
+* Tue Jan 04 2011 David Knox <dknox@redhat.com> 0:5.5.28-11
+- Resolves: JIRA JBPAPP-3627
+
+* Thu Nov 18 2010 David Knox <dknox@redhat.com> 0:5.5.28-10-patch_1
+- Resolves: JIRA JBPAPP-3626
+
+* Wed Aug 04 2010 David Knox <dknox@rehat.com> - 0:5.5.28-9-patch_1.1
+- Fixed bug in CVE-2009-2902 patch that caused a stack overflow
+
+* Tue Jul 13 2010 David Knox <dknox@redhat.com> - 0:5.5.28-9
+- Add CVE-2010-2227
+-
+
+* Wed Apr 28 2010 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-8
+- Add missing patches, sources to repolib, and fix repolib location
+
+* Wed Feb 10 2010 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-7
+- Add patch for CVE-2009-3555 (from dknox@redhat.com)
+
+* Wed Feb 10 2010 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-6
+- Add patch for CVE-2009-2693, CVE-2009-2901, CVE-2009-2902 (from dknox@redhat.com)
+
+* Wed Feb 10 2010 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-5
+- Add commons-dbcp,pool,collections-tomcat5 to commonlib dir in zip
+- Uncomment library path in config file and add lib64
+- Leave commons-logging-api.jar as a real file instead of a symlink
+  to avoid upgrade issue
+
+* Tue Jan 26 2010 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-4
+- Add patch for loading tomcat native
+
+* Wed Jan 20 2010 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-3
+- Separate tomcat-parent pom into its own subpackage
+
+* Thu Jan 14 2010 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-2
+- Fix post admin-webapp
+
+* Wed Jan 13 2010 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-1
+- Merge with upstream
+
+* Tue Jan 05 2010 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-0.3
+- BR: and R: jboss-transaction instead of geronimo-jta
+- Fix patches
+
+* Fri Dec 18 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-0.2
+- Add struts-taglib and commons-chain, commons-io jars to admin.zip
+
+* Wed Dec 16 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.28-0.1
+- Upgrade to 5.5.28
+- Add admin.zip to the -zip subpackage
+- Update some patches
+- Remove patches for CVE-2008-5515, CVE-2009-0033, CVE-2009-0580, CVE-2009-0783
+  which are fixed in 5.5.28
+- Remove patches for CVE-2008-1232, CVE-2008-1947, CVE-2008-2370, CVE-2008-2938
+  which are fixed in 5.5.27
+- Remove patches for CVE-2007-5342, CVE-2007-5461 which are fixed in 5.5.26
+- Remove patches for CVE-2007-2449, CVE-2007-2450, CVE-2007-3382, CVE-2007-3385
+  which are fixed in 5.5.25
+
+* Tue Sep 22 2009 Marc Schoenefeld <mschoene@redhat.com> - 0:5.5.23-1.patch07.19
+- Fixed NVR to 19 , necessary for CVE-2009-0783 fix
+
+* Tue Sep 15 2009 David Knox <dknox@redhat.com> - 0:5.5.23-1.patch07.1
+- Spinning Errata 8692 CVE-2009-0783
+
+* Wed Aug 19 2009 David Knox <dknox@redhat.com> - 0:5.5.23-1.patch07.1t
+- Merging CVE-2009-0783. Was not advised for patch05.18
+
+* Mon Jul 13 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.18
+- Merge CVE fixes from JBoss_4_0_5 branch
+- add patch for CVE-2007-5333
+  Resolves: rhbz#427766
+- add patch for CVE-2008-5515
+  Resolves: rhbz#504753
+- add patch for CVE-2009-0033
+  Resolves: rhbz#493381
+- add patch for CVE-2009-0580
+  Resolves: rhbz#503978
+
+* Wed Mar 25 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.17
+- Remove quotes around $_RUNJAVA in catalina.sh and tool-wrapper.sh
+
+* Wed Mar 25 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.16
+- Rebuild
+
+* Wed Mar 25 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.15
+- Fix src zip
+
+* Thu Mar 12 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.14
+- Fix sed command
+
+* Thu Mar 12 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.13
+- Remove %post webapps
+- Move content of the READMEs for the CVE to index.html to avoid broken links
+- Add examples-zip for QE
+
+* Fri Feb 27 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.12
+- BR jta from geronimo-specs
+
+* Mon Feb 23 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.11
+- Fix zip content
+
+* Mon Feb 23 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.10
+- Fix zip
+- Use new struts
+
+* Fri Jan 23 2009 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.9
+- Fix %post webapps and %preun webapps
+- Add jsvc.tar.gz to zip
+- Use glassfish-jaf and glassfish-javamail instead of the classpathx ones
+
+* Thu Jan 22 2009 David Walluck <dwalluck@redhat.com> 0:5.5.23-1.patch05.8
+- build zip using upstream release process
+- own directories in zip subpackages
+- fix path to update-alternatives
+
+* Tue Dec 09 2008 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.7
+- Fix zip content
+
+* Thu Dec 04 2008 David Walluck <dwalluck@redhat.com> 0:5.5.23-1.patch05.6
+- set jdt.jar to ecj
+- fix component-info.xml TAG replacement
+- fix repolib file ownership
+- rediff catalina.sh.patch so that it applies with --fuzz=0
+- change ecj version to >= 1:3.3.1.1
+
+* Tue Dec 02 2008 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.5
+- BR and R ecj instead of eclipse-ecj
+
+* Tue Dec 02 2008 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.4
+- Fix content of zip
+
+* Tue Nov 25 2008 Permaine Cheung <pcheung@redhat.com> - 0:5.5.23-1.patch05.3
+- Add -zip and -src-zip optional subpackages
+
+* Fri Nov 14 2008 Fernando Nasser <fnasser@redhat.com> - 0:5.5.23-1.patch05.2
+- Rebuild with Java5
+
+* Tue Nov 04 2008 Fernando Nasser <fnasser@redhat.com> - 0:5.5.23-1.patch05.1
+- Rebuild for EWS
+
+* Tue Aug 19 2008 Permaine Cheung <pcheung@redhat.com> 0:5.5.23-1.patch05.0jpp.1jb
+- Add patch for CVE-2008-1232, CVE-2008-1947, CVE-2008-2370, CVE-2008-2938
+
+* Fri Apr 11 2008 David Walluck <dwalluck@redhat.com> 0:5.5.23-1.patch04.0jpp.4jb
+- dereference symlinks when copying to repodirlib
+
+* Fri Apr 11 2008 David Walluck <dwalluck@redhat.com> 0:5.5.23-1.patch04.0jpp.3jb
+- add build-build-properties-default.patch to repodirsrc
+
+* Fri Apr 11 2008 David Walluck <dwalluck@redhat.com> 0:5.5.23-1.patch04.0jpp.2jb
+- fix location of repodir using macro for patch level
+
+* Thu Apr 10 2008 David Walluck <dwalluck@redhat.com> 0:5.5.23-1.patch04.0jpp.1jb
+- patch for CVE-2007-5342 (ASPATCH-343)
+- fix for CVE-2007-1355 (ASPATCH-343)
+- patch for IT #168408
+- copy correct patch for CVE-2007-5461 to repolib directory
+- install repolib sources as mode 0644 and preserve timestamps
+- don't build outside of $RPM_BUILD_DIR
+- update description in component-info.xml
+
+* Wed Nov 07 2007 Fernando Nasser <fnasser@redhat.com> - 0:5.5.23-1.patch03.0jpp.1jb
+- Patch for CVE-2007-5461
+
+* Thu Aug 30 2007 Fernando Nasser <fnasser@redhat.com> - 0:5.5.23-1.patch02.0jpp.2jb
+- Fix repolib directory path
+- Copy new patches to src directory
+
+* Thu Aug 30 2007 Fernando Nasser <fnasser@redhat.com> - 0:5.5.23-1.patch02.0jpp.1jb
+From jean-frederic clere <jclere@redhat.com>:
+- Patch for CVE-2007-3382 and CVE-2007-3385
+- Patch for CVE-2007-3386
+
+* Thu Jul 26 2007 Vivek Lakshmanan <vivekl@redhat.com> - 0:5.5.23-0jpp.3.jb.4
+- Add tag placeholder back in component-info file
+
+* Thu Jul 26 2007 Vivek Lakshmanan <vivekl@redhat.com> - 0:5.5.23-0jpp.3.jb.3
+- Add the new patches to repolib package
+
+* Thu Jul 26 2007 Vivek Lakshmanan <vivekl@redhat.com> - 0:5.5.23-0jpp.3.jb.2
+- Remove unnecesary backups of patches
+
+* Thu Jul 26 2007 Vivek Lakshmanan <vivekl@redhat.com> - 0:5.5.23-0jpp.3.jb.1
+- Merge spec changes from 0:5.5.23-0jpp.3 over (cosmetic/Examples related fixes)
+  which we dont ship in JBoss but less stressful on the eyes with the diff)
+- patch for ASPATCH-234
+
+* Sat Apr 28 2007 Vivek Lakshmanan <vivekl@redhat.com> - 0:5.5.23-0jpp.1.jb.1
+- Import to JBossAS-4_0_5 branch and modify to build for JBoss 4.0.x
+- Add repolib support (on by dafult)
+- Modify patch2 and add patch20 to allow for building of 
+  jasper-compiler-jdt.jar
+
+* Mon Apr 23 2007 vivek Lakshmanan <vivekl@redhat.com> - 0:5.5.23-0jpp.1
+- Resolves: bug 237089 
+- Merge 0:5.5.17-8jpp.2 with sources/patches from 5.5.23
+
+* Thu Jan 18 2007 Rafael Schloming <rafaels@redhat.com> - 0:5.5.17-8jpp.2
+- Changed PreReq to Requires(pre)
+
+* Wed Oct 04 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-8jpp.1
+- Merge with upstream
+
+* Wed Oct 04 2006 Permaine Cheung <pcheung@redhat.com> 0:5.5.17-8jpp
+- Fix condrestart in init script and location of init script in the spec file.
+
+* Mon Oct 02 2006 Permaine Cheung <pcheung@redhat.com> 0:5.5.17-7jpp
+- Add the new config file, and add the CONNECTOR_PORT variable in it.
+
+* Mon Oct 02 2006 Permaine Cheung <pcheung@redhat.com> 0:5.5.17-6jpp
+- Add the ability to start multiple instances of tomcat on the same machine.
+
+* Wed Aug 30 2006 Deepak Bhole <dbhole@redhat.com> 5.5.17-6jpp.2
+- Rebuilding.
+
+* Mon Aug 21 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-6jpp.1
+- Merge with upstream
+
+* Mon Aug 21 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-6jpp
+- Rebuild
+
+* Mon Aug 21 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-5jpp
+From Andrew Overholt <overholt@redhat.com>:
+- Silence post common-lib and server-lib.
+
+* Thu Jul 27 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-3jpp_5fc
+- Fix regression in relink with patch from Matt Wringe
+
+* Sat Jul 22 2006 Jakub Jelinek <jakub@redhat.com> - 0:5.5.17-3jpp_4fc
+- Rebuilt
+
+* Thu Jul 13 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-3jpp_3fc
+- Rebuild in full
+
+* Wed Jul 05 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-3jpp_2fc
+- Re-enable ppc64 and s390x
+- Disable JSP pre-compilation on ppc64 and x390x (FIXME)
+- Bootstrap mode (with apisonly) build
+
+* Wed Jul 05 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-3jpp_1fc
+- Full build
+- Do not build on ppc64 and s390x
+- Fix servlet-api.jar path
+- Add version to catalina .so
+From Ralph Apel <rapel@redhat.com>:
+- Re-add patch to add rt.jar
+- Add mx4j JMX API and struts to classpath
+
+* Wed Jul 05 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-3jpp_0fc
+- Upgrade
+- Use any JTA for now
+- Try and remove exclude for sample.war
+- Bootstrap build with apisonly
+
+* Wed Jul 05 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-3jpp_1rh
+- Merge with upstream
+
+* Fri Jun 30 2006 Ralph Apel <r.apel@r-apel.de> 0:5.5.17-3jpp
+- Create option --with apisonly to build just tomcat5-servlet-2.4-api,
+  tomcat5-jsp-2.0-api and its -javadoc subpackages
+- Create option --without ecj to build even when eclipse-ecj not available
+- Drop several unnecessary export CLASSPATH=
+
+* Sat Jun 17 2006 Deepak Bhole <dbhole@redhat.com> - 0:5.5.15-1jpp_7fc
+- Re-enable ppc64, s390 and s390x architectures now that eclipse is built there
+
+* Mon May 15 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-2jpp_1rh
+- Merge with upstream for upgrade to 5.5.17
+
+* Mon May 15 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-2jpp
+- Requires on post things that are linked to at post
+  Merge changes from downstream:
+- Fix line breaks in the tomcat5 init script
+- Split preun section among main package and the two new subpackages
+- Move catalina-ant*.jar to the server-lib subpackage to avoid circular
+  dependency with the main package
+- Remove leading zero from alternative priorities
+- Rebuild with new classpath-mail as javamail alternative
+- Update versions of dependencies and move them to library subpackages
+- Use only jta from geronimo-specs
+
+* Mon May 15 2006 Fernando Nasser <fnasser@redhat.com> 0:5.5.17-1jpp
+- Upgrade to 5.5.17
+- Remove jasper2 subdirectory of jasper from patches and this spec file
+
+* Wed Apr 19 2006 Ralph Apel <r.apel@r-apel.de> 0:5.5.16-3jpp
+- Drop jdtCompilerAdapter from build-jar-repository
+- Use ant-trax in static webapp build
+- Duplicate admin-webapps jars in _javadir and make them world readable
+- Direct install of common-lib and server-lib to _javadir and symlink for TC5
+
+* Tue Apr 04 2006 Ralph Apel <r.apel@r-apel.de> 0:5.5.16-2jpp
+- Require eclipse-ecj >= 3.1.1 and adapt to it
+
+* Fri Mar 24 2006 Ralph Apel <r.apel@r-apel.de> 0:5.5.16-1jpp
+- Upgrade to 5.5.16
+
+* Mon Mar 06 2006 Jeremy Katz <katzj@redhat.com> - 0:5.5.15-1jpp_6fc
+- stop scriptlet spew
+
+* Fri Mar 03 2006 Thomas Fitzsimmons <fitzsim@redhat.com> - 0:5.5.15-1jpp_5fc
+- Require java-gcj-compat for post and postun sections of
+  servlet-2.4-api, jsp-2.0-api-javadoc and
+  server-lib sub-packages, since these three packages call
+  /usr/bin/rebuild-gcj-db in their post and/or postun sections.
+
+* Wed Mar 01 2006 Rafael Schloming <rafaels@redhat.com> - 0:5.5.15-1jpp_4fc
+- Disabled juli logging as a workaround for a number of classpath bugs
+- in java.util.logging.*
+
+* Thu Feb 23 2006 Rafael Schloming <rafaels@redhat.com> - 0:5.5.15-1jpp_3fc
+- Added jasper-foo symlinks for jars.
+
+* Wed Feb 22 2006 Rafael Schloming <rafaels@redhat.com> - 0:5.5.15-1jpp_2fc
+- Exclude ppc64 s390 s390x
+
+* Wed Feb 22 2006 Rafael Schloming <rafaels@redhat.com> - 0:5.5.15-1jpp_1fc
+- Updated to 5.5.15
+
+* Tue Feb 14 2006 Ralph Apel <r.apel@r-apel.de> 0:5.5.12-2jpp
+- Fix jta.jar location
+
+* Fri Nov 11 2005 Fernando Nasser <fnasser@redhat.com> 0:5.5.12-1jpp
+- Place jsp in its own subpackage
+- Fix alternative links to jsp and servlet
+- Fix alternative priorities to jsp and servlet
+- Create library subpackages: common-lib and server-lib
+  From Vadim Nasardinov <vadimn@redhat.com> 0:5.5.12-1jpp
+- Upgrade to 5.5.12
+  From Deepak Bhole <dbhole@redhat.com>
+- Fix init script so it works with SELinux
+
+* Wed Jun 08 2005 Fernando Nasser <fnasser@redhat.com> 0:5.5.9-1jpp
+- Merge for upgrade
+- Change the user to tomcat from tomcat4
+- Relax permissions on appdir directory so jonas package can build
+- Remove spurious links to log4j.jar from common and server/lib
+- Remove spurious dependency on tyrex (only needed for tomcat4)
+- Make sure the main package installs first so user tomcat is created
+- Reinstate ssl code changes so that tomcat can be built with other SDKs
+  and not only with Sun's or BEA's.
+
+* Mon May 09 2005 Fernando Nasser <fnasser@redhat.com> 0:5.5.9-1jpp
+- Upgrade to 5.5.9
+- Add jmx to bindir and lower requirement to java 1.4.2
+
+* Fri Feb 04 2005 Jason Corley 0:5.5.7-2jpp
+- Add provides servletapi5 in addition to obsoletes servletapi5 (Martin Grotzke)
+
+* Thu Feb 03 2005 Jason Corley 0:5.5.7-1jpp
+- Upgrade to current stable release, 5.5.7
+
+* Mon Jan 31 2005 Jason Corley 0:5.5.4-17jpp
+- Use new eclipse-ecj package to remove old jasper-compiler-jdt.jar hack
+
+* Thu Jan 27 2005 Jason Corley 0:5.5.4-16jpp
+- Attempt to replace non-free jta with free geronimo-specs
+
+* Thu Jan 27 2005 Jason Corley 0:5.5.4-15jpp
+- Clean rebuild
+
+* Thu Dec 16 2004 Jason Corley 0:5.5.4-14jpp
+- First attempt at jasper subpackages
+
+* Thu Dec 16 2004 Jason Corley 0:5.5.4-13jpp
+- Yet another "servletapi" naming scheme change
+
+* Tue Dec 14 2004 Jason Corley 0:5.5.4-12jpp
+- Update the servletapi and servletapi-javadoc subpackages to the way proposed
+  by Gary Benson (based on work by Ralph Apel) in the 5.0.30 RPMs
+
+* Wed Dec 08 2004 Jason Corley 0:5.5.4-10jpp
+- Incorporate Fernando Nasser's javaxssl patch from the tomcat 5.0.28 RPM
+- Replace find ... -exec's with find | xargs
+
+* Tue Dec 07 2004 Jason Corley 0:5.5.4-9jpp
+- First attempt at the whole servletapi issue
+- Replace jmxri references with mx4j
+- Build with JDK 1.4 and require a 1.4 JDK to run
+- Remove cruft
+- Clearly lost track of some stuff between changelog entries ;-)
+
+* Fri Dec 03 2004 Jason Corley 0:5.5.4-1jpp
+- First attempt at building 5.5
+
+* Fri Sep 10 2004 Fernando Nasser <fnasser@redhat.com> 0:5.0.27-4jpp
+- Rebuild using Tyrex 1.0.1
+
+* Sat Sep 04 2004 Fernando Nasser <fnasser@redhat.com> 0:5.0.27-3jpp
+- Rebuild with Ant 1.6.2
+
+* Fri Jul 16 2004 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.27-2jpp
+- Oops, don't require mx4j 2.0.1. 1.1.1 or later should be enough.
+  jmxri won't work anymore since tc5 needs mx4j-tools.
+
+* Fri Jul 16 2004 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.27-1jpp
+- Update to 5.0.27 (stable)
+- Don't remove tomcat4 user/group on uninstall see the mailing list
+  for discussion
+- build w/ xml-apis.jar instead of xmlParserAPIs.jar (release notes 5.0.27)
+- Require junit 3.8.1 or newer (release notes 5.0.26)
+- Require jakarta-commons-dbcp 1.2.1 or newer (release notes 5.0.27)
+- Require jakarta-commons-logging 1.0.4 or newer (release notes 5.0.27)
+- Require jakarta-commons-pool 1.1 or newer (release notes 5.0.27)
+
+* Wed Jun 09 2004 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.24-3jpp
+- Change default webapps file permissions from 0640 -> 0644
+
+* Tue Jun 08 2004 Fernando Nasser <fnasser@redhat.com> 0:5.0.24-2jpp
+- Allow browsing of webapps directory so that JOnAS can build.
+
+* Mon May 17 2004 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.24-1jpp
+- Update to 5.0.24
+- Require xerces-j2 2.6.2 (release notes 5.0.21), also require ant < 1.6
+  as tomcat5 doesn't seem to build cleanly with 1.6 yet.
+
+* Fri Mar 19 2004 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.19-2jpp
+- Set JAVA_ENDORSED_DIRS by default in tomcat5.conf, it is otherwise empty
+  Suggestion from Aleksander Adamowski <aleksander.adamowski@altkom.pl>
+
+* Wed Feb 25 2004 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.19-1jpp
+- Update to 5.0.19
+
+* Fri Jan 23 2004 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.18-1jpp
+- Update to 5.0.18
+- Build catalina before connectors
+- Hack connectors build
+- Require xerces-j2 2.6.0 (release notes 5.0.17)
+
+* Sat Jan 17 2004 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-4jpp
+- Create TC4 user and group separately, lets TC5 work out of the box
+  on Trustix (Patch from Iain Arnell)
+
+* Sat Jan 10 2004 Kaj J. Niemi <kajtzu@fi.basen.net> - 0:5.0.16-3jpp
+- servletapi5 is required
+- move confdir/Catalina from admin-webapps to main package
+  (otherwise we end up requiring tomcat5-admin-webapps for struts-webapps)
+
+* Sat Jan 10 2004 Kaj J. Niemi <kajtzu@fi.basen.net> - 0:5.0.16-2jpp
+- Fix conflict with tomcat4 catalina-ant.jar in %_javadir by renaming it
+  catalina-ant5.jar for now.
+
+* Fri Jan 09 2004 Kaj J. Niemi <kajtzu@fi.basen.net> - 0:5.0.16-1jpp
+- First build for JPackage
+
+* Mon Dec 29 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-0.11
+- Merge changes from tomcat4.init to tomcat5.init
+
+* Mon Dec 22 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-0.10
+- Some jsp-examples require jakarta-taglibs-standard to work
+
+* Mon Dec 22 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-0.9.1
+- Struts should be 1.1 or later according to the release notes
+- The /admin webapp works now as well
+- manager.xml needs to be group writeable, otherwise tomcat complains
+
+* Fri Dec 19 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-0.7
+- Accept an older version of xerces-j2 as well.
+
+* Fri Dec 19 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-0.6
+- Require xerces-j2 instead of just jaxp_parser_impl
+- Require jpackage commons-logging instead of internal version
+
+* Wed Dec 17 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-0.5
+- Tomcat5 isn't beta anymore
+
+* Wed Dec 17 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-0.beta.4
+- Place jspapi, jmxri, commons-el in common/lib as mentioned in the
+  upstream RELEASE-NOTES.txt. This makes jsps actually work.
+
+* Wed Dec 17 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-0.beta.3
+- Separated jakarta-commons-el from tomcat
+- Require servletapi5 and jakata-commons-el
+- Added Patch #4 (tomcat5-5.0.16-cluster-pathelement.patch) which fixes
+  build failure when servlet-api is renamed something else than the default
+- Added Patch #5 (tomcat5-5.0.16-skip-build-on-install.patch) which corrects
+  servletapi/jspapi related build snafu on install. They're already built so
+  it's OK to skip.
+
+* Thu Dec 04 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.16-0.beta.1
+- 5.0.16
+- jakarta-commons-el included here instead of somewhere else for now,
+  packaging unfinished
+- Patch #3 removes dependency to jsvc.tar.gz which doesn't seem to be anywhere
+
+* Tue Aug 05 2003 Kaj J. Niemi <kajtzu@fi.basen.net> 0:5.0.12-0.beta.1
+- Based on JPackage.org's tomcat4 .spec
+- No compat stuff anymore.
+- First build
+
+------------------------------------------------------------------------
+Source: rpm2cpio
+/mnt/redhat/brewroot/packages/tomcat5/5.5.33/22_patch_07.ep5.el4/src/tomcat5-5.5.33-22_patch_07.ep5.el4.src.rpm
+| cpio --quiet -i --to-stdout '*.spec'
+
