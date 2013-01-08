@@ -454,8 +454,8 @@ sub _check_changelog_macros {
         ++$lineno;
     }
 
-    # FIXME: ignore %{?dist} in '*' lines?
-    # http://brewtap-devel.app.eng.bos.redhat.com/nvr/polkit/0.109/2.el7
+    # Get the diffs between the original (specfile) changelog and the
+    # parsed one. Gripe about any that involve macros.
     $lineno = $changelog[0]->lineno;
     my @diffs = diff( \@cl_orig, \@cl_post );
 #    use Data::Dumper; print STDERR Dumper(\@diffs);
