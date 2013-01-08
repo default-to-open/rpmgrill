@@ -1,0 +1,38 @@
+# Created: 2013-01-08T11:39:47
+{
+  'SpecFileSanity' => [
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Fri</u> Jul 11 2012 David Zeuthen &lt;davidz@redhat.com&gt; 0.107-1%{?dist}'
+        ],
+        'path' => 'polkit-0.109-2.el7.spec',
+        'lineno' => 201
+      },
+      'diag' => 'Jul 11 2012 is actually a Wednesday. Did you mean <b>Wed</b>? Or Jul <b>13</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Fri</u> Aug 04 2011 David Zeuthen &lt;davidz@redhat.com&gt; 0.102-1'
+        ],
+        'path' => 'polkit-0.109-2.el7.spec',
+        'lineno' => 248
+      },
+      'diag' => 'Aug 04 2011 is actually a Thursday. Did you mean <b>Thu</b>? Or Aug <b>5</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    },
+    {
+      'context' => {
+        'excerpt' => [
+          '* <u>Fri</u> Nov 14 2010 Matthias Clasen &lt;mclasen@redhat.com&gt; - 0.98-5'
+        ],
+        'path' => 'polkit-0.109-2.el7.spec',
+        'lineno' => 285
+      },
+      'diag' => 'Nov 14 2010 is actually a Sunday. Did you mean <b>Sun</b>? Or Nov <b>12</b>?',
+      'code' => 'ChangelogWrongWeekday'
+    }
+  ]
+}
