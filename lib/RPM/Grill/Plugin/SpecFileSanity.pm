@@ -285,6 +285,10 @@ sub _check_changelog_version {
         # FIXME: explain
         if ($vr =~ m{^(.*)-(.*)$}) {
             my ($v, $r) = ($1, $2);
+
+            # It's OK to use %{?dist} in the release string
+            $r =~ s/\%\{\?dist\}$/.*/;
+
             if ($v ne $nvr[1]) {
                 # Version does not match. But can we match partially?
                 if ($v =~ /^(.+)\b$nvr[1]$/) {
@@ -450,6 +454,8 @@ sub _check_changelog_macros {
         ++$lineno;
     }
 
+    # FIXME: ignore %{?dist} in '*' lines?
+    # http://brewtap-devel.app.eng.bos.redhat.com/nvr/polkit/0.109/2.el7
     $lineno = $changelog[0]->lineno;
     my @diffs = diff( \@cl_orig, \@cl_post );
 #    use Data::Dumper; print STDERR Dumper(\@diffs);
