@@ -460,22 +460,18 @@ sub _check_changelog_macros {
     my @diffs = diff( \@cl_orig, \@cl_post );
 #    use Data::Dumper; print STDERR Dumper(\@diffs);
     for my $diff (@diffs) {
-        if (@$diff == 2) {
-            if ($diff->[0][0] eq '-' && $diff->[1][0] eq '+') {
-                if ($diff->[0][2] =~ /%/) {
-                    $self->gripe({
-                        code => 'ChangelogMacros',
-                        # FIXME: better diagnostic!
-                        # FIXME: "Unescaped percent signs (%) in specfiles may be expanded unexpectedly"
-                        diag => "Percent signs (%) in specfile changelog should be escaped",
-                        context => {
-                            path    => $specfile_basename,
-                            lineno  => $lineno + $diff->[0][1],
-                            excerpt => _friendly_excerpt($diff),
-                        },
-                    });
-                }
-            }
+        if (my $excerpt = _is_macro_diff($diff)) {
+            $self->gripe({
+                code => 'ChangelogMacros',
+                # FIXME: better diagnostic!
+                # FIXME: "Unescaped percent signs (%) in specfiles may be expanded unexpectedly"
+                diag => "Percent signs (%) in specfile changelog should be escaped",
+                context => {
+                    path    => $specfile_basename,
+                    lineno  => $lineno + $diff->[0][1],
+                    excerpt => $excerpt,
+                },
+            });
         }
     }
 }
@@ -510,11 +506,27 @@ sub _date_suggestion {
     return $hint;
 }
 
-#######################
-#  _friendly_excerpt  #  Returns the change between two specfile lines
-#######################
-sub _friendly_excerpt {
+####################
+#  _is_macro_diff  #  Returns the change between two specfile lines
+####################
+#
+# If diff element is one that involves macros (%), returns a friendly
+# excerpt message of the form:
+#
+#    spec: blah blah %foo
+#    rpm : blah blah /expanded-value-of-foo
+#
+# Otherwise, returns undef.
+#
+sub _is_macro_diff {
     my $diff = shift;                           # in: Algorithm::Diff entry
+
+    # We're only interested in changes (-/+), not deleted or added lines.
+    return unless @$diff == 2;
+    return unless $diff->[0][0] eq '-' && $diff->[1][0] eq '+';
+
+    # Only interested if the previous (changed) line has a percent sign
+    return unless $diff->[0][2] =~ /%/;
 
     # Split into two arrays, each divided into its component words.
     my @ante = map {escapeHTML($_)} grep($_ ne '',split(/(\W)/,$diff->[0][2]));
@@ -544,6 +556,13 @@ sub _friendly_excerpt {
     (my $ante = join('', @ante)) =~ s|</var><var>||g;
     (my $post = join('', @post)) =~ s|</var><var>||g;
 
+    # It's ok to use %{?dist} in any line that begins with '*':
+    #  * Mon Jan 07 2013 Matthias Clasen <mclasen@redhat.com> - 0.109-2%{?dist}
+    # FIXME: this assumes that there won't be any %-macros anywhere else
+    # in that line. Sounds like a reasonable assumption, but just you wait.
+    return if $ante =~ m{^\*\s .* <var>\%\{\?dist\}\s*</var>\s*$}x;
+
+    # Return a human-friendly string highlighting the diffs.
     return "spec: $ante\nrpm : $post";
 }
 
