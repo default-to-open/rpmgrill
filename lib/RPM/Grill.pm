@@ -56,6 +56,11 @@ ppc                    | ppc64
 s390                   | s390x
 END_ARCH_MAP
 
+# 2013-01-18 these are special Windows "architectures". They are not
+# RPM-based, and have no RPMs. We care about them because we run AV scans.
+our @Non_RPM_Arches = qw(maven win);
+our %Is_Non_RPM_Arch = map { $_ => 1 } @Non_RPM_Arches;
+
 our %Multilib_Peers;
 our %Is_64bit;
 for my $line (split "\n", $Arch_Map) {
@@ -73,6 +78,9 @@ for my $line (split "\n", $Arch_Map) {
     $Multilib_Peers{$_} = [ @arch64 ]   for @arch32;
     $Multilib_Peers{$_} = [ @arch32 ]   for @arch64;
 }
+
+# Special case for the non-RPM architectures
+$Is_64bit{$_} = 0  for @Non_RPM_Arches;
 
 
 # END   user-configurable section
@@ -122,7 +130,7 @@ sub new {
     my %all_subpackages;
     for my $arch (@arches) {
         my @subp = grep { -d "$dir/$arch/$_" } read_dir("$dir/$arch")
-            or die "FIXME: $dir/$arch";
+            or die "FIXME: $dir/$arch has no subdirs";
 
         # Key = arch, value = list of subpackages, just like dir structure
         #
@@ -269,6 +277,17 @@ sub invoke_plugin {
     $plugin =~ m{^.*::Plugin::(.*)$}
         or croak "$ME: Internal error: unexpected plugin '$plugin'";
     my $module = $1;
+
+    # 2013-01-18 "maven" and "win" don't have RPMs or build logs,
+    # but we still need to run AV scans on them.
+    if ((my @arches = $self->non_src_arches) == 1) {
+        if ($Is_Non_RPM_Arch{$arches[0]}) {
+            if ($plugin !~ /virus/i) {
+                dprintf "xxxxx: $plugin (skipped)\n";
+                return;
+            }
+        }
+    }
 
     dprintf "vvvvv: $plugin\n";
 

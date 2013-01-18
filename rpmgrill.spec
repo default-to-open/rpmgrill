@@ -66,6 +66,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- support for maven and win builds (antivirus scan only)
 - bz853078: /bin (and other) files should be owned by root
 - bz876281: test for detecting dangerous polkit constructions
 - ChangelogMacros and ChangelogBadRelease: %%{?dist} in release is OK
