@@ -1,6 +1,6 @@
 Name:           rpmgrill
 Version:        0.16
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        A utility for catching problems in brew builds
 Group:          Development/Tools
 License:        Red Hat internal.  Do not redistribute.
@@ -66,6 +66,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Fri Jan 18 2013 Ed Santiago <santiago@redhat.com> 0.16-4
 - support for maven and win builds (antivirus scan only)
 - bz853078: /bin (and other) files should be owned by root
 - bz876281: test for detecting dangerous polkit constructions
