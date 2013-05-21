@@ -1,0 +1,250 @@
+<!-- To convert to html: pandoc -o foo.html README.unpacking -->
+
+About This Document
+===================
+
+This document describes the directory structure rpmgrill expects
+as input, containing one or more unpacked RPMs from a Koji build.
+It is targeted toward the application developer who wishes to
+understand rpmgrill and its context, but doesn't necessarily
+want to delve deep into the code.
+
+See also the `bin/rpmgrill-fetch-build` script.
+
+Background: Koji
+================
+
+Builds don't necessarily come from [koji](http://koji.fedoraproject.org/koji/),
+but for our purposes it's easier to assume that they do. A koji build will
+consist of:
+
+* A source RPM
+* A set of zero or more **architecture-specific** RPMs (eg i686, x86_64)
+* A set of zero or more **`noarch`** RPMs
+* Build logs for each architecture
+
+See APPENDIX A for a sample Koji build.
+
+rpmgrill expects those RPMs and build logs to be downloaded locally,
+unpacked, and certain RPM metadata information made easily available.
+The `bin/rpmgrill-fetch-build` script is one example of how this
+can be done, but other tools can easily be written following its example.
+
+Directory Structure
+===================
+
+This describes what rpmgrill expects to see.
+
+The first level of subdirectories is **architectures**: one for each.
+For Fedora, that will usually translate to:
+
+       src    i686    x86_64    noarch(not always)
+
+The second level is **subpackage name**. Usually one for the main
+package name, and one for each subpackage. Example:
+
+        my-tree/
+        ├── i686/
+        │   ├── pkgname/
+        │   └── pkgname-debuginfo/
+        ├── src
+        │   └── pkgname/
+        └── x86_64/
+            ├── pkgname/
+            └── pkgname-debuginfo/
+
+Under each *arch* / *subpackage* subdirectory will be the RPM file,
+the extracted contents thereof, and some extracted RPM metadata:
+
+* The file **`rpm.rpm`** : this is `*subpackage*-*version*-*release*.*arch*.rpm`
+* The directory **`payload`**: contains the extracted contents of the RPM
+* A bunch of **`README.xxx`** files: RPM metadata, the result of
+a series of `rpm -qp --something` commands.
+
+Example:
+
+        my-tree/i686/pkgname
+        ├── RPM.changelog
+        ├── RPM.conflicts
+        ...
+        ├── payload/
+        │   ├── etc/my-config-file
+        │   ├── usr/bin/mybin*
+        │   ├── usr/lib/mylib.so.1
+        ... ...
+        └── rpm.rpm
+
+Each `RPM.*` file contains the output of one `rpm -qp --something` command.
+As of this writing (2013-05-03) that list is:
+
+        Each of these options gets saved into its own RPM.nnnn file:
+
+            --provides   --requires   --obsoletes  --conflicts
+            --info       --changelog  --scripts    --triggers
+
+        These two files are a little more special:
+
+           RPM.version    contains the string "%{EPOCH}:%{VERSION}-%{RELEASE}"
+
+           RPM.per_file_metadata ... is complicated. See below.
+
+`RPM.per_file_metadata` is essentially the RPM manifest: the list
+of files included in the RPM, and info about each file. As of this
+writing (2013-05-03) that is a tab-separated list of:
+
+    md5sum    mode         owner  group   flags   filecolor   path
+
+e.g.:
+
+    md5sum    mode         owner  group   flags   filecolor   path
+    e49cfa..  -rwxr-xr-x   root   root    0       2           /usr/sbin/foo
+
+`flags` can indicate whether a file is defined as a config file,
+documentation file, "ghost", and other magic RPM terminology.
+See the `rpmfileAttrs_e` enum in `/usr/include/rpm/rpmfi.h`
+for more than you need to know.
+
+`filecolor` is a nightmare. It's basically a way to handle multilib
+(as in, installing -32 and -64 pkgs on the same system). If you already
+understand filecolor, you don't need my explanation. And if you don't,
+you almost certainly don't want to (and I couldn't offer a reasonable
+explanation in this space anyway). So just nod wisely and move along.
+
+See APPENDIX B for an illustration of an extracted directory tree.
+
+**FIXME**: there is a need to extract packages recursively, e.g.
+jar or zip files. The intent is to extract those into a subdirectory
+at the same level as `payload`. This remains TBI.
+
+______________________________________________________________________________
+
+
+APPENDIX A: Sample Koji Input
+=============================
+
+This shows a sample Koji build, demonstrating multiple architectures
+(including noarch) and multiple subpackages per architecture. Whitespace
+below is for readability, to better highlight package names and
+file extensions. RPM filenames do not ever include spaces.
+
+[glusterfs-3.3.1-14.fc18](http://koji.fedoraproject.org/koji/buildinfo?buildID=415412):
+
+    src
+        glusterfs                  -3.3.1-14.fc18  .src.rpm
+    i686
+        glusterfs                  -3.3.1-14.fc18  .i686.rpm
+        glusterfs-devel            -3.3.1-14.fc18  .i686.rpm
+        glusterfs-fuse             -3.3.1-14.fc18  .i686.rpm
+        glusterfs-geo-replication  -3.3.1-14.fc18  .i686.rpm
+        glusterfs-rdma             -3.3.1-14.fc18  .i686.rpm
+        glusterfs-server           -3.3.1-14.fc18  .i686.rpm
+        glusterfs-debuginfo        -3.3.1-14.fc18  .i686.rpm
+    noarch
+        glusterfs-swift            -3.3.1-14.fc18  .noarch.rpm
+        glusterfs-swift-account    -3.3.1-14.fc18  .noarch.rpm
+        glusterfs-swift-container  -3.3.1-14.fc18  .noarch.rpm
+        glusterfs-swift-doc        -3.3.1-14.fc18  .noarch.rpm
+        glusterfs-swift-object     -3.3.1-14.fc18  .noarch.rpm
+        glusterfs-swift-proxy      -3.3.1-14.fc18  .noarch.rpm
+        glusterfs-ufo              -3.3.1-14.fc18  .noarch.rpm
+    x86_64
+        glusterfs                  -3.3.1-14.fc18  .x86_64.rpm
+        glusterfs-devel            -3.3.1-14.fc18  .x86_64.rpm
+        glusterfs-fuse             -3.3.1-14.fc18  .x86_64.rpm
+        glusterfs-geo-replication  -3.3.1-14.fc18  .x86_64.rpm
+        glusterfs-rdma             -3.3.1-14.fc18  .x86_64.rpm
+        glusterfs-server           -3.3.1-14.fc18  .x86_64.rpm
+        glusterfs-debuginfo        -3.3.1-14.fc18  .x86_64.rpm
+
+______________________________________________________________________________
+
+APPENDIX B: What rpmgrill expects
+=================================
+
+This shows the above set of RPMs looks like when unpacked and prepared
+for rpmgrill. For the sake of readability, only one arch/subpackage
+subdirectory (the bottommost one) is expanded. You can safely assume
+that all the others look similar.
+
+    glusterfs-3.3.1-14.fc18/
+    ├── README .................................... for human consumption
+    ├── i686/
+    │   ├── build.log ............................. one build log per arch
+    │   ├── glusterfs/
+    │   ├── glusterfs-debuginfo/
+    │   ├── glusterfs-devel/
+    │   ├── glusterfs-fuse/
+    │   ├── glusterfs-geo-replication/
+    │   ├── glusterfs-rdma/
+    │   └── glusterfs-server/
+    ├── noarch/ ................................... (no build log for noarch)
+    │   ├── glusterfs-swift/
+    │   ├── glusterfs-swift-account/
+    │   ├── glusterfs-swift-container/
+    │   ├── glusterfs-swift-doc/
+    │   ├── glusterfs-swift-object/
+    │   ├── glusterfs-swift-proxy/
+    │   └── glusterfs-ufo/
+    ├── src/
+    │   └── glusterfs/
+    └── x86_64/
+        ├── build.log ............................. one build log per arch
+        ├── glusterfs/
+        ├── glusterfs-debuginfo/
+        ├── glusterfs-devel/
+        ├── glusterfs-fuse/
+        ├── glusterfs-geo-replication/
+        ├── glusterfs-rdma/
+        └── glusterfs-server/
+            ├── RPM.changelog ..................... rpm -qp --changelog
+            ├── RPM.conflicts ..................... (you get the idea)
+            ├── RPM.metadata
+            ├── RPM.obsoletes
+            ├── RPM.per_file_metadata
+            ├── RPM.provides
+            ├── RPM.requires
+            ├── RPM.scripts
+            ├── RPM.triggers
+            ├── RPM.version
+            ├── payload/ .......................... actual contents of RPM:
+            │   ├── etc/
+            │   │   ├── glusterfs/
+            │   │   │   └── glusterd.vol
+            │   │   ├── logrotate.d/
+            │   │   │   ├── glusterd
+            │   │   │   └── glusterfsd
+            │   │   └── sysconfig/
+            │   │       ├── glusterd
+            │   │       └── glusterfsd
+            │   └── usr/
+            │       ├── lib/
+            │       │   └── systemd/
+            │       │       └── system/
+            │       │           ├── glusterd.service
+            │       │           └── glusterfsd.service
+            │       ├── lib64/
+            │       │   └── glusterfs/
+            │       │       └── 3.3.1/
+            │       │           └── xlator/
+            │       │               ├── features/
+            │       │               │   └── posix-locks.so -> locks.so
+            │       │               ├── mgmt/
+            │       │               │   ├── glusterd.so -> glusterd.so.0.0.0*
+            │       │               │   ├── glusterd.so.0 -> glusterd.so.0.0.0*
+            │       │               │   └── glusterd.so.0.0.0*
+            │       │               ├── nfs/
+            │       │               │   ├── server.so -> server.so.0.0.0*
+            │       │               │   ├── server.so.0 -> server.so.0.0.0*
+            │       │               │   └── server.so.0.0.0*
+            │       │               ├── protocol/
+            │       │               │   ├── server.so -> server.so.0.0.0*
+            │       │               │   ├── server.so.0 -> server.so.0.0.0*
+            │       │               │   └── server.so.0.0.0*
+            │       │               └── storage/
+            │       │                   ├── posix.so -> posix.so.0.0.0*
+            │       │                   ├── posix.so.0 -> posix.so.0.0.0*
+            │       │                   └── posix.so.0.0.0*
+            │       └── sbin/
+            │           ├── gluster*
+            │           └── glusterd -> glusterfsd
+            └── rpm.rpm ........................... (N-V-R.arch.rpm)

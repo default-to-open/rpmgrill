@@ -1,0 +1,21 @@
+This is RpmGrill, part of a tool suite for analyzing RPM builds.
+
+RpmGrill analyzes RPM builds(*). The idea is to catch potential problems
+early, while there's still time and energy to fix them.
+
+ (*) An RPM build consists of one SRPM plus all derivatives, including
+     all architectures and all subpackages. For example, samba includes
+     subpackages samba-client, samba-common, lsmbclient, (others) and
+     builds on i386, x86_64, ia64, ppc*, s390*.
+
+RpmGrill requires a calling package to set up its input. RpmGrill's
+input is a tree structure containing unpacked RPMs. RpmGrill runs
+tests on these, for example:
+
+  * specfile: confirm that it looks like valid UTF-8
+
+  * build logs: look for gcc warnings
+
+  * multilib: warn about conflicts between 32- and 64-bit installs.
+
+  * ...many more.

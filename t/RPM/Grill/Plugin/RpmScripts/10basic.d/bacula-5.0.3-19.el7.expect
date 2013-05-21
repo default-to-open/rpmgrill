@@ -1,0 +1,30 @@
+{
+  RpmScripts => [
+    {
+      arch => 'src',
+      code => 'GroupaddWrongGid',
+      context => {
+        excerpt => [
+          'fedora-groupadd 33 -r bacula'
+        ],
+        lineno => '707',
+        path => 'bacula-5.0.3-19.el7.spec',
+        sub => '%pre common'
+      },
+      diag => 'Invocation of <tt>groupadd</tt> with incorrect GID <var>33</var>; you should use <b>133</b>, as defined in <tt>/usr/share/doc/setup-[v]/uidgid</tt>'
+    },
+    {
+      arch => 'src',
+      code => 'UseraddWrongUid',
+      context => {
+        excerpt => [
+          'fedora-useradd  33 -r -s /sbin/nologin -d /var/spool/bacula -M -c &#39;Bacula Backup System&#39; -g bacula bacula',
+        ],
+        lineno => '708',
+        path => 'bacula-5.0.3-19.el7.spec',
+        sub => '%pre common'
+      },
+      diag => 'Invocation of <tt>useradd</tt> with incorrect UID <var>33</var>; you should use <b>133</b>, as defined in <tt>/usr/share/doc/setup-[v]/uidgid</tt>',
+    }
+  ]
+}

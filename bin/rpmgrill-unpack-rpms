@@ -1,0 +1,427 @@
+#!/usr/bin/perl
+#
+# rpmgrill-unpack-rpms - unpacks downloaded RPMs into what rpmgrill wants
+#
+package RPM::Grill::UnpackRPMs;
+
+use strict;
+use warnings;
+
+(our $ME = $0) =~ s|.*/||;
+
+our $VERSION = '0.0';                 # Will be replaced by Makefile
+
+# For debugging, show data structures using DumpTree($var)
+#use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
+
+###############################################################################
+# BEGIN user-customizable section
+
+# Standard RPM command
+our @RPM = qw(rpm -qp --nosignature --nodigest);
+
+# Fields used to generate the RPM.per_file_metadata file.  This will
+# get passed to the rpm command as a --queryformat string in the form:
+#      %{field1}\t%{field2}\t...
+# The special-casing of (\d+) is so we get a fixed-width %64{filemd5s},
+# which is nice for making readable output.
+our @Per_File_Metadata = map { /(.*?)(\((\d+)\))?$/; "%" . ($3||'') . "{$1}" }
+    qw(
+          filemd5s(64)
+          filemodes:perms
+          fileusername
+          filegroupname
+          fileflags
+          filecolors
+          filenames
+  );
+our $Per_File_Metadata = join("\\t", @Per_File_Metadata);
+
+# Metadata files we create.  For each line below, we create a file RPM.xxx
+# which will be read by rpmgrill.  Format of the list below is:
+#
+#    <name><nodups?>    [<rpm options>]
+#
+#    name          Name of the RPM.xxx file, eg 'provides' => RPM.provides
+#                  If there is nothing on the right-hand side, this is
+#                  also the name of the rpm option (e.g. 'rpm --provides')
+#
+#    nodups?       A tilde here means 'filter duplicate lines'.  Needed
+#                  to handle an odd case in libpng-1.2.10-7.1.el5_5.3 (and
+#                  probably others) in which 'rpm --provides' on 32-bit
+#                  arches spits out two identical 'libpng.so.3' lines.
+#                  (on 64-bit, the second line includes '()(64bit)').
+#
+#    rpm options   Options passed to the rpm command for generating this file.
+#                  If blank, prepend '--' to <name>; e.g. --provides
+#
+our $Metadata_Files = <<"END_METADATA_FILES";
+provides~
+requires~
+scripts
+obsoletes
+conflicts
+changelog
+triggers
+info
+version           --queryformat %{EPOCH}:%{VERSION}-%{RELEASE}\\n
+per_file_metadata --queryformat [$Per_File_Metadata\\n]
+END_METADATA_FILES
+
+# Parse the above.  Main data structure is a list of names, everything else
+# is keyed off of that.
+our @Metadata_Files;
+our %Metadata_File_Opts;
+our %Filter_Dups;
+for my $line (split "\n", $Metadata_Files) {
+    my ($name, @rest) = split(' ', $line);
+
+    # FIRST, before doing anything with $name, see if it has a
+    # trailing tilde.  If it does, strip it off: it means that
+    # this metadata file does not want duplicates.
+    $Filter_Dups{$name} = ($name =~ s/~$//);
+
+    push @Metadata_Files, $name;
+
+    # rpm options defined?  Use them.  Otherwise, same as RPM.xxxx name
+    $Metadata_File_Opts{$name} = (@rest ? \@rest
+                                        : [ "--$name" ]);
+}
+
+# These arches don't need a build log.
+our %Doesnt_Need_Build_Log = map { $_ => 1 } ('noarch');
+
+# Name of the subdirectory (of INPUTDIR) into which we unpack
+our $Unpack_Into = 'unpacked';
+
+# END   user-customizable section
+###############################################################################
+
+use Carp;
+use File::Copy                  qw(copy);
+use File::Path                  qw(mkpath);
+use LWP::Simple                 qw(getstore);
+
+###############################################################################
+# BEGIN boilerplate args checking, usage messages
+
+sub usage {
+    print  <<"END_USAGE";
+Usage: $ME INPUTDIR
+
+$ME unpacks a set of RPMs in INPUTDIR into a format usable
+by rpmgrill. $ME creates a subdirectory 'unpacked' into which
+it writes its results; if that subdirectory already exists,
+$ME aborts with an appropriate diagnostic.
+
+   INPUTDIR   specifies the input directory containing RPMs and logs.
+              Typical use is for these to have been downloaded by
+              something like 'koji download-build --debuginfo N-V-R'
+
+OPTIONS:
+
+  -v, --verbose  show verbose progress indicators to stdout
+
+  --help         display this message
+  --man          display program man page
+  --version      display program name and version
+END_USAGE
+
+    exit;
+}
+
+sub man {
+    # Read the POD contents.  If it hasn't been filled in yet, abort.
+    my $pod = do { local $/; <DATA>; };
+    if ($pod =~ /=head1 \s+ NAME \s+ FIXME/xm) {
+        warn "$ME: No man page available.  Please try $ME --help\n";
+        exit;
+    }
+
+    # Use Pod::Man to convert our __DATA__ section to *roff
+    eval { require Pod::Man }
+        or die "$ME: Cannot generate man page; Pod::Man unavailable: $@\n";
+    my $parser = Pod::Man->new(name => $ME, release => $VERSION, section => 1);
+
+    # If called without output redirection, man-ify.
+    my $out_fh;
+    if (-t *STDOUT) {
+        my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
+        open $out_fh, "| nroff -man";
+    }
+    else {
+        open $out_fh, '>&STDOUT';
+    }
+
+    # Read the POD contents, and have Pod::Man read from fake filehandle.
+    # This requires 5.8.0.
+    open my $pod_handle, '<', \$pod;
+    $parser->parse_from_filehandle($pod_handle, $out_fh);
+    exit;
+}
+
+
+# Command-line options.  Note that this operates directly on @ARGV !
+our $debug   = 0;
+our $force   = 0;
+our $verbose = 0;
+our $NOT     = '';              # print "blahing the blah$NOT\n" if $debug
+sub handle_opts {
+    use Getopt::Long;
+    GetOptions(
+        'debug!'     => \$debug,
+        'dry-run|n!' => sub { $NOT = ' [NOT]' },
+        'force'      => \$force,
+        'verbose|v'  => \$verbose,
+
+        help         => \&usage,
+        man          => \&man,
+        version      => sub { print "$ME version $VERSION\n"; exit 0 },
+    ) or die "Try `$ME --help' for help\n";
+}
+
+############################## CODE BEGINS HERE ###############################
+
+# The term is "modulino".
+__PACKAGE__->main()                                     unless caller();
+
+our @ARGV_orig;
+
+# Main starting point.
+sub main {
+    # Preserve original ARGV; used for logging details about this run
+    @ARGV_orig = @ARGV;
+
+    # Note that we operate directly on @ARGV, not on function parameters.
+    # This is deliberate: it's because Getopt::Long only operates on @ARGV
+    # and there's no clean way to make it use @_.
+    handle_opts();                      # will set package globals
+
+    # Fetch command-line arguments.  Barf if too many.
+    my $input_dir = shift(@ARGV)
+        or die "$ME: missing INPUTDIR argument; try $ME --help\n";
+
+    do_unpack($input_dir);
+}
+
+
+###############
+#  do_unpack  #  Create output dir, unpack into it
+###############
+sub do_unpack {
+    my $input_dir = shift;              # in: dir (may be relative)
+
+    # Input directory must exist. Duh.
+    chdir $input_dir
+        or die "$ME: Cannot cd $input_dir: $!\n";
+
+    # We unpack into a subdirectory of the input dir. If that
+    # subdirectory already exists, don't overwrite it: that
+    # would just cause mayhem.
+    die "$ME: Subdirectory '$input_dir/$Unpack_Into' already exists; aborting\n"
+        if -e $Unpack_Into;
+    mkdir $Unpack_Into, 02755
+        or die "$ME: Could not mkdir $input_dir/$Unpack_Into: $!\n";
+
+    # We now have a bunch of *.arch.rpm files. Move them into place.
+    for my $rpm (glob("*.rpm")) {
+        my ($arch) = ($rpm =~ /\.([^.]+)\.rpm$/)
+            or die "$ME: Internal error: Bad RPM name '$rpm'";
+        extract_rpm($rpm, $Unpack_Into);
+    }
+}
+
+#################
+#  extract_rpm  #  Extract one RPM file
+#################
+sub extract_rpm {
+    my $rpm     = shift;                        # in: foo.rpm
+    my $destdir = shift;                        # in: dir into which to unpack
+
+    # Get the name of the package.  From that name, and the rpm architecture,
+    # create a new directory into which we unpack.
+    my $P = run_rpm( [ '--queryformat' => '%{NAME}' ], $rpm );
+
+    my ($arch) = ($rpm =~ /\.([a-z0-9_]+)\.rpm$/)
+        or die "$ME: RPM name does not end in .<arch>.rpm: $rpm";
+
+    my $rpmdir = "$destdir/$arch/$P";
+    if (-d $rpmdir) {
+        die "$ME: FATAL: Directory $rpmdir already exists."
+            . " (this means we've already been invoked for this rpm)\n";
+    }
+
+    print "\$ mkdir -p $rpmdir/payload\n"               if $verbose;
+    eval { mkpath "$rpmdir/payload", 0, 02755 };
+    die "$ME: Could not mkdir $rpmdir/payload: $@\n"    if $@;
+
+    # Hardlink the locally-cached rpm into that directory. We keep the
+    # original rpm (and inputdir) intact.
+    link $rpm => "$rpmdir/rpm.rpm"
+        or die "$ME: Cannot ln $rpm -> $rpmdir/rpm.rpm: $!\n";
+
+    chdir $rpmdir
+        or die "$ME: Cannot cd $rpmdir: $!";
+
+    # Extract contents
+    my $cmd = "rpm2cpio rpm.rpm | (cd payload && cpio -i -d --quiet)";
+    print "\$ $cmd\n"                                   if $verbose;
+    system($cmd) == 0
+        or die "$ME: FATAL: error running command: $cmd\n";
+
+    # Create each RPM.xxx file
+    for my $opt (@Metadata_Files) {
+        my @foo = run_rpm( $opt, 'rpm.rpm' );
+    }
+    chdir "../../.."
+        or die "$ME: Cannot cd ../.. !?!?!";
+}
+
+#############
+#  run_rpm  #  Invokes rpm command with given args, preserves its output
+#############
+sub run_rpm {
+    my $meta = shift;                           # in: AREF or string
+    my $rpm  = shift;                           # in: path to RPM
+
+    my @opts;
+    my $filter_dups;
+    my $outfile;
+
+    # When invoked with explicit command-line arguments (via an AREF)
+    # invoke rpm with those arguments and return the output to our caller.
+    #
+    # When invoked with a simple string, use the command-line arguments
+    # predefined at the top of the script, then save the output to RPM.* file.
+    if (ref($meta)) {                   # eg [ '--queryformat' => '%%NAME' ]
+        @opts = @$meta;
+    }
+    else {                              # eg 'provides', 'requires'
+        @opts        = @{ $Metadata_File_Opts{$meta} };
+        $filter_dups = $Filter_Dups{$meta};
+        $outfile     = "RPM.$meta";
+    }
+
+    my @cmd = (@RPM, @opts, $rpm);
+    if ($verbose) {
+        printf "\$ rpm ... %-12s", "@opts";
+        print  " >$outfile"                     if $outfile;
+        print  "\n";
+        print "[ @cmd ]\n"                      if $debug;
+    }
+
+    my $out_fh;
+    my $out_tmp;
+    if ($outfile) {
+        $out_tmp = "$outfile.tmp.$$";
+        # FIXME: barf if outfile already exists?
+        open $out_fh, '>', $out_tmp
+            or die "$ME: Cannot create $out_tmp: $!\n";
+    }
+
+    my @retval;
+    open RPM, '-|', @cmd
+        or die "$ME: Cannot fork: $!\n";
+    my %seen;
+  RPMLINE:
+    while (my $line = <RPM>) {
+        next RPMLINE            if $filter_dups && $seen{$line}++;
+
+        print { $out_fh } $line                 if $out_fh;
+
+        chomp $line;
+        push @retval, $line;
+    }
+    close RPM
+        or die "$ME: Error running @cmd: status=$?\n";
+
+    if ($outfile) {
+        close $out_fh
+            or die "$ME: Error writing $out_tmp: $!\n";
+        chmod 0444 => $out_tmp;
+        rename $out_tmp => $outfile
+            or die "$ME: Cannot rename $out_tmp: $!\n";
+    }
+
+    # Called in array context?  Return everything we read.
+    return @retval              if wantarray;
+
+    # Called in VOID context?  Don't return anything.
+    return                      if ! defined wantarray;
+
+    # Called in scalar context.  We _should_ have seen only one line of output.
+    return $retval[0]           if  @retval == 1;
+    return                      if !@retval;
+    die "$ME: Internal error: Expecting 1 line of output from @cmd, got: @retval\n";
+}
+
+
+__DATA__
+
+###############################################################################
+#
+# Documentation
+#
+
+=head1	NAME
+
+rpmgrill-unpack-rpms - converts an input dir into a format expected by rpmgrill
+
+=head1	SYNOPSIS
+
+rpmgrill-unpack-rpms INPUTDIR
+
+rpmgrill-unpack-rpms  B<--help>  |  B<--version> | B<--man>
+
+=head1	DESCRIPTION
+
+B<rpmgrill-unpack-rpms> converts an input dir into a format expected by B<rpmgrill>
+
+=head1  USAGE EXAMPLES
+
+  $ rpmgrill-unpack-rpms ypserv-2.31-2.fc19
+
+=head1  ARGUMENTS
+
+=over 1
+
+B<INPUTDIR> specifies the input directory (containing RPMs and logs).
+
+=back
+
+=head1	OPTIONS
+
+=over 3
+
+=item B<--help>
+
+Emit usage hints.
+
+=item B<--version>
+
+Display program version.
+
+=item B<--man>
+
+Display this man page.
+
+=back
+
+
+=head1	DIAGNOSTICS
+
+FIXME
+
+=head1	ENVIRONMENT
+
+FIXME
+
+=head1	FILES
+
+FIXME
+
+=head1	AUTHOR
+
+Ed Santiago <santiago@redhat.com>
+
+=cut

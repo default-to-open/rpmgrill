@@ -1,0 +1,13 @@
+*.tar.bz2
+*.src.rpm
+Build
+META.yml
+META.json
+MYMETA.yml
+MYMETA.json
+my-*
+_build/
+blib/
+jobs/
+tmp/
+wrangler-get-*

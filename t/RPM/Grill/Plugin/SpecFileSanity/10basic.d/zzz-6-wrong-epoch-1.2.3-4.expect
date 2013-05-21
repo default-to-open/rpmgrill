@@ -1,0 +1,15 @@
+{
+  SpecFileSanity => [
+    {
+      code => 'ChangelogWrongEpoch',
+      context => {
+        excerpt => [
+          '* Fri May 20 2011 Eduardo Santiago &lt;santiago@redhat.com&gt; 2:1.2.3-4'
+        ],
+        lineno => '11',
+        path => 'zzz-6-wrong-epoch-1.2.3-4.spec'
+      },
+      diag => 'Wrong epoch <var>2</var> in first %changelog entry; expected <var>1</var>',
+    }
+  ]
+}

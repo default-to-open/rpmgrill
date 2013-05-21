@@ -1,0 +1,30 @@
+{
+  RpmScripts => [
+    {
+      arch => 'src',
+      code => 'UseraddBadShell',
+      context => {
+        excerpt => [
+          'useradd -M -N -g %amanda_group -o -r -d %{_localstatedir}/lib/amanda -s /bin/bash -c &quot;Amanda user&quot; -u 33 %amanda_user'
+        ],
+        lineno => '160',
+        path => 'amanda-3.3.0-5.el7.spec',
+        sub => '%pre'
+      },
+      diag => 'Invocation of <tt>useradd</tt> with unexpected login shell <var>/bin/bash</var> (expected <tt>/sbin/nologin</tt>)'
+    },
+    {
+      arch => 'src',
+      code => 'UseraddUnknownUid',
+      context => {
+        excerpt => [
+          'useradd -M -N -g %amanda_group -o -r -d %{_localstatedir}/lib/amanda -s /bin/bash -c &quot;Amanda user&quot; -u 33 %amanda_user'
+        ],
+        lineno => '160',
+        path => 'amanda-3.3.0-5.el7.spec',
+        sub => '%pre'
+      },
+      diag => 'Invocation of <tt>useradd</tt> with UID <var>33</var>, but there\'s no assigned UID for <var>%amanda_user</var> in /usr/share/doc/setup-[v]/uidgid (WARNING: UID <var>33</var> is assigned to <b>amandabackup</b>'
+    }
+  ]
+}

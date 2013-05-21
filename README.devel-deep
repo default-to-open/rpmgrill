@@ -1,0 +1,49 @@
+<!-- To convert to html: pandoc -o foo.html README.devel-deep -->
+
+About This README
+=================
+
+This document describes the rpmgrill tool from the perspective of
+a maintenance developer. It is targeted at someone familiar with
+Fedora build processes (Koji)) and with Perl. It also assumes some
+familiarity with rpmgrill itself, the idea behind it, how it runs,
+what it generates. See README.AAA_FIRST for an introduction at
+that level.
+
+This is *all* of rpmgrill. If you merely need to add/fix *individual
+tests*, see README.devel-tests.
+
+Overview
+========
+
+Simplified/edited tree showing what you most need to know:
+
+    .
+    ├── bin/
+    │   └── rpmgrill*
+    └── lib/
+        └── RPM/
+            ├── Grill/
+            │   ├── Plugin/
+            │   │   ├── AAATemplate.pm
+            │   │   ├── BuildLog.pm
+            │   │   ├   ....
+            │   │   └── VirusCheck.pm
+            │   ├── RPM/
+            │   │   ├── Files.pm
+            │   │   ├── Metadata.pm
+            │   │   └── SpecFile.pm
+            │   ├── RPM.pm
+            │   └── dprintf.pm
+            └── Grill.pm
+
+The intuitive starting point would be `bin/rpmgrill`. That's the executable
+script. There's not much in it, though; it's principally a wrapper
+for `lib/RPM/Grill.pm`. So take a look at it, run it a few times,
+and move on.
+
+`lib/RPM/Grill.pm`
+
+
+Testing
+=======

@@ -1,0 +1,841 @@
+#!/usr/bin/perl
+#
+# rpmgrill-fetch-build - given NVR + dir, unpack all koji RPMs & logs
+#
+# $Id$
+#
+package RPM::Grill::FetchBuild;
+
+use strict;
+use warnings;
+
+(our $ME = $0) =~ s|.*/||;
+
+our $VERSION = '0.0';                 # Will be replaced by Makefile
+
+# For debugging, show data structures using DumpTree($var)
+#use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
+
+###############################################################################
+# BEGIN user-customizable section
+
+# Standard RPM command
+our @RPM = qw(rpm -qp --nosignature --nodigest);
+
+# Fields used to generate the RPM.per_file_metadata file.  This will
+# get passed to the rpm command as a --queryformat string in the form:
+#      %{field1}\t%{field2}\t...
+# The special-casing of (\d+) is so we get a fixed-width %64{filemd5s},
+# which is nice for making readable output.
+our @Per_File_Metadata = map { /(.*?)(\((\d+)\))?$/; "%" . ($3||'') . "{$1}" }
+    qw(
+          filemd5s(64)
+          filemodes:perms
+          fileusername
+          filegroupname
+          fileflags
+          filecolors
+          filenames
+  );
+our $Per_File_Metadata = join("\\t", @Per_File_Metadata);
+
+# Metadata files we create.  For each line below, we create a file RPM.xxx
+# which will be read by rpmgrill.  Format of the list below is:
+#
+#    <name><nodups?>    [<rpm options>]
+#
+#    name          Name of the RPM.xxx file, eg 'provides' => RPM.provides
+#                  If there is nothing on the right-hand side, this is
+#                  also the name of the rpm option (e.g. 'rpm --provides')
+#
+#    nodups?       A tilde here means 'filter duplicate lines'.  Needed
+#                  to handle an odd case in libpng-1.2.10-7.1.el5_5.3 (and
+#                  probably others) in which 'rpm --provides' on 32-bit
+#                  arches spits out two identical 'libpng.so.3' lines.
+#                  (on 64-bit, the second line includes '()(64bit)').
+#
+#    rpm options   Options passed to the rpm command for generating this file.
+#                  If blank, prepend '--' to <name>; e.g. --provides
+#
+our $Metadata_Files = <<"END_METADATA_FILES";
+provides~
+requires~
+scripts
+obsoletes
+conflicts
+changelog
+triggers
+info
+version           --queryformat %{EPOCH}:%{VERSION}-%{RELEASE}\\n
+per_file_metadata --queryformat [$Per_File_Metadata\\n]
+END_METADATA_FILES
+
+# Parse the above.  Main data structure is a list of names, everything else
+# is keyed off of that.
+our @Metadata_Files;
+our %Metadata_File_Opts;
+our %Filter_Dups;
+for my $line (split "\n", $Metadata_Files) {
+    my ($name, @rest) = split(' ', $line);
+
+    # FIRST, before doing anything with $name, see if it has a
+    # trailing tilde.  If it does, strip it off: it means that
+    # this metadata file does not want duplicates.
+    $Filter_Dups{$name} = ($name =~ s/~$//);
+
+    push @Metadata_Files, $name;
+
+    # rpm options defined?  Use them.  Otherwise, same as RPM.xxxx name
+    $Metadata_File_Opts{$name} = (@rest ? \@rest
+                                        : [ "--$name" ]);
+}
+
+# These arches don't need a build log.
+our %Doesnt_Need_Build_Log = map { $_ => 1 } ('noarch');
+
+# Template for generating a URL to a build log. %s will be replaced
+# with N, V, R, arch respectively.
+our $Build_Log_URL_Template =
+  'http://kojipkgs.fedoraproject.org/packages/%s/%s/%s/data/logs/%s/build.log';
+
+# END   user-customizable section
+###############################################################################
+
+use Carp;
+use File::Path                  qw(mkpath);
+
+###############################################################################
+# BEGIN boilerplate args checking, usage messages
+
+sub usage {
+    print  <<"END_USAGE";
+Usage: $ME [OPTIONS]  BUILDINFO  DESTDIR
+
+$ME extracts a full set of RPMs from a koji build (including
+scratch builds). $ME writes into DESTDIR, something like:
+
+   DESTDIR/
+   ├── i686/
+   │   ├── foo/
+   │   │   └── payload/
+   │   ├── foo-subpkg/
+   │   │   └── payload/
+   └── src/
+       └── foo/
+           └── payload/
+
+  BUILDINFO  may be one of:
+    N-V-R                         mypackage-1.2-3.el5
+    koji task ID                  12345
+
+  DESTDIR    destination directory into which to extract.
+             Directory must not exist; $ME will create it.
+
+CACHING:
+   If the environment variable \$RPMGRILL_FETCH_BUILD_CACHE is defined,
+   and points to an existing directory, and that directory has a
+   subdirectory named N-V-R, $ME fetches RPMs and
+   build logs from there.
+
+OPTIONS:
+
+  --download-only  Create DESTDIR, download RPMs and build logs, then exit
+                   without unpacking. Probably only useful for debugging.
+
+  -v, --verbose  show verbose progress indicators to stdout
+
+  --help         display this message
+  --man          display program man page
+  --version      display program name and version
+END_USAGE
+
+    exit;
+}
+
+sub man {
+    # Read the POD contents.  If it hasn't been filled in yet, abort.
+    my $pod = do { local $/; <DATA>; };
+    if ($pod =~ /=head1 \s+ NAME \s+ FIXME/xm) {
+        warn "$ME: No man page available.  Please try $ME --help\n";
+        exit;
+    }
+
+    # Use Pod::Man to convert our __DATA__ section to *roff
+    eval { require Pod::Man }
+        or die "$ME: Cannot generate man page; Pod::Man unavailable: $@\n";
+    my $parser = Pod::Man->new(name => $ME, release => $VERSION, section => 1);
+
+    # If called without output redirection, man-ify.
+    my $out_fh;
+    if (-t *STDOUT) {
+        my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
+        open $out_fh, "| nroff -man | $pager";
+    }
+    else {
+        open $out_fh, '>&STDOUT';
+    }
+
+    # Read the POD contents, and have Pod::Man read from fake filehandle.
+    # This requires 5.8.0.
+    open my $pod_handle, '<', \$pod;
+    $parser->parse_from_filehandle($pod_handle, $out_fh);
+    exit;
+}
+
+
+# Command-line options.  Note that this operates directly on @ARGV !
+our $download_only;
+our $debug   = 0;
+our $force   = 0;
+our $verbose = 0;
+our $NOT     = '';              # print "blahing the blah$NOT\n" if $debug
+sub handle_opts {
+    use Getopt::Long;
+    GetOptions(
+        'download-only!' => \$download_only,
+
+        'debug!'         => \$debug,
+        'dry-run|n!'     => sub { $NOT = ' [NOT]' },
+        'force'          => \$force,
+        'verbose|v'      => \$verbose,
+
+        help             => \&usage,
+        man              => \&man,
+        version          => sub { print "$ME version $VERSION\n"; exit 0 },
+    ) or die "Try `$ME --help' for help\n";
+}
+
+# END   boilerplate args checking, usage messages
+###############################################################################
+# BEGIN code for parsing koji buildinfo
+
+package Koji::Build;
+
+use Carp;
+use File::Copy                  qw(copy);
+use LWP::Simple                 qw(getstore);
+
+#########
+#  new  #  Given NVR or build ID, run 'koji buildinfo'
+#########
+sub new {
+    my $proto = shift;
+    my $class = ref($proto) || $proto;
+    my $build_arg = shift;                      # in: N-V-R or koji build ID
+
+    my $self = {};
+    my $context;
+
+    # Sample output from koji buildinfo:
+    #
+    #   BUILD: pv-1.2.0-3.fc17 [292940]
+    #   State: COMPLETE
+    #   Built by: ausil
+    #   Volume: DEFAULT
+    #   Task: 3699117 build (f17-rebuild, /pv:2bd42ca77f5fe3384948580489....)
+    #   Finished: Sun, 15 Jan 2012 22:24:07 EST
+    #   Tags: f17-final f17-rebuild f17
+    #   RPMs:
+    #   /mnt/koji/packages/pv/1.2.0/3.fc17/i686/pv-debuginfo-{V-R}.i686.rpm
+    #   /mnt/koji/packages/pv/1.2.0/3.fc17/i686/pv-1.2.0-3.fc17.i686.rpm
+    #   /mnt/koji/packages/pv/1.2.0/3.fc17/x86_64/pv-1.2.0-3.fc17.x86_64.rpm
+    #   /mnt/koji/packages/pv/1.2.0/3.fc17/x86_64/pv-debuginfo-{V-R}.x86_64.rpm
+    #   /mnt/koji/packages/pv/1.2.0/3.fc17/src/pv-1.2.0-3.fc17.src.rpm
+    #
+    # (some truncations made in order to fit in 80 columns).
+    # We attempt no interpretation of that; we just parse & save into
+    # a hash keyed on the lower-case label of each of the above.
+    #
+    my @cmd = ('koji', 'buildinfo', $build_arg);
+    print "\$ @cmd\n"                                           if $verbose;
+
+    open my $koji, '-|', @cmd
+        or die "$ME: Cannot fork: $!\n";
+    while (my $line = <$koji>) {
+        chomp $line;
+
+        if ($line =~ /^(\S.*?):\s+(.*)/) {                # eg 'State: COMPLETE'
+            $self->{lc $1} = $2;
+            undef $context;
+        }
+        elsif ($line =~ /^(\S+):$/) {                   # eg 'RPMs:'
+            $context = lc $1;
+            $self->{$context} = [];
+        }
+        elsif ($context) {                              # eg '/mnt/koji/...'
+            push @{ $self->{$context} }, $line;
+        }
+        elsif ($line =~ /^No such build/) {
+            die "$ME: $line\n";
+        }
+        else {
+            warn "$ME: In output of '@cmd': cannot grok '$line'\n";
+        }
+    }
+    close $koji
+        or die "$ME: Command failed: @cmd\n";
+
+    return bless $self, $class;
+}
+
+
+#########
+#  nvr  #  Returns the build N-V-R
+#########
+sub nvr {
+    my $self = shift;
+
+    my $b = $self->{build}
+        or die "$ME: No 'Build' field found in koji buildinfo";
+    $b =~ /^(\S+)-(\S+)-(\S+)/
+        or die "$ME: Internal error: Cannot grok koji build string '$b'";
+
+    return wantarray ? ($1, $2, $3) : "$1-$2-$3";
+}
+
+############
+#  arches  #  Returns a list of arches that had builds
+############
+sub arches {
+    my $self = shift;
+
+    my @arches = map { /\.([^.]+)\.rpm$/; $1 } @{$self->{rpms}};
+    my %arches = map { $_ => 1 } @arches;
+
+    return sort keys %arches;
+}
+
+##########
+#  rpms  #  Returns list of rpm files
+##########
+sub rpms {
+    my $self = shift;
+
+    if (my $rpms = $self->{rpms}) {
+        return @$rpms;
+    }
+    return;
+}
+
+##########
+#  logs  #  Returns a list of "build.log.<arch>" files (possibly empty)
+##########
+sub logs {
+    my $self = shift;
+
+    if (my $aref = $self->{logs}) {
+        return @$aref;
+    }
+    return;
+}
+
+# END   general build info code
+#-------------------------------------------------------------------------------
+# BEGIN rpm download
+
+########################
+#  _fetch_cached_rpms  #  Used if we have a locally cached copy of RPMs
+########################
+sub _fetch_cached_rpms {
+    my $self = shift;
+
+    # FIXME: should --download-only disable caching?
+    my $nvr = $self->nvr;
+    my $cache = $ENV{RPMGRILL_FETCH_BUILD_CACHE}                or return;
+    -d (my $build_cache = "$cache/$nvr")                        or return;
+    my @rpms = glob("$build_cache/*.rpm")                       or return;
+
+    # We have one or more *.rpm files. Copy them into place.
+    for my $rpm (@rpms) {
+        print "[cached: $rpm]\n"                                if $verbose;
+
+        (my $basename = $rpm) =~ s|^.*/||;
+
+        link($rpm => $basename)
+            or copy($rpm => $basename)
+            or die "$ME: Could not link or copy $rpm : $!";
+    }
+
+    return 1;                   # success
+}
+
+##############################
+#  _download_rpms_from_koji  #  No local cache; use koji command to fetch rpms
+##############################
+sub _download_rpms_from_koji {
+    my $self = shift;
+
+    my $nvr = $self->nvr;
+    my @cmd = ('koji', 'download-build', '--debuginfo', $nvr);
+    print "\$ @cmd\n"                                           if $verbose;
+    system(@cmd) == 0
+        or die "$ME: Command failed: @cmd\n";
+}
+
+###################
+#  download_rpms  #  Invoke koji download-build for a given NVR
+###################
+sub download_rpms {
+    my $self = shift;
+
+    $self->_fetch_cached_rpms || $self->_download_rpms_from_koji;
+
+    # Preserve a list of those rpm files
+    $self->{rpms} = [ glob("*.rpm") ];
+
+    return;
+}
+
+# END   rpm download
+#-------------------------------------------------------------------------------
+# BEGIN log file download
+
+#######################
+#  _fetch_cached_log  #  Look for a build log file in our local cache
+#######################
+sub _fetch_cached_log {
+    my $self = shift;
+    my $arch = shift;                           # in: i386, x86_64, noarch, etc
+
+    # FIXME: should --download-only disable caching?
+    my $cache = $ENV{RPMGRILL_FETCH_BUILD_CACHE}                or return;
+    my $nvr   = $self->nvr;
+    -d (my $build_cache = "$cache/$nvr")                        or return;
+
+    my $basename = "build.log.$arch";
+    if (-e (my $log  = "$build_cache/$basename")) {
+        if (link($log => $basename) || copy($log => $basename)) {
+            return $basename;
+        }
+    }
+
+    return;
+}
+
+###################
+#  build_log_url  #  URL to build.log for a given N-V-R and arch
+###################
+sub build_log_url {
+    my $self = shift;
+    my $arch = shift;                           # in: 'i686', etc
+
+    return sprintf($Build_Log_URL_Template, $self->nvr, $arch);
+}
+
+###################
+#  _download_log  #  Fetch a build log directly from koji
+###################
+sub _download_log {
+    my $self = shift;
+    my $arch = shift;                           # in: i386, x86_64, noarch, etc
+
+    my $url = $self->build_log_url($arch);
+    my $localpath = "build.log.$arch";
+
+    print "GET $url\n"                                      if $verbose;
+    my $st = getstore($url, $localpath);
+    if ($st != 200) {
+        warn "$ME: WARNING: Cannot fetch $url : $st [continuing]\n"
+            unless $Doesnt_Need_Build_Log{$arch};
+        return;
+    }
+    return $localpath;
+}
+
+###################
+#  download_logs  #  Download build logs for all arches
+###################
+sub download_logs {
+    my $self = shift;
+
+    # Now fetch the build logs.
+    $self->{logs} = [];
+    for my $arch (grep { $_ ne 'src' } $self->arches) {
+        if (my $log = $self->_fetch_cached_log($arch)
+                   || $self->_download_log($arch)) {
+            push @{ $self->{logs} }, $log;
+        }
+    }
+}
+
+# END   log file download
+#-------------------------------------------------------------------------------
+
+##############
+#  download  #  Download RPMs and build logs into the current directory
+##############
+sub download {
+    my $self = shift;
+
+    $self->download_rpms;
+    $self->download_logs;
+
+    # FIXME: implement a --save or --preserve option, to copy rpms and logs
+    # into a cachedir?
+}
+
+# Back to main package
+package RPM::Grill::FetchBuild;
+
+# END   code for parsing koji buildinfo
+###############################################################################
+
+############################## CODE BEGINS HERE ###############################
+
+# The term is "modulino".
+__PACKAGE__->main()                                     unless caller();
+
+our @ARGV_orig;
+
+# Main starting point.
+sub main {
+    # Preserve original ARGV; used for logging details about this run
+    @ARGV_orig = @ARGV;
+
+    # Note that we operate directly on @ARGV, not on function parameters.
+    # This is deliberate: it's because Getopt::Long only operates on @ARGV
+    # and there's no clean way to make it use @_.
+    handle_opts();                      # will set package globals
+
+    # Fetch command-line arguments.  Barf if too many.
+    my $build_arg = shift(@ARGV)
+        or die "$ME: missing BUILDINFO argument; try $ME --help\n";
+    my $destdir = shift(@ARGV)
+        or die "$ME: missing DESTDIR argument; try $ME --help\n";
+    die "$ME: Too many arguments; try $ME --help\n"                 if @ARGV;
+
+    # Destination directory must not exist.
+    die "$ME: Will not overwrite existing $destdir\n"   if -d $destdir;
+
+    my $buildinfo = Koji::Build->new($build_arg);
+
+    do_unpack($buildinfo, $destdir);
+}
+
+
+###############
+#  do_unpack  #  Create output dir, unpack into it
+###############
+sub do_unpack {
+    my $build   = shift;        # in: NVR or task ID
+    my $destdir = shift;        # in: dir (may be relative; must not exist)
+
+    # Now's the time to create the destination directory
+    mkdir $destdir, 02755
+        or die "$ME: mkdir $destdir: $!\n";
+    chdir $destdir
+        or die "$ME: Cannot cd $destdir: $!\n";
+
+    write_readme( $build, <<'END_TEMP_WARNING');
+ **************************************************************************
+***  WARNING: If you're reading this text, it means the unpacking is     ***
+***  incomplete. Perhaps it's in progress. More likely, the unpacking    ***
+***  process crashed. Caveat lector.                                     ***
+ **************************************************************************
+END_TEMP_WARNING
+
+    # Download (or fetch) all RPMs and build logs. This leaves us with
+    # one or more *.rpm files and zero or more build.log.<arch> files.
+    $build->download();
+
+    # Called with --download-only? Update the README, then exit cleanly.
+    if ($download_only) {
+        write_readme( $build, <<'END_WARNING');
+** Download complete, but RPMs and logs not unpacked due to --download-only
+END_WARNING
+        exit 0;
+    }
+
+    extract_rpm($_)                     for $build->rpms;
+
+    # We have build.log.<arch>, but rpmgrill expects the builds logs to
+    # be named <arch>/build.log
+    for my $log ($build->logs) {
+        $log =~ /^build\.log\.(\S+)$/
+            or die "$ME: Internal error: Unexpected build log '$log'";
+        rename $log => "$1/build.log"
+            or die "$ME: Internal error: Could not mv $log $1/build.log : $!";
+    }
+
+    # Done. Rewrite the README, without the in-progress warning.
+    write_readme( $build );
+}
+
+
+##################
+#  write_readme  #  Write a README file to assist spelunkers
+##################
+sub write_readme {
+    my $build       = shift;            # in: build info
+
+    # Write to a temp file, then mv it into place.
+    my $readme_path = 'README';
+    my $tmpfile     = "$readme_path.tmp.$$";
+    unlink $tmpfile;
+
+    # Top part is always standard.
+    open my $readme_fh, '>', $tmpfile
+        or die "$ME: Cannot create $tmpfile: $!\n";
+    printf $readme_fh <<"END_README",
+
+     Contents: %s
+           on: %s
+           by: $ME $VERSION
+   invoked as: $ME @ARGV_orig
+
+END_README
+        scalar($build->nvr), scalar(CORE::localtime);
+
+    # Extra args? Append to file. This may signal a temporary file
+    # or a failure in extraction.
+    print $readme_fh @_     if @_;
+
+    close $readme_fh
+        or die "$ME: Error writing $readme_path: $!\n";
+    chmod 0444 => $tmpfile;
+    rename $tmpfile => $readme_path
+        or die "$ME: Could not mv $tmpfile: $!\n";
+}
+
+#################
+#  extract_rpm  #  Extract one RPM file
+#################
+sub extract_rpm {
+    my $rpm = shift;
+
+    # Get the name of the package.  From that name, and the rpm architecture,
+    # create a new directory into which we unpack.
+    my $P = run_rpm( [ '--queryformat' => '%{NAME}' ], $rpm );
+
+    my ($arch) = ($rpm =~ /\.([a-z0-9_]+)\.rpm$/)
+        or die "$ME: RPM name does not end in .<arch>.rpm: $rpm";
+
+    my $rpmdir = "$arch/$P";
+    if (-d $rpmdir) {
+        die "$ME: FATAL: Directory $rpmdir already exists."
+            . " (this means we've already been invoked for this rpm)\n";
+    }
+
+    print "\$ mkdir -p $rpmdir/payload\n"               if $verbose;
+    eval { mkpath "$rpmdir/payload", 0, 02755 };
+    die "$ME: Could not mkdir $rpmdir/payload: $@\n"    if $@;
+
+    # Move the locally-cached rpm into that directory
+    rename $rpm => "$rpmdir/rpm.rpm"
+        or die "$ME: Cannot mv cached $rpm -> $rpmdir/rpm.rpm: $!\n";
+
+    chdir $rpmdir
+        or die "$ME: Cannot cd $rpmdir: $!";
+
+    # Extract contents
+    my $cmd = "rpm2cpio rpm.rpm | (cd payload && cpio -i -d --quiet)";
+    print "\$ $cmd\n"                                   if $verbose;
+    system($cmd) == 0
+        or die "$ME: FATAL: error running command: $cmd\n";
+
+    # Create each RPM.xxx file
+    for my $opt (@Metadata_Files) {
+        my @foo = run_rpm( $opt, 'rpm.rpm' );
+    }
+    chdir "../.."
+        or die "$ME: Cannot cd ../.. !?!?!";
+}
+
+#############
+#  run_rpm  #  Invokes rpm command with given args, preserves its output
+#############
+sub run_rpm {
+    my $meta = shift;                           # in: AREF or string
+    my $rpm  = shift;                           # in: path to RPM
+
+    my @opts;
+    my $filter_dups;
+    my $outfile;
+
+    # When invoked with explicit command-line arguments (via an AREF)
+    # invoke rpm with those arguments and return the output to our caller.
+    #
+    # When invoked with a simple string, use the command-line arguments
+    # predefined at the top of the script, then save the output to RPM.* file.
+    if (ref($meta)) {                   # eg [ '--queryformat' => '%%NAME' ]
+        @opts = @$meta;
+    }
+    else {                              # eg 'provides', 'requires'
+        @opts        = @{ $Metadata_File_Opts{$meta} };
+        $filter_dups = $Filter_Dups{$meta};
+        $outfile     = "RPM.$meta";
+    }
+
+    my @cmd = (@RPM, @opts, $rpm);
+    if ($verbose) {
+        printf "\$ rpm ... %-12s", "@opts";
+        print  " >$outfile"                     if $outfile;
+        print  "\n";
+        print "[ @cmd ]\n"                      if $debug;
+    }
+
+    my $out_fh;
+    my $out_tmp;
+    if ($outfile) {
+        $out_tmp = "$outfile.tmp.$$";
+        # FIXME: barf if outfile already exists?
+        open $out_fh, '>', $out_tmp
+            or die "$ME: Cannot create $out_tmp: $!\n";
+    }
+
+    my @retval;
+    open RPM, '-|', @cmd
+        or die "$ME: Cannot fork: $!\n";
+    my %seen;
+  RPMLINE:
+    while (my $line = <RPM>) {
+        next RPMLINE            if $filter_dups && $seen{$line}++;
+
+        print { $out_fh } $line                 if $out_fh;
+
+        chomp $line;
+        push @retval, $line;
+    }
+    close RPM
+        or die "$ME: Error running @cmd: status=$?\n";
+
+    if ($outfile) {
+        close $out_fh
+            or die "$ME: Error writing $out_tmp: $!\n";
+        chmod 0444 => $out_tmp;
+        rename $out_tmp => $outfile
+            or die "$ME: Cannot rename $out_tmp: $!\n";
+    }
+
+    # Called in array context?  Return everything we read.
+    return @retval              if wantarray;
+
+    # Called in VOID context?  Don't return anything.
+    return                      if ! defined wantarray;
+
+    # Called in scalar context.  We _should_ have seen only one line of output.
+    return $retval[0]           if  @retval == 1;
+    return                      if !@retval;
+    die "$ME: Internal error: Expecting 1 line of output from @cmd, got: @retval\n";
+}
+
+
+__DATA__
+
+###############################################################################
+#
+# Documentation
+#
+
+=head1	NAME
+
+rpmgrill-fetch-build - extract all RPMs and build logs from a Koji build
+
+=head1	SYNOPSIS
+
+rpmgrill-fetch-build BUILDINFO DESTDIR
+
+rpmgrill-fetch-build  B<--help>  |  B<--version> | B<--man>
+
+=head1	DESCRIPTION
+
+B<rpmgrill-fetch-build> extracts all RPMs and build logs from a koji
+build. This is a helper step required by the B<rpmgrill> analysis tool.
+
+=head1  USAGE EXAMPLES
+
+  # By name
+  $ rpmgrill-fetch-build  coreutils-8.15-10.fc17  my-coreutils-8.15-10.fc17
+
+  # Same thing, by Koji task ID
+  $ rpmgrill-fetch-build  381337 my-coreutils-8.15-10.fc17
+
+=head1  ARGUMENTS
+
+=over 2
+
+=item *
+
+B<BUILDINFO> describes what to extract. It may be an B<N-V-R>
+or a B<task ID>. FIXME: test with scratch builds.
+
+=item *
+
+B<DESTDIR> is the path to a directory into which rpmgrill-fetch-build will
+extract RPMs. It must not exist: if it does, rpmgrill-fetch-build will abort
+with a fatal error.
+
+=back
+
+=head1	OPTIONS
+
+=over 4
+
+=item   B<--download-only>
+
+Download the RPMs and build logs into DESTDIR, then exit cleanly.
+
+RPM filenames will be exactly as downloaded; log files will
+be named C<build.log.ARCH> for all available ARCHes.
+
+=item B<--verbose>
+
+Show progress messages.
+
+=item B<--help>
+
+Emit usage hints.
+
+=item B<--version>
+
+Display program version.
+
+=item B<--man>
+
+Display this man page.
+
+=back
+
+
+=head1	DIAGNOSTICS
+
+FIXME
+
+=head1	ENVIRONMENT
+
+If the environment variable $RPMGRILL_FETCH_BUILD_CACHE is defined,
+and points to an existing directory, and that directory has a
+subdirectory named N-V-R, rpmgrill-fetch-build fetches RPMs and
+build logs from there.
+
+The format of this directory is:
+
+    \$RPMGRILL_FETCH_BUILD_CACHE/
+    `-- mypkg-1.0-1.fc19/
+        |-- build.log.i686
+        |-- build.log.x86_64
+        |-- mypkg-1.0-1.fc19.i686.rpm
+        `-- mypkg-1.0-1.fc19.x86_64.rpm
+
+That is: all *.rpm files (as fetched from koji), and all build logs
+using the convention C<build.log.ARCH> for all available ARCHes.
+
+=head1	FILES
+
+rpmgrill-fetch-build writes a README file to DESTDIR. On successful completion
+of all rpms, it will look like:
+
+      Contents: coreutils-8.15-10.fc17
+            on: Fri May  3 12:02:03 2013
+            by: rpmgrill-fetch-build 0.0
+    invoked as: rpmgrill-fetch-build 381337 my-coreutils-8.15-10.fc17
+
+During extraction, or if there's a failure, the README will have
+the above text and also a note explaining that the directory is
+incomplete and should not be used.
+
+=head1	AUTHOR
+
+Ed Santiago <santiago@redhat.com>
+
+=cut

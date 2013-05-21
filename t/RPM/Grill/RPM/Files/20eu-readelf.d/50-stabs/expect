@@ -1,0 +1,8 @@
+{
+  debug => '1',
+  elf_type => 'EXEC (Executable file)',
+  libs => [
+    'libc.so.6'
+  ],
+  stabs => '1'
+}

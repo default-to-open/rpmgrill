@@ -1,0 +1,66 @@
+Severity : how important is it that you fix this right now?
+
+Confidence : how confident is rpmgrill that this is not a false alarm?
+
+-------
+
+I see three ways to do this:
+
+  1) in the code; or
+  2) at push-to-DB time; or
+  3) by associating and updating severity/confidence tables in the DB,
+     dynamically.
+
+I propose (2) so I will start by shooting down (1) and (3).
+
+--------------
+
+(1) in the code:
+
+Advantages:
+* Could possibly be used to selectively set severity/confidence
+  using program logic, eg something FooCode is important and
+  sometimes it's not.
+
+Drawbacks:
+* Reduces code maintainability
+* Requires a brew build, sign-and-push, and yum install for each change
+
+-------------
+
+(3) DB association table
+
+e.g. not modifying the results table at all, but simply adding a new
+lookup table such as:
+
+    Code         | Severity | Confidence
+    -------------+----------+-----------
+    FooCode      | low      | high
+    BarCode      | high     | high
+
+...then, every time a result is displayed, the web UI looks up the
+severity and confidence associated with each code and displays it
+as appropriate.
+
+Advantage:
+* Simple to understand and implement.
+
+Disadvantage:
+* no provision for time: a given result R may be low-low yesterday,
+  high-high today, and low-high tomorrow.
+
+------------------
+
+(2) at push-to-DB time
+
+Like the above, but the lookup table is only referenced when new results
+are shoved into the DB. The web UI, instead of doing a dynamic lookup,
+uses the static severity/confidence values in each result.
+
+Advantages:
+* No time-confusion.
+* Scores can apply at subscription-mailing time
+
+Disadvantages:
+* Requires adding new rows (severity, confidence) to existing DB tables;
+* More complex to code. Not much, though.

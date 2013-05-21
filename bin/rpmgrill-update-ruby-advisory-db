@@ -1,0 +1,266 @@
+#!/usr/bin/perl
+#
+# rpmgrill-update-ruby-advisory-db - maintain a local cache of ruby gem CVE DB
+#
+# See https://bugzilla.redhat.com/928428
+#
+# $Id$
+#
+package RPM::Grill::UpdateRubyAdvisoryDB;
+
+use strict;
+use warnings;
+
+(our $ME = $0) =~ s|.*/||;
+(our $VERSION = '$Revision: 0.0 $ ') =~ tr/[0-9].//cd;
+
+# For debugging, show data structures using DumpTree($var)
+#use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
+
+###############################################################################
+# BEGIN user-customizable section
+
+# Remote location of git master repo. This is where we pull FROM.
+our $Git_Repo = 'git://github.com/rubysec/ruby-advisory-db.git';
+
+# Local directory containing the cache. This is where we pull TO.
+# Starts off undefined, because it's filled in by dest_dir() below.
+# Can be overridden via command-line option.
+our $Local_Cache;
+
+# Set up safe, well-known environment
+$ENV{PATH}   = '/usr/bin:/bin';
+$ENV{CDPATH} = '';
+$ENV{IFS}    = '';
+
+# Don't create any group- or world-writable files
+umask 022;
+
+# END   user-customizable section
+###############################################################################
+
+use File::Path                  qw(mkpath);
+use RPM::Grill;
+
+###############################################################################
+# BEGIN boilerplate args checking, usage messages
+
+sub usage {
+    # Given a git:// URL, convert it to https
+    (my $url = $Git_Repo) =~ s|^git(://.*)\.git|https$1|;
+    my $dest_dir = dest_dir();
+
+    print  <<"END_USAGE";
+Usage: $ME [OPTIONS]
+
+$ME maintains a local cache of the Ruby Gem
+vulnerability database[1]. The remote is a git repository; we update
+via 'git pull'. This local cache is used by plugins in rpmgrill for
+checking whether a rubygem-* package is vulnerable to known CVEs.
+
+  [1] $url
+
+$ME is intended to run from cron.
+
+OPTIONS:
+
+  --cachedir=DIR  Use DIR as local cache directory
+                  (default: $dest_dir)
+
+  -v, --verbose  show verbose progress indicators
+  -n, --dry-run  make no actual changes
+
+  --help         display this message
+  --man          display program man page
+  --version      display program name and version
+END_USAGE
+
+    exit;
+}
+
+sub man {
+    # Read the POD contents.  If it hasn't been filled in yet, abort.
+    my $pod = do { local $/; <DATA>; };
+    if ($pod =~ /=head1 \s+ NAME \s+ FIXME/xm) {
+        warn "$ME: No man page available.  Please try $ME --help\n";
+        exit;
+    }
+
+    # Use Pod::Man to convert our __DATA__ section to *roff
+    eval { require Pod::Man }
+        or die "$ME: Cannot generate man page; Pod::Man unavailable: $@\n";
+    my $parser = Pod::Man->new(name => $ME, release => $VERSION, section => 1);
+
+    # If called without output redirection, man-ify.
+    my $out_fh;
+    if (-t *STDOUT) {
+        my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
+        open $out_fh, "| nroff -man | $pager";
+    }
+    else {
+        open $out_fh, '>&STDOUT';
+    }
+
+    # Read the POD contents, and have Pod::Man read from fake filehandle.
+    # This requires 5.8.0.
+    open my $pod_handle, '<', \$pod;
+    $parser->parse_from_filehandle($pod_handle, $out_fh);
+    exit;
+}
+
+
+# Command-line options.  Note that this operates directly on @ARGV !
+our $debug   = 0;
+our $force   = 0;
+our $verbose = 0;
+our $NOT     = '';              # print "blahing the blah$NOT\n" if $debug
+sub handle_opts {
+    use Getopt::Long;
+    GetOptions(
+        'cachedir=s' => \$Local_Cache,
+
+        'debug!'     => \$debug,
+        'dry-run|n!' => sub { $NOT = ' [NOT]' },
+        'force'      => \$force,
+        'verbose|v'  => \$verbose,
+
+        help         => \&usage,
+        man          => \&man,
+        version      => sub { print "$ME version $VERSION\n"; exit 0 },
+    ) or die "Try `$ME --help' for help\n";
+}
+
+# END   boilerplate args checking, usage messages
+###############################################################################
+
+############################## CODE BEGINS HERE ###############################
+
+# The term is "modulino".
+__PACKAGE__->main()                                     unless caller();
+
+# Main code.
+sub main {
+    # Note that we operate directly on @ARGV, not on function parameters.
+    # This is deliberate: it's because Getopt::Long only operates on @ARGV
+    # and there's no clean way to make it use @_.
+    handle_opts();                      # will set package globals
+
+    die "$ME: This script takes no arguments; try $ME --help\n"  if @ARGV;
+
+    my $dest_dir = dest_dir();
+
+    # First time through, do a checkout. Always (even 1st time) do an update.
+    git_checkout($dest_dir)             if ! -d $dest_dir;
+    git_update($dest_dir);
+}
+
+##################
+#  git_checkout  #  Invoked the first time through. Creates a checkout dir.
+##################
+sub git_checkout {
+    my $dest_dir = shift;
+
+    # eg /usr/share/rpmgrill  /  ruby-advisory-db
+    my ($parent, $subdir) = ($dest_dir =~ m|^(/.*)/([^/]+)$|)
+        or die "$ME: Internal error: '$dest_dir' is not an absolute path";
+
+    # Create the parent directory if necessary
+    mkpath($parent, 0, 02755);
+    chdir $parent
+        or die "$ME: Internal error: could not cd $parent: $!";
+
+    my @cmd = ('git', 'clone', '-q', $Git_Repo, $subdir);
+    system(@cmd) == 0
+        or die "$ME: Command failed: @cmd (cwd: $parent)\n";
+}
+
+
+################
+#  git_update  #  This is what does 99% of the work, 99% of the time
+################
+sub git_update {
+    my $dest_dir = shift;
+
+    chdir $dest_dir
+        or die "$ME: Cannot cd $dest_dir: $!\n";
+    my @cmd = qw(git pull);
+    push @cmd, "-q"                     unless $verbose || $debug;
+    system(@cmd) == 0
+        or die "$ME: Command failed: @cmd (cwd: $dest_dir)\n";
+}
+
+
+##############
+#  dest_dir  #  Returns the path to the destination directory.
+##############
+sub dest_dir {
+
+    # FIXME-hardcoding: the name of the plugin that runs the tests,
+    # as well as the specific variable name therein. 'Twould be much
+    # better to refactor this to a central config file instead. Some day.
+    use RPM::Grill::Plugin::SecurityPolicy;
+    return $Local_Cache
+        || $RPM::Grill::Plugin::SecurityPolicy::Ruby_Advisory_DB;
+}
+
+1;
+
+__DATA__
+
+###############################################################################
+#
+# Documentation
+#
+
+=head1	NAME
+
+rpmgrill-update-ruby-advisory-db - maintain a local cache of ruby gem CVEs
+
+=head1	SYNOPSIS
+
+rpmgrill-update-ruby-advisory-db [B<--verbose>] [B<--cachedir=DIR>]
+
+rpmgrill-update-ruby-advisory-db  B<--help>  |  B<--version> | B<--man>
+
+=head1	DESCRIPTION
+
+B<rpmgrill-update-ruby-advisory-db> maintains a local cache of the
+Ruby Gem advisory database:
+
+   https://github.com/rubysec/ruby-advisory-db
+
+It's basically a C<git checkout> (first time only) followed by
+frequent C<git update>s.
+
+=head1	OPTIONS
+
+=over 4
+
+=item B<--cachedir=DIR>
+
+Use B<DIR> as the local cache directory. The default is to use
+the same directory defined in the rpmgrill SecurityPolicy plugin.
+
+=item B<--verbose>
+
+Run git without the "-q" (quiet) option
+
+=item B<--help>
+
+Emit usage hints.
+
+=item B<--version>
+
+Display program version.
+
+=item B<--man>
+
+Display this man page.
+
+=back
+
+=head1	AUTHOR
+
+Ed Santiago <santiago@redhat.com>
+
+=cut

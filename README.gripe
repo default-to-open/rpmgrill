@@ -1,0 +1,45 @@
+This is how to use gripe.
+
+Full example showing all the available fields:
+
+  $self->gripe({
+                arch       => ...
+                subpackage => ...
+                code       => 'ShortCodeName',
+                diag       => "This is a human-readable string",
+                context    => {
+                                 path    => "/path/to/file",
+                                 lineno  => 123,
+                                 sub     => ???,
+                                 excerpt => "e.g. from a build log",
+                              },
+             });
+
+In real life, you won't use all of those.
+
+=== Testing
+
+When using gripe, please use the convention:
+
+          code => 'Something'
+
+(i.e. the bareword "code", an arrow, and a string in single or double quotes).
+
+This convention is used by  t/RPM/Grill/40codes.t  to cross-reference
+plugins with tooltips, and (try to) make sure that no tests go
+undocumented.
+
+
+=== FIXME
+
+I'm finding it hard to deal with context. Here are some of
+the real-world cases it has to cope with:
+
+  * The problem is with the CONTENT of {path}
+  * The problem is with {path} itself
+  * The problem is in the specfile (path unknown)
+  * The problem is with the RPM itself
+  * The problem is in a build log
+
+There's also a need for a "for more information" thingy (eg
+SecurityPolicy.pm > _check_cve_file)
