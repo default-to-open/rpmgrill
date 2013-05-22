@@ -180,17 +180,49 @@ sub _check_manpage_presence {
     # Got here. File is an executable in an important directory. Let's
     # make sure it has a corresponding man page.
     my $basename = $bin->basename;
+    my %arch_seen;
     for my $manpage (@{ $self->{_manpages} }) {
         if ($manpage->path =~ m{/$basename\.[^/]+$}) {
+            # The usual case: man page is in same arch or in noarch
             return if $manpage->rpm->arch eq $bin->arch
                    || $manpage->rpm->arch eq 'noarch';
+
+            # Not one of the usual cases. We could have a file in noarch
+            # that's documented in <arch>. See below.
+            $arch_seen{ $manpage->rpm->arch }++;
         }
+    }
+
+    # Man page might be missing. Prepare a gripe message.
+    my $diag = "No man page for <tt>" . sanitize_text($bin->path) . "</tt>";
+
+    # Corner case: a config file (eg /etc/gitweb.conf in git-1.8.2.1-4.el7)
+    # ships in noarch, but its man page is packaged in arch (i686, etc).
+    # If *every* arch includes the man page, we're probably OK. (Not 100%
+    # certain, because we're not cross-checking subpackages, but we can't
+    # check everything).
+    if ($bin->rpm->arch eq 'noarch' && keys %arch_seen) {
+        my @arch_missing;
+        for my $arch ($bin->rpm->grill->non_src_arches) {
+            if ($arch ne 'noarch' && !$arch_seen{$arch}) {
+                push @arch_missing, $arch;
+            }
+        }
+
+        return if ! @arch_missing;
+
+        # We have a man page on one arch, but it's missing on others.
+        # This seems *really* unlikely ever to trigger...
+        $diag = sprintf("Man page for <tt>%s</tt> shipped on %s but missing on %s",
+                        sanitize_text($bin->path),
+                        join(',', sort keys %arch_seen),
+                        join(',', @arch_missing));
     }
 
     # No man page anywhere.
     $bin->gripe({
         code       => 'ManPageMissing',
-        diag       => "No man page for <tt>" . sanitize_text($bin->path) . "</tt>",
+        diag       => $diag,
         context    => undef,
     });
 

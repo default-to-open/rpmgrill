@@ -137,6 +137,36 @@ __DATA__
 
 ...expect:
 
+------------manpage-in-arch-but-configfile-is-in-noarch-----------------
+
+>> -rw-r--r--  root root 1 /noarch/mypkg/etc/gitweb.conf
+>> -rw-r--r--  root root 0 /i686/mypkg/usr/share/man/man5/gitweb.conf.5
+.Dd to make it look like a valid man page
+>> -rw-r--r--  root root 0 /x86_64/mypkg/usr/share/man/man5/gitweb.conf.5
+.Dd to make it look like a valid man page
+
+...expect:
+
+------------manpage-in-only-some-arches----------------------
+
+>> -rw-r--r--  root root 1 /noarch/mypkg/etc/gitweb.conf
+>> -rw-r--r--  root root 0 /i686/mypkg/usr/share/man/man5/gitweb.conf.5
+.Dd to make it look like a valid man page
+>> -rw-r--r--  root root 0 /x86_64/mypkg/usr/bin/add-x86_64-to-arch-list
+
+...expect:
+
+{
+  ManPages => [
+    {
+      arch => 'noarch',
+      code => 'ManPageMissing',
+      diag => 'Man page for <tt>/etc/gitweb.conf</tt> shipped on i686 but missing on x86_64',
+      subpackage => 'mypkg'
+    }
+  ]
+}
+
 ------------bad-gzip-manpage-------------------
 
 >> -rw-r--r--  root root 0 /i386/mypkg-docs/usr/share/man/man1/foo.1.gz

@@ -67,3 +67,4 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+- bz966075: ManPages test: deal with file in noarch, man pages in arch
