@@ -5,6 +5,7 @@ Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
 Source0:        %{name}-%{version}.tar.bz2
+URL:            https://git.fedorahosted.org/git/rpmgrill.git
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl
@@ -22,7 +23,7 @@ Requires: /usr/bin/desktop-file-validate
 Requires: elfutils
 
 # For bz876281 (polkit)
-Requires: libxslt
+Requires: /usr/bin/xsltproc
 
 # Optional module, allows RpmMetadata plugin to check https URLs
 Requires: perl-IO-Socket-SSL
