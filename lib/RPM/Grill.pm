@@ -268,6 +268,7 @@ sub nvr {
 sub major_release {
     my $self = shift;
 
+    # FIXME: memoize, otherwise we get hundreds of warnings
     my $release = $self->nvr( 'release' );
     return "RHEL$1"     if $release =~ /\.el(\d+)/;
     return "FC$1"       if $release =~ /\.fc?(\d+)/;
