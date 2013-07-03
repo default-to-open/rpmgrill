@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.20
+Version:        0.21
 Release:        1%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
@@ -67,4 +67,5 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/rpmgrill/*
 
 %changelog
+* Wed Jul  3 2013 Ed Santiago <santiago@redhat.com> 0.21-1
 - bz966075: ManPages test: deal with file in noarch, man pages in arch
