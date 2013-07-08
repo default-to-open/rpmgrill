@@ -6,7 +6,6 @@ Group:          Development/Tools
 License:        Artistic 2.0
 Source0:        http://www.edsantiago.com/f/%{name}-%{version}.tar.bz2
 URL:            https://git.fedorahosted.org/git/rpmgrill.git
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 BuildRequires:  perl(Module::Build)
