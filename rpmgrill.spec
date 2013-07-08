@@ -1,6 +1,6 @@
 Name:           rpmgrill
 Version:        0.22
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
@@ -55,6 +55,9 @@ find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null \;
 %{_datadir}/%{name}/*
 
 %changelog
+* Mon Jul 10 2013 Ed Santiago <santiago@redhat.com> 0.22-2
+- specfile: remove unnecessary BuildRoot definition
+
 * Wed Jul  3 2013 Ed Santiago <santiago@redhat.com> 0.22-1
 - incorporate Fedora review feedback; Thanks to Christopher Meng
 
