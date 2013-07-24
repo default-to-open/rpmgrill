@@ -59,7 +59,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 - package missing RPM::Grill::Util module
 - more review feedback; thanks again to Christopher Meng
 
-* Mon Jul 10 2013 Ed Santiago <santiago@redhat.com> 0.22-2
+* Mon Jul  8 2013 Ed Santiago <santiago@redhat.com> 0.22-2
 - specfile: remove unnecessary BuildRoot definition
 
 * Wed Jul  3 2013 Ed Santiago <santiago@redhat.com> 0.22-1
