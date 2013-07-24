@@ -1,6 +1,6 @@
 Name:           rpmgrill
-Version:        0.22
-Release:        2%{?dist}
+Version:        0.23
+Release:        1%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
@@ -55,6 +55,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+* Tue Jul 23 2013 Ed Santiago <santiago@redhat.com> 0.23-1
 - package missing RPM::Grill::Util module
 - more review feedback; thanks again to Christopher Meng
 
