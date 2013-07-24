@@ -211,9 +211,9 @@ END
 -| { VirusCheck => [
 -|  { code    => 'ClamAV',
 -|    diag    => 'ClamAV <b>Eicar-Test-Signature</b> subtest triggered',
--|    context => { path => '/usr/bin/myfile2' },
+-|    context => { path => '/usr/bin/myfile1' },
 -|  },
 -|  { code    => 'ClamAV',
 -|    diag    => 'ClamAV <b>Eicar-Test-Signature</b> subtest triggered',
--|    context => { path => '/usr/bin/myfile1' },
+-|    context => { path => '/usr/bin/myfile2' },
 -|  } ] }
