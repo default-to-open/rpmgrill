@@ -21,10 +21,11 @@ Requires: desktop-file-utils
 # For LibGather, Rpath : need eu-readelf
 Requires: elfutils
 
-# For bz876281 (polkit)
-Requires: /usr/bin/xsltproc
+# The SecurityPolicy plugin uses xsltproc to validate polkit files.
+Requires: libxslt
 
-# For bz928428 - ruby gems
+# The SecurityPolicy plugin checks for vulnerabilities in Ruby gems;
+# the database is cached locally using git.
 Requires: git
 
 %description
@@ -43,7 +44,6 @@ multilib incompatibilities.
 ./Build pure_install --destdir %{buildroot}
 
 find %{buildroot} -type f -name .packlist -exec rm -f {} \;
-find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null \;
 
 %{_fixperms} %{buildroot}/*
 
@@ -55,6 +55,9 @@ find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null \;
 %{_datadir}/%{name}/*
 
 %changelog
+- package missing RPM::Grill::Util module
+- more review feedback; thanks again to Christopher Meng
+
 * Mon Jul 10 2013 Ed Santiago <santiago@redhat.com> 0.22-2
 - specfile: remove unnecessary BuildRoot definition
 
