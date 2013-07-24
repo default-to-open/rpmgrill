@@ -9,7 +9,7 @@ VERSION = $(shell rpm -q --specfile $(SPECFILE) --queryformat '%{VERSION}')
 RELEASE = $(shell rpm -q --specfile $(SPECFILE) --queryformat '%{RELEASE}')
 
 # Magic tag thingy for building
-DIST = fc17
+DIST = fc19
 
 $(NAME)-$(VERSION).tar.bz2:
 	@rm -rf $(NAME)-0.0 $(NAME)-$(VERSION)
