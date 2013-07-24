@@ -349,6 +349,6 @@ L<Some::OtherModule>
 
 =head1	AUTHOR
 
-Ed Santiago <ed@edsantiago.com>
+Ed Santiago <santiago@redhat.com>
 
 =cut
