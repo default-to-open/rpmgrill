@@ -25,6 +25,7 @@ lib/RPM/Grill/RPM.pm
 lib/RPM/Grill/RPM/Files.pm
 lib/RPM/Grill/RPM/Metadata.pm
 lib/RPM/Grill/RPM/SpecFile.pm
+lib/RPM/Grill/Util.pm
 Makefile
 MANIFEST
 README.AAA_FIRST
