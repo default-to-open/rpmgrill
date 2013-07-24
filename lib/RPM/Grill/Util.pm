@@ -8,6 +8,7 @@ package RPM::Grill::Util;
 
 use strict;
 use warnings;
+our $VERSION = '0.01';
 
 use Carp;
 use CGI                         qw(escapeHTML);
@@ -22,9 +23,6 @@ use utf8;
 
 # Program name of our caller
 (our $ME = $0) =~ s|.*/||;
-
-# RCS id, accessible to our caller via "$<this_package>::VERSION"
-(our $VERSION = '$Revision: 0.0 $ ') =~ tr/[0-9].//cd;
 
 # For non-OO exporting of code, symbols
 our @ISA         = qw(Exporter);
