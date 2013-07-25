@@ -16,13 +16,13 @@ Requires: clamav
 Requires: clamav-data
 
 # For checking desktop/icon files using /usr/bin/desktop-file-validate
-Requires: desktop-file-utils
+Requires: /usr/bin/desktop-file-validate
 
-# For LibGather, Rpath : need eu-readelf
+# For LibGather, Rpath : need eu-readelf & associated tools
 Requires: elfutils
 
 # The SecurityPolicy plugin uses xsltproc to validate polkit files.
-Requires: libxslt
+Requires: /usr/bin/xsltproc
 
 # The SecurityPolicy plugin checks for vulnerabilities in Ruby gems;
 # the database is cached locally using git.
