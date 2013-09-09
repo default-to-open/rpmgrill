@@ -55,6 +55,9 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+- test suite: clamav output differs between f17 & f19
+- specfile: fix bad date in changelog; re-update some Requires
+
 * Tue Jul 23 2013 Ed Santiago <santiago@redhat.com> 0.23-1
 - package missing RPM::Grill::Util module
 - more review feedback; thanks again to Christopher Meng
