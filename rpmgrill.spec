@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.24
+Version:        0.25
 Release:        1%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
@@ -55,6 +55,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+* Wed Sep 11 2013 Ed Santiago <santiago@redhat.com> 0.25-1
 - Manifest: include License file, missing selftests
 
 * Mon Sep  9 2013 Ed Santiago <santiago@redhat.com> 0.24-1
