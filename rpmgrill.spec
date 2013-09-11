@@ -55,6 +55,8 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+- Manifest: include License file, missing selftests
+
 * Mon Sep  9 2013 Ed Santiago <santiago@redhat.com> 0.24-1
 - test suite: clamav output differs between f17 & f19
 - specfile: fix bad date in changelog; re-update some Requires

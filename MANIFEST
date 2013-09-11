@@ -26,13 +26,17 @@ lib/RPM/Grill/RPM/Files.pm
 lib/RPM/Grill/RPM/Metadata.pm
 lib/RPM/Grill/RPM/SpecFile.pm
 lib/RPM/Grill/Util.pm
+LICENSE
 Makefile
 MANIFEST
+META.json
+META.yml
 README.AAA_FIRST
 README.about
 README.devel-deep
 README.devel-tests
 README.gripe
+README.sev-conf
 README.unpacking
 t/00.load.t
 t/lib/FakeTree.pm
@@ -44,6 +48,7 @@ t/RPM/Grill/12major_release_ge.t
 t/RPM/Grill/20multilib.t
 t/RPM/Grill/30aggregate_gripes.t
 t/RPM/Grill/40codes.t
+t/RPM/Grill/50as_xml.t
 t/RPM/Grill/Plugin/10order.t
 t/RPM/Grill/Plugin/20docs.t
 t/RPM/Grill/Plugin/90real-world.t
@@ -157,6 +162,5 @@ t/RPM/Grill/RPM/Files/20eu-readelf.t
 t/RPM/Grill/RPM/Files/30file_type.t
 t/RPM/Grill/RPM/Files/40dw_at_producer.t
 t/RPM/Grill/RPM/Specfile/01basic.t
+t/RPM/Grill/Util/10sanitize_text.t
 TODO
-META.yml
-META.json
