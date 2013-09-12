@@ -1,6 +1,6 @@
 Name:           rpmgrill
 Version:        0.25
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
@@ -48,6 +48,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_fixperms} %{buildroot}/*
 
 %files
+%doc README.AAA_FIRST LICENSE
 %{perl_vendorlib}/*
 %{_bindir}/*
 %{_mandir}/man1/*
@@ -55,6 +56,9 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+* Thu Sep 12 2013 Ed Santiago <santiago@redhat.com> 0.25-2
+- Don't just include License file in tarball, package it.
+
 * Wed Sep 11 2013 Ed Santiago <santiago@redhat.com> 0.25-1
 - Manifest: include License file, missing selftests
 
