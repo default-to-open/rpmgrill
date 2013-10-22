@@ -56,6 +56,8 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+- internal fixes for updated perl-Encode module
+
 * Thu Sep 12 2013 Ed Santiago <santiago@redhat.com> 0.25-2
 - Don't just include License file in tarball, package it.
 

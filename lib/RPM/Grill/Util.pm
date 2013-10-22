@@ -12,7 +12,7 @@ our $VERSION = '0.01';
 
 use Carp;
 use CGI                         qw(escapeHTML);
-use Encode                      qw(decode_utf8);
+use Encode                      qw(is_utf8 decode_utf8);
 use utf8;
 
 ###############################################################################
@@ -36,9 +36,10 @@ our %EXPORT_TAGS =   (all => \@EXPORT_OK);
 sub sanitize_text {
     my $text = shift;                           # in: text string
 
-    # Although we assume that our input is UTF8, it might not be. This
+    # Although our input is _probably_ clean UTF-8, it might not be. This
     # converts non-UTF8 characters into '&nnn;'
-    my $decoded = decode_utf8($text, Encode::FB_HTMLCREF);
+    my $decoded = is_utf8($text, 1) ? $text
+                                    : decode_utf8($text, Encode::FB_HTMLCREF);
 
     # Control characters except tab and newline: show as ^x
     $decoded =~ s{([[:cntrl:]])}{
