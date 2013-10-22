@@ -112,13 +112,18 @@ for my $cmd (sort keys %Command_Line_Options) {
 
 #
 # At script start time, read the uidgid file from the 'setup' package.
+# If we can't, barf immediately: this is something the maintainer
+# needs to know, not something to report as a package gripe.
 #
 my $UidGid_File;
 my %UidGid;
 {
     my @label;                 # NAME, UID, GID, etc
 
-    my $uidgid_glob = '/usr/share/doc/setup-*/uidgid';
+    # Fedora up through 19 uses version number in the directory name,
+    # eg /usr/share/doc/setup-2.8.71. Fedora 20 and above, with the
+    # UnversionedDocdirs change, use just the package name. Deal with both.
+    my $uidgid_glob = '/usr/share/doc/setup*/uidgid';
     my @uidgid_file = glob( $uidgid_glob )
         or die "$ME: No match for '$uidgid_glob'";
     open my $uidgid_fh, '<', $uidgid_file[0]

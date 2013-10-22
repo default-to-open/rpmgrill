@@ -56,6 +56,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+- bz1021298: Handle UnversionedDocdirs change in F20
 - internal fixes for updated perl-Encode module
 
 * Thu Sep 12 2013 Ed Santiago <santiago@redhat.com> 0.25-2
