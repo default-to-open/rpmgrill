@@ -1,6 +1,6 @@
 Name:           rpmgrill
-Version:        0.25
-Release:        2%{?dist}
+Version:        0.26
+Release:        1%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
@@ -56,6 +56,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+* Tue Oct 22 2013 Ed Santiago <santiago@redhat.com> 0.26-1
 - bz1021298: Handle UnversionedDocdirs change in F20
 - internal fixes for updated perl-Encode module
 
