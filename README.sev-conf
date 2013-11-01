@@ -6,7 +6,7 @@ Confidence : how confident is rpmgrill that this is not a false alarm?
 
 I see three ways to do this:
 
-  1) in the code; or
+  1) in the code that issues a gripe; or
   2) at push-to-DB time; or
   3) by associating and updating severity/confidence tables in the DB,
      dynamically.
@@ -15,22 +15,26 @@ I propose (2) so I will start by shooting down (1) and (3).
 
 --------------
 
-(1) in the code:
+(1) in the code that issues a gripe:
+
+i.e. the test code that issues a gripe() adds 'confidence => high/low'
+and 'severity => high/low'.
 
 Advantages:
 * Could possibly be used to selectively set severity/confidence
-  using program logic, eg something FooCode is important and
+  using program logic, eg sometimes FooCode is important and
   sometimes it's not.
 
 Drawbacks:
+* Inflexible
 * Reduces code maintainability
-* Requires a brew build, sign-and-push, and yum install for each change
+* Requires a respin and yum install for each change.
 
 -------------
 
 (3) DB association table
 
-e.g. not modifying the results table at all, but simply adding a new
+i.e. not modifying the results table at all, but simply adding a new
 lookup table such as:
 
     Code         | Severity | Confidence
@@ -46,21 +50,21 @@ Advantage:
 * Simple to understand and implement.
 
 Disadvantage:
-* no provision for time: a given result R may be low-low yesterday,
-  high-high today, and low-high tomorrow.
+* no provision for passage of time: a given result R may be low-low
+  yesterday, high-high today, and low-high tomorrow.
 
 ------------------
 
-(2) at push-to-DB time
+(2) at push-to-DB time. This is what I believe is the best idea.
 
 Like the above, but the lookup table is only referenced when new results
-are shoved into the DB. The web UI, instead of doing a dynamic lookup,
-uses the static severity/confidence values in each result.
+are shoved into the DB. The email notifier and web UI, instead of doing a
+dynamic lookup, use the static severity/confidence values in each result.
 
 Advantages:
-* No time-confusion.
-* Scores can apply at subscription-mailing time
+* No inconsistencies over time.
+* Flexible: as we gain experience, sev-confidence can be adjusted easily.
 
 Disadvantages:
 * Requires adding new rows (severity, confidence) to existing DB tables;
-* More complex to code. Not much, though.
+* Slightly more complex to code.
