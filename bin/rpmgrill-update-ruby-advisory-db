@@ -93,9 +93,9 @@ sub man {
 
     # If called without output redirection, man-ify.
     my $out_fh;
-    if (-t *STDOUT) {
+    if (-t *STDOUT) {                                   ## no critic
         my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
-        open $out_fh, "| nroff -man | $pager";
+        open $out_fh, "| nroff -man | $pager";          ## no critic
     }
     else {
         open $out_fh, '>&STDOUT';
@@ -165,7 +165,7 @@ sub git_checkout {
         or die "$ME: Internal error: '$dest_dir' is not an absolute path";
 
     # Create the parent directory if necessary
-    mkpath($parent, 0, 02755);
+    mkpath($parent, 0, 02755);          ## no critic
     chdir $parent
         or die "$ME: Internal error: could not cd $parent: $!";
 

@@ -65,12 +65,12 @@ sub man {
 
     # If called without output redirection, man-ify.
     my $out_fh;
-    if (-t *STDOUT) {
+    if (-t *STDOUT) {                           ## no critic
         my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
-        open $out_fh, "| nroff -man | $pager";
+        open $out_fh, "| nroff -man | $pager";  ## no critic
     }
     else {
-        open $out_fh, '>&STDOUT';
+        open $out_fh, '>&STDOUT';       ## no critic
     }
 
     # Read the POD contents, and have Pod::Man read from fake filehandle.
@@ -143,7 +143,7 @@ END_HEADER
 
     # FIXME: do code here
     for my $p (RPM::Grill->plugins) {
-        eval "use $p";
+        eval "use $p";          ## no critic
         die "$ME: $@" if $@;
 
         (my $x = "$p.pm") =~ s{::}{/}g;

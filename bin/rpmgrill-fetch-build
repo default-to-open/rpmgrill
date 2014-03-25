@@ -167,12 +167,12 @@ sub man {
 
     # If called without output redirection, man-ify.
     my $out_fh;
-    if (-t *STDOUT) {
+    if (-t *STDOUT) {                           ## no critic
         my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
-        open $out_fh, "| nroff -man | $pager";
+        open $out_fh, "| nroff -man | $pager";  ## no critic
     }
     else {
-        open $out_fh, '>&STDOUT';
+        open $out_fh, '>&STDOUT';               ## no critic
     }
 
     # Read the POD contents, and have Pod::Man read from fake filehandle.
@@ -302,7 +302,8 @@ sub arches {
     my @arches = map { /\.([^.]+)\.rpm$/; $1 } @{$self->{rpms}};
     my %arches = map { $_ => 1 } @arches;
 
-    return sort keys %arches;
+    my @arches_uniq_sorted = sort keys %arches;
+    return @arches_uniq_sorted;
 }
 
 ##########
@@ -521,7 +522,7 @@ sub do_unpack {
     my $destdir = shift;        # in: dir (may be relative; must not exist)
 
     # Now's the time to create the destination directory
-    mkdir $destdir, 02755
+    mkdir $destdir, 0755
         or die "$ME: mkdir $destdir: $!\n";
     chdir $destdir
         or die "$ME: Cannot cd $destdir: $!\n";
@@ -617,7 +618,7 @@ sub extract_rpm {
     }
 
     print "\$ mkdir -p $rpmdir/payload\n"               if $verbose;
-    eval { mkpath "$rpmdir/payload", 0, 02755 };
+    eval { mkpath "$rpmdir/payload", 0, 02755 };        ## no critic
     die "$ME: Could not mkdir $rpmdir/payload: $@\n"    if $@;
 
     # Move the locally-cached rpm into that directory
@@ -684,11 +685,11 @@ sub run_rpm {
     }
 
     my @retval;
-    open RPM, '-|', @cmd
+    open my $rpm_fh, '-|', @cmd
         or die "$ME: Cannot fork: $!\n";
     my %seen;
   RPMLINE:
-    while (my $line = <RPM>) {
+    while (my $line = <$rpm_fh>) {
         next RPMLINE            if $filter_dups && $seen{$line}++;
 
         print { $out_fh } $line                 if $out_fh;
@@ -696,7 +697,7 @@ sub run_rpm {
         chomp $line;
         push @retval, $line;
     }
-    close RPM
+    close $rpm_fh
         or die "$ME: Error running @cmd: status=$?\n";
 
     if ($outfile) {

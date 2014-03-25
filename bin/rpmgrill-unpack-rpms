@@ -145,12 +145,12 @@ sub man {
 
     # If called without output redirection, man-ify.
     my $out_fh;
-    if (-t *STDOUT) {
+    if (-t *STDOUT) {                           ## no critic
         my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
-        open $out_fh, "| nroff -man";
+        open $out_fh, "| nroff -man";           ## no critic
     }
     else {
-        open $out_fh, '>&STDOUT';
+        open $out_fh, '>&STDOUT';               ## no critic
     }
 
     # Read the POD contents, and have Pod::Man read from fake filehandle.
@@ -220,7 +220,7 @@ sub do_unpack {
     # would just cause mayhem.
     die "$ME: Subdirectory '$input_dir/$Unpack_Into' already exists; aborting\n"
         if -e $Unpack_Into;
-    mkdir $Unpack_Into, 02755
+    mkdir $Unpack_Into, 0755
         or die "$ME: Could not mkdir $input_dir/$Unpack_Into: $!\n";
 
     # We now have a bunch of *.arch.rpm files. Move them into place.
@@ -252,7 +252,7 @@ sub extract_rpm {
     }
 
     print "\$ mkdir -p $rpmdir/payload\n"               if $verbose;
-    eval { mkpath "$rpmdir/payload", 0, 02755 };
+    eval { mkpath "$rpmdir/payload", 0, 02755 };        ## no critic
     die "$ME: Could not mkdir $rpmdir/payload: $@\n"    if $@;
 
     # Hardlink the locally-cached rpm into that directory. We keep the
@@ -320,11 +320,11 @@ sub run_rpm {
     }
 
     my @retval;
-    open RPM, '-|', @cmd
+    open my $rpm_fh, '-|', @cmd
         or die "$ME: Cannot fork: $!\n";
     my %seen;
   RPMLINE:
-    while (my $line = <RPM>) {
+    while (my $line = <$rpm_fh>) {
         next RPMLINE            if $filter_dups && $seen{$line}++;
 
         print { $out_fh } $line                 if $out_fh;
@@ -332,7 +332,7 @@ sub run_rpm {
         chomp $line;
         push @retval, $line;
     }
-    close RPM
+    close $rpm_fh
         or die "$ME: Error running @cmd: status=$?\n";
 
     if ($outfile) {
