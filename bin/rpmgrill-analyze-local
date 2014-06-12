@@ -1,0 +1,332 @@
+#!/usr/bin/perl
+#
+# rpmgrill-analyze-local - run rpmgrill on local RPMs
+#
+# $Id$
+#
+package RpmGrill::Analyze::Local;
+
+use strict;
+use warnings;
+
+(our $ME = $0) =~ s|.*/||;
+(our $VERSION = '$Revision: 0.0 $ ') =~ tr/[0-9].//cd;
+
+# For debugging, show data structures using DumpTree($var)
+#use Data::TreeDumper; $Data::TreeDumper::Displayaddress = 0;
+
+###############################################################################
+# BEGIN user-customizable section
+
+
+# END   user-customizable section
+###############################################################################
+
+use File::Basename;
+use File::Copy                  qw(copy);
+use File::Path                  qw(make_path);
+use File::Temp                  qw(tempdir);
+use FindBin;
+use lib $FindBin::Bin;
+
+###############################################################################
+# BEGIN boilerplate args checking, usage messages
+
+sub usage {
+    print  <<"END_USAGE";
+Usage: $ME [OPTIONS] RPM [RPM...] [BUILDLOG]
+
+$ME is a simple front-end wrapper allowing rpmgrill to
+perform simple (incomplete) analysis on locally-built RPMs.
+
+OPTIONS:
+
+  -v, --verbose  show verbose progress indicators
+  -n, --dry-run  make no actual changes
+
+  --help         display this message
+  --man          display program man page
+  --version      display program name and version
+END_USAGE
+
+    exit;
+}
+
+sub man {
+    # Read the POD contents.  If it hasn't been filled in yet, abort.
+    my $pod = do { local $/; <DATA>; };
+    if ($pod =~ /=head1 \s+ NAME \s+ FIXME/xm) {
+        warn "$ME: No man page available.  Please try $ME --help\n";
+        exit;
+    }
+
+    # Use Pod::Man to convert our __DATA__ section to *roff
+    eval { require Pod::Man }
+        or die "$ME: Cannot generate man page; Pod::Man unavailable: $@\n";
+    my $parser = Pod::Man->new(name => $ME, release => $VERSION, section => 1);
+
+    # If called without output redirection, man-ify.
+    my $out_fh;
+    if (-t *STDOUT) {
+        my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
+        open $out_fh, "| nroff -man | $pager";
+    }
+    else {
+        open $out_fh, '>&STDOUT';
+    }
+
+    # Read the POD contents, and have Pod::Man read from fake filehandle.
+    # This requires 5.8.0.
+    open my $pod_handle, '<', \$pod;
+    $parser->parse_from_filehandle($pod_handle, $out_fh);
+    exit;
+}
+
+
+# Command-line options.  Note that this operates directly on @ARGV !
+our $debug   = 0;
+our $force   = 0;
+our $verbose = 0;
+our $NOT     = '';              # print "blahing the blah$NOT\n" if $debug
+sub handle_opts {
+    use Getopt::Long;
+    GetOptions(
+        'debug!'     => \$debug,
+        'dry-run|n!' => sub { $NOT = ' [NOT]' },
+        'force'      => \$force,
+        'verbose|v'  => \$verbose,
+
+        help         => \&usage,
+        man          => \&man,
+        version      => sub { print "$ME version $VERSION\n"; exit 0 },
+    ) or die "Try `$ME --help' for help\n";
+}
+
+# END   boilerplate args checking, usage messages
+###############################################################################
+
+############################## CODE BEGINS HERE ###############################
+
+# The term is "modulino".
+__PACKAGE__->main()                                     unless caller();
+
+# Main code.
+sub main {
+    # Note that we operate directly on @ARGV, not on function parameters.
+    # This is deliberate: it's because Getopt::Long only operates on @ARGV
+    # and there's no clean way to make it use @_.
+    handle_opts();                      # will set package globals
+
+    die "$ME: No arguments given; try $ME --help\n" if !@ARGV;
+
+    # Parse command-line args; these must be one or more RPMs and logs
+    my @infiles = handle_args(@ARGV);
+    use Data::Dumper;print Dumper(\@infiles);
+
+    # From our input files, make a guess at a package NVR
+    my $nvr = guess_nvr(@infiles);
+
+
+    # Create a temporary working directory. This will be used to
+    #   1) Hold copies of the rpms and build logs in one place; and
+    #   2) unpack the rpms, for rpmgrill to work on
+    my $tmpdir = tempdir( "$ME.XXXXXXX", TMPDIR => 1, CLEANUP => 0 );
+
+    # Copy all our input args into a holding directory
+    $ENV{RPMGRILL_FETCH_BUILD_CACHE} = "$tmpdir/cache";
+    make_cache_dir("$tmpdir/cache/$nvr", @infiles);
+
+    # Invoke rpmdiff-fetch
+    # FIXME
+    require('rpmgrill-fetch-build');
+    my $buildinfo = bless {
+        build => $nvr,
+        rpms  => [ map { basename($_->{path}) } grep { $_->{type} eq 'rpm' } @infiles],
+    }, 'Koji::Build';
+
+    RPM::Grill::FetchBuild::do_unpack($buildinfo, "$tmpdir/workdir");
+
+    # Finally, invoke rpmgrill
+    my @cmd = ('rpmgrill',"$tmpdir/workdir");
+    system(@cmd) == 0
+        or die "$ME: command failed: @cmd\n";
+
+    # FIXME: preserve results
+    # FIXME: cd out, clean up tempdir
+}
+
+#######################
+#  handle_input_args  #  Parse RPMs and build logs from command-line input
+#######################
+#
+# ...returns a list of HREFs containing { path, type, arch }
+sub handle_args {
+    my (@rpms, @logs);                  # for gathering return values
+    my %arch_seen;
+
+    for my $rpm_or_log (@_) {
+        if ($rpm_or_log =~ /\.(\w+)\.rpm$/) {
+            my $arch = $1;
+            $arch_seen{$arch}++;
+            push @rpms, { path => $rpm_or_log, arch => $arch };
+        }
+
+        elsif ($rpm_or_log =~ /\.log$/) {
+            push @logs, { path => $rpm_or_log, arch => undef };
+        }
+
+        else {
+            die "$ME: Unrecognized input file '$rpm_or_log'; I can only handle *.rpm or *.log\n";
+        }
+    }
+
+    #
+    # Done with input files. Perform cross-checks.
+    #
+    @logs
+        or warn "$ME: WARNING: Invoked without build log; some tests will not run\n";
+
+    delete $arch_seen{src}
+        or warn "$ME: WARNING: Invoked without SRPM; some tests will not run\n";
+    my @arches = sort keys %arch_seen
+        or die "$ME: FATAL: Invoked with no built RPMs; this is pointless.\n";
+
+    # Figure out the arch for the log file. Try for a real arch first,
+    # but fall back to noarch
+    my @log_arch = ((grep { $_ ne 'noarch' } @arches), 'noarch');
+    $_->{arch} = $log_arch[0]       for @logs;
+
+
+    return ((map { $_->{type} = 'rpm'; $_ } @rpms),
+            (map { $_->{type} = 'log'; $_ } @logs));
+}
+
+sub make_cache_dir {
+    my $cache_dir = shift;                      # in: dir to create
+    my @files = @_;                             # in: files to put in it
+
+    make_path($cache_dir, { mode => 0755 })
+        or die "$ME: Could not mkdir $cache_dir: $!\n";
+    for my $file (@files) {
+        my $path = $file->{path};
+        my $basename = basename($path);
+        link($path => "$cache_dir/$basename")
+            || copy($path => "$cache_dir/$basename")
+            || die "$ME: Could not copy $path to $cache_dir";
+    }
+}
+
+###############################################################################
+# BEGIN helpers for extracting NVR
+
+###############
+#  guess_nvr  #  From a list of input RPMs, try to guess an NVR
+###############
+sub guess_nvr {
+    if (my @rpms = grep { $_->{type} eq 'rpm' } @_) {
+        if (my @srpm = grep { $_->{arch} eq 'src' } @rpms) {
+            return extract_nvr_from_path($srpm[0]->{path});
+        }
+        return extract_nvr_from_path($rpms[0]->{path});
+    }
+
+    # No RPMs
+    return "unknown-0.0-0";
+}
+
+###########################
+#  extract_nvr_from_path  #  Given an RPM path name, return the NVR
+###########################
+sub extract_nvr_from_path {
+    my $path = shift;
+
+    $path =~ s|^.*/||;                  # Filter out directory components
+
+    $path =~ /^(.*-.*-.*)\.[^.]+\.rpm$/
+        or die "$ME: FATAL: RPM name '$path' is not of the form 'N-V-R.arch.rpm'\n";
+    return $1;
+}
+
+# END   helpers for extracting NVR
+###############################################################################
+
+1;
+
+__DATA__
+
+###############################################################################
+#
+# Documentation
+#
+
+=head1	NAME
+
+FIXME - description of what this script does
+
+=head1	SYNOPSIS
+
+FIXME [B<--foo>]  [B<--bar>]  [B<--verbose>] ARG1 [ARG2...] FIXME
+
+FIXME  B<--help>  |  B<--version> | B<--man>
+
+=head1	DESCRIPTION
+
+B<FIXME> grobbles the frobniz on alternate Tuesdays, except where
+prohibited by law.
+
+=head1	OPTIONS
+
+=over 4
+
+=item B<--foo>
+
+FIXME
+
+=item B<--verbose>
+
+Show progress messages.
+
+=item B<--help>
+
+Emit usage hints.
+
+=item B<--version>
+
+Display program version.
+
+=item B<--man>
+
+Display this man page.
+
+=back
+
+
+=head1	DIAGNOSTICS
+
+FIXME
+
+=head1	ENVIRONMENT
+
+FIXME
+
+=head1	FILES
+
+FIXME
+
+=head1	RESTRICTIONS
+
+FIXME
+
+=head1	SEE ALSO
+
+FIXME
+
+e.g. L<Foo::Bar|Foo::Bar>
+
+=head1	AUTHOR
+
+Your Name <ed@edsantiago.com>
+
+Please report bugs or suggestions to <ed@edsantiago.com>
+
+=cut
