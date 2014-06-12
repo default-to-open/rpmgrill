@@ -720,6 +720,7 @@ sub run_rpm {
     die "$ME: Internal error: Expecting 1 line of output from @cmd, got: @retval\n";
 }
 
+1;
 
 __DATA__
 
