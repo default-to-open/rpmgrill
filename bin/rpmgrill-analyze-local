@@ -140,6 +140,7 @@ sub main {
 
     # From our input files, make a guess at a package NVR
     my $nvr = guess_nvr(@infiles);
+    print "[$ME: NVR is $nvr]\n"                        if $debug;
 
 
     # Create a temporary working directory. This will be used to
@@ -149,12 +150,15 @@ sub main {
 
     # Copy all our input args into a holding directory
     $ENV{RPMGRILL_FETCH_BUILD_CACHE} = "$tmpdir/cache";
+    print " [copying RPMs to $tmpdir/cache]\n"                  if $verbose;
     make_cache_dir("$tmpdir/cache/$nvr", @infiles);
 
+    print " [unpacking RPMs]\n"                                 if $verbose;
     my $workdir = unpack_rpms_and_logs($nvr, $tmpdir, @infiles);
 
     # Finally, invoke rpmgrill
     my @cmd = ('rpmgrill', $workdir);
+    print " [running: @cmd]\n"                                  if $verbose;
     system(@cmd) == 0
         or die "$ME: command failed: @cmd\n";
 
@@ -170,6 +174,8 @@ sub main {
         rename          $dest => "$dest.BAK";   # Preserve backup, if applicable
         copy   $path => $dest;
     }
+
+    print "$ME: Results are in rpmgrill-$nvr.*\n"               if $verbose;
 
     # Clean up extracted RPMs
     remove_tree($tmpdir)                                unless $opt_keep;
