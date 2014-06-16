@@ -25,7 +25,7 @@ use warnings;
 use Cwd                         qw(getcwd);
 use File::Basename;
 use File::Copy                  qw(copy);
-use File::Path                  qw(make_path);
+use File::Path                  qw(make_path remove_tree);
 use File::Temp                  qw(tempdir);
 
 # Needed so we can load rpmgrill-fetch-build utility script
@@ -42,12 +42,22 @@ Usage: $ME [OPTIONS] RPM [RPM...] [BUILDLOG]
 $ME is a simple front-end wrapper allowing rpmgrill to
 perform simple (incomplete) analysis on locally-built RPMs.
 
+Example:
+
+    \$ $ME foo-1.2-3.fc20.*.rpm foo.log
+
+rpmgrill results will be in files named rpmgrill-<NVR>.* eg
+
+     rpmgrill-foo-1.2-3.fc20.{json,xml,yaml}
+
+Parsing and interpreting those results is left as an exercise
+for the reader.
+
 OPTIONS:
 
   --keep-tmpdir  preserve working directory on exit
 
   -v, --verbose  show verbose progress indicators
-  -n, --dry-run  make no actual changes
 
   --help         display this message
   --man          display program man page
@@ -93,14 +103,12 @@ our $opt_keep;                  # Don't delete our tmpdir on exit
 our $debug   = 0;
 our $force   = 0;
 our $verbose = 0;
-our $NOT     = '';              # print "blahing the blah$NOT\n" if $debug
 sub handle_opts {
     use Getopt::Long;
     GetOptions(
         'keep-tmpdir' => \$opt_keep,
 
         'debug!'     => \$debug,
-        'dry-run|n!' => sub { $NOT = ' [NOT]' },
         'force'      => \$force,
         'verbose|v'  => \$verbose,
 
@@ -326,26 +334,28 @@ __DATA__
 
 =head1	NAME
 
-FIXME - description of what this script does
+rpmgrill-analyze-local - run rpmgrill on locally-built RPMs
 
 =head1	SYNOPSIS
 
-FIXME [B<--foo>]  [B<--bar>]  [B<--verbose>] ARG1 [ARG2...] FIXME
+rpmgrill-analyze-local  [B<--verbose>] RPM-OR-LOGFILE [...]
 
-FIXME  B<--help>  |  B<--version> | B<--man>
+rpmgrill-analyze-local  B<--help>  |  B<--version> | B<--man>
 
 =head1	DESCRIPTION
 
-B<FIXME> grobbles the frobniz on alternate Tuesdays, except where
-prohibited by law.
+B<rpmgrill-analyze-local> is a simple front end to B<rpmgrill>,
+intended for quick-and-dirty use by developers on local builds.
 
 =head1	OPTIONS
 
 =over 4
 
-=item B<--foo>
+=item B<--keep-tmpdir>
 
-FIXME
+rpmgrill-analyze-local unpacks RPMs into a temporary working
+directory under C<$TMPDIR>. This is what B<rpmgrill> works on.
+Use this option if you need to debug or just peek at internals.
 
 =item B<--verbose>
 
@@ -372,26 +382,29 @@ FIXME
 
 =head1	ENVIRONMENT
 
-FIXME
+C<$TMPDIR> : rpmgrill-analyze-local will create a temporary subdirectory
+here, then unpack RPMs in the way B<rpmgrill> expects.
 
 =head1	FILES
 
-FIXME
+rpmgrill-analyze-local copies rpmgrill's results into files named
+B<rpmgrill-N-V-R.TYPE> in your current directory, where B<N-V-R>
+is the name-version-release of your package and B<TYPE> is one
+of C<json>, C<xml>, or C<yaml>. All are equivalent; multiple
+forms are provided as a convenience for the end user.
 
 =head1	RESTRICTIONS
 
-FIXME
+You must provide, at the very least, a SRPM and a built RPM.
+It is nonsensical to invoke rpmgrill with just a SRPM or just
+a built RPM.
 
 =head1	SEE ALSO
 
-FIXME
-
-e.g. L<Foo::Bar|Foo::Bar>
+L<rpmgrill|rpmgrill>
 
 =head1	AUTHOR
 
-Your Name <ed@edsantiago.com>
-
-Please report bugs or suggestions to <ed@edsantiago.com>
+Ed Santiago <santiago@redhat.com>
 
 =cut
