@@ -22,6 +22,7 @@ use warnings;
 # END   user-customizable section
 ###############################################################################
 
+use Cwd                         qw(getcwd);
 use File::Basename;
 use File::Copy                  qw(copy);
 use File::Path                  qw(make_path);
@@ -42,6 +43,8 @@ $ME is a simple front-end wrapper allowing rpmgrill to
 perform simple (incomplete) analysis on locally-built RPMs.
 
 OPTIONS:
+
+  --keep-tmpdir  preserve working directory on exit
 
   -v, --verbose  show verbose progress indicators
   -n, --dry-run  make no actual changes
@@ -86,6 +89,7 @@ sub man {
 
 
 # Command-line options.  Note that this operates directly on @ARGV !
+our $opt_keep;                  # Don't delete our tmpdir on exit
 our $debug   = 0;
 our $force   = 0;
 our $verbose = 0;
@@ -93,6 +97,8 @@ our $NOT     = '';              # print "blahing the blah$NOT\n" if $debug
 sub handle_opts {
     use Getopt::Long;
     GetOptions(
+        'keep-tmpdir' => \$opt_keep,
+
         'debug!'     => \$debug,
         'dry-run|n!' => sub { $NOT = ' [NOT]' },
         'force'      => \$force,
@@ -137,23 +143,28 @@ sub main {
     $ENV{RPMGRILL_FETCH_BUILD_CACHE} = "$tmpdir/cache";
     make_cache_dir("$tmpdir/cache/$nvr", @infiles);
 
-    # Invoke rpmdiff-fetch
-    # FIXME
-    require('rpmgrill-fetch-build');
-    my $buildinfo = bless {
-        build => $nvr,
-        rpms  => [ map { basename($_->{path}) } grep { $_->{type} eq 'rpm' } @infiles],
-    }, 'Koji::Build';
-
-    RPM::Grill::FetchBuild::do_unpack($buildinfo, "$tmpdir/workdir");
+    my $workdir = unpack_rpms_and_logs($nvr, $tmpdir, @infiles);
 
     # Finally, invoke rpmgrill
-    my @cmd = ('rpmgrill',"$tmpdir/workdir");
+    my @cmd = ('rpmgrill', $workdir);
     system(@cmd) == 0
         or die "$ME: command failed: @cmd\n";
 
-    # FIXME: preserve results
-    # FIXME: cd out, clean up tempdir
+    # rpmgrill leaves us with results in the form of "rpmgrill.*" files
+    # in the working directory. Move those into the current directory,
+    # renaming so as to include the NVR.
+    my @results = glob("$workdir/rpmgrill.*")
+        or die "$ME: FATAL: No results found ($workdir/rpmgrill.*)\n";
+    for my $path (@results) {
+        (my $dest = basename($path)) =~ s|^(rpmgrill)\.([^/]+)$|$1-$nvr.$2|
+            or die "$ME: INTERNAL ERROR: Unexpected filename '$path'";
+        unlink                   "$dest.BAK";   # Remove old backup, if any
+        rename          $dest => "$dest.BAK";   # Preserve backup, if applicable
+        copy   $path => $dest;
+    }
+
+    # Clean up extracted RPMs
+    remove_tree($tmpdir)                                unless $opt_keep;
 }
 
 #######################
@@ -202,6 +213,12 @@ sub handle_args {
             (map { $_->{type} = 'log'; $_ } @logs));
 }
 
+###############################################################################
+# BEGIN helpers for extracting RPMs
+
+####################
+#  make_cache_dir  #  Copy RPMs and logs into a cache for rpmgrill-fetch-build
+####################
 sub make_cache_dir {
     my $cache_dir = shift;                      # in: dir to create
     my @files = @_;                             # in: files to put in it
@@ -226,6 +243,44 @@ sub make_cache_dir {
     }
 }
 
+
+##########################
+#  unpack_rpms_and_logs  #  Unpack a set of RPMs and log files, for rpmgrill
+##########################
+#
+# We've established the framework for a cache directory in the form
+# expected by rpmgrill-fetch-build; now let it do the unpacking.
+#
+sub unpack_rpms_and_logs {
+    my $nvr     = shift;                # in: NVR
+    my $tmpdir  = shift;                # in: where to create our workdir
+    my @infiles = @_;
+
+    require('rpmgrill-fetch-build');
+
+    # Prepare an object containing the basenames of our RPMs.
+    # FIXME: this requires knowledge of rpmgrill-fetch-build internals!
+    # ...but fixing that would require defining an API. Too much work.
+    my $buildinfo = bless {
+        build => $nvr,
+        rpms  => [ map  { basename($_->{path}) }
+                   grep { $_->{type} eq 'rpm' } @infiles],
+        # Note that we do not include logs. do_unpack() will find and copy
+        # those automatically based on the log file name.
+    }, 'Koji::Build';
+
+    # do_unpack() changes directory! Make sure we restore context.
+    my $cwd = getcwd;
+
+    # Unpack into a directory for rpmgrill. do_unpack() will die on error.
+    my $workdir = "$tmpdir/workdir";
+    RPM::Grill::FetchBuild::do_unpack($buildinfo, $workdir);
+
+    chdir $cwd;
+    return $workdir;
+}
+
+# END   helpers for extracting RPMs
 ###############################################################################
 # BEGIN helpers for extracting NVR
 
