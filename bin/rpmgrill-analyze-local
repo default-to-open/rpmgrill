@@ -4,7 +4,7 @@
 #
 # $Id$
 #
-package RpmGrill::Analyze::Local;
+package RPM::Grill::Analyze::Local;
 
 use strict;
 use warnings;
@@ -26,6 +26,8 @@ use File::Basename;
 use File::Copy                  qw(copy);
 use File::Path                  qw(make_path);
 use File::Temp                  qw(tempdir);
+
+# Needed so we can load rpmgrill-fetch-build utility script
 use FindBin;
 use lib $FindBin::Bin;
 
@@ -121,7 +123,6 @@ sub main {
 
     # Parse command-line args; these must be one or more RPMs and logs
     my @infiles = handle_args(@ARGV);
-    use Data::Dumper;print Dumper(\@infiles);
 
     # From our input files, make a guess at a package NVR
     my $nvr = guess_nvr(@infiles);
@@ -171,7 +172,7 @@ sub handle_args {
             push @rpms, { path => $rpm_or_log, arch => $arch };
         }
 
-        elsif ($rpm_or_log =~ /\.log$/) {
+        elsif ($rpm_or_log =~ /\.log\b/) {
             push @logs, { path => $rpm_or_log, arch => undef };
         }
 
@@ -209,9 +210,18 @@ sub make_cache_dir {
         or die "$ME: Could not mkdir $cache_dir: $!\n";
     for my $file (@files) {
         my $path = $file->{path};
-        my $basename = basename($path);
-        link($path => "$cache_dir/$basename")
-            || copy($path => "$cache_dir/$basename")
+        my $destname = basename($path);
+
+        # Special case: build logs must be named 'build.log.<arch>' for
+        # rpmgrill-fetch-build to see them in the cache dir
+        if ($file->{type} eq 'log') {
+            $destname = "build.log.$file->{arch}";
+        }
+
+        # Try a hardlink first, to save space/speed. But that's likely
+        # to fail if we use $TMPDIR, so fall back gracefully to File::Copy
+        link($path => "$cache_dir/$destname")
+            || copy($path => "$cache_dir/$destname")
             || die "$ME: Could not copy $path to $cache_dir";
     }
 }
