@@ -46,7 +46,8 @@ Example:
 
     \$ $ME foo-1.2-3.fc20.*.rpm foo.log
 
-rpmgrill results will be in files named rpmgrill-<NVR>.* eg
+rpmgrill results will be in files named rpmgrill-<NVR>.* written
+by default in the current directory, e.g.:
 
      rpmgrill-foo-1.2-3.fc20.{json,xml,yaml}
 
@@ -55,13 +56,14 @@ for the reader.
 
 OPTIONS:
 
-  --keep-tmpdir  preserve working directory on exit
+  --results-dir=DIR  write rpmgrill results into DIR (default: .)
+  --keep-tmpdir      preserve working directory on exit
 
-  -v, --verbose  show verbose progress indicators
+  -v, --verbose      show verbose progress indicators
 
-  --help         display this message
-  --man          display program man page
-  --version      display program name and version
+  --help             display this message
+  --man              display program man page
+  --version          display program name and version
 END_USAGE
 
     exit;
@@ -99,6 +101,7 @@ sub man {
 
 
 # Command-line options.  Note that this operates directly on @ARGV !
+our $results_dir = '.';         # Where to write rpmgrill results
 our $opt_keep;                  # Don't delete our tmpdir on exit
 our $debug   = 0;
 our $force   = 0;
@@ -106,7 +109,8 @@ our $verbose = 0;
 sub handle_opts {
     use Getopt::Long;
     GetOptions(
-        'keep-tmpdir' => \$opt_keep,
+        'results-dir=s' => \$results_dir,
+        'keep-tmpdir'   => \$opt_keep,
 
         'debug!'     => \$debug,
         'force'      => \$force,
@@ -132,6 +136,12 @@ sub main {
     # This is deliberate: it's because Getopt::Long only operates on @ARGV
     # and there's no clean way to make it use @_.
     handle_opts();                      # will set package globals
+
+    # Sanity check: results directory must exist
+    -e $results_dir
+        or die "$ME: Results directory '$results_dir' does not exist\n";
+    -d $results_dir
+        or die "$ME: Results directory '$results_dir' is not a directory!\n";
 
     die "$ME: No arguments given; try $ME --help\n" if !@ARGV;
 
@@ -163,19 +173,21 @@ sub main {
         or die "$ME: command failed: @cmd\n";
 
     # rpmgrill leaves us with results in the form of "rpmgrill.*" files
-    # in the working directory. Move those into the current directory,
+    # in the working directory. Move those into the desired directory,
     # renaming so as to include the NVR.
     my @results = glob("$workdir/rpmgrill.*")
         or die "$ME: FATAL: No results found ($workdir/rpmgrill.*)\n";
     for my $path (@results) {
         (my $dest = basename($path)) =~ s|^(rpmgrill)\.([^/]+)$|$1-$nvr.$2|
             or die "$ME: INTERNAL ERROR: Unexpected filename '$path'";
+        $dest = "$results_dir/$dest";
+
         unlink                   "$dest.BAK";   # Remove old backup, if any
         rename          $dest => "$dest.BAK";   # Preserve backup, if applicable
         copy   $path => $dest;
     }
 
-    print "$ME: Results are in rpmgrill-$nvr.*\n"               if $verbose;
+    print "$ME: Results are in $results_dir/rpmgrill-$nvr.*\n"  if $verbose;
 
     # Clean up extracted RPMs
     remove_tree($tmpdir)                                unless $opt_keep;
@@ -357,6 +369,11 @@ intended for quick-and-dirty use by developers on local builds.
 
 =over 4
 
+=item B<--results-dir=DIR>
+
+Write rpmgrill results into B<DIR> instead of the current directory.
+DIR must exist.
+
 =item B<--keep-tmpdir>
 
 rpmgrill-analyze-local unpacks RPMs into a temporary working
@@ -394,7 +411,8 @@ here, then unpack RPMs in the way B<rpmgrill> expects.
 =head1	FILES
 
 rpmgrill-analyze-local copies rpmgrill's results into files named
-B<rpmgrill-N-V-R.TYPE> in your current directory, where B<N-V-R>
+B<rpmgrill-N-V-R.TYPE> in your current directory (or as specified
+with --results-dir option), where B<N-V-R>
 is the name-version-release of your package and B<TYPE> is one
 of C<json>, C<xml>, or C<yaml>. All are equivalent; multiple
 forms are provided as a convenience for the end user.
