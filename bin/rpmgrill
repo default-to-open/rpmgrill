@@ -55,7 +55,6 @@ pre-set-up set of extracted RPMs and metadata.
 
 OPTIONS:
 
-  --results-dir=DIR  write rpmgrill results into DIR (default: .)
   --list-plugins     list available plugins
   --disable=[LIST]   disable one or more plugins, e.g.: --disable=virus,buildlog
 
@@ -102,7 +101,6 @@ sub man {
 
 
 # Command-line options.  Note that this operates directly on @ARGV !
-our $results_dir = '.';         # Where to write rpmgrill results
 our $debug   = 0;
 our $force   = 0;
 our $verbose = 0;
@@ -112,8 +110,6 @@ our @disable_plugin;            # plugins to disable
 sub handle_opts {
     use Getopt::Long;
     GetOptions(
-        'results-dir=s' => \$results_dir,
-
         'debug!'     => \$debug,
         'dry-run|n!' => sub { $NOT = ' [NOT]' },
         'force'      => \$force,
@@ -168,12 +164,6 @@ sub main {
     # and there's no clean way to make it use @_.
     handle_opts();                      # will set package globals
 
-    # Sanity check: results directory must exist
-    -e $results_dir
-        or die "$ME: Results directory '$results_dir' does not exist\n";
-    -d $results_dir
-        or die "$ME: Results directory '$results_dir' is not a directory!\n";
-
     # Fetch command-line arguments.  Barf if too many.
     my $base_dir = shift(@ARGV)
         or die "$ME: missing BASEDIR argument; try $ME --help\n";
@@ -208,7 +198,7 @@ sub main {
     # Done. Write XML, YAML, and JSON output files for our caller.
     #
     for my $format (qw(json xml yaml)) {
-        my $outfile = "$results_dir/$ME.$format";
+        my $outfile = "$ME.$format";
         my $tmpfile = "$outfile.tmp.$$";
         unlink $tmpfile;
 
