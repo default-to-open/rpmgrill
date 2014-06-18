@@ -84,12 +84,12 @@ sub man {
 
     # If called without output redirection, man-ify.
     my $out_fh;
-    if (-t *STDOUT) {
+    if (-t *STDOUT) {                           ## no critic
         my $pager = $ENV{MANPAGER} || $ENV{PAGER} || 'less';
-        open $out_fh, "| nroff -man | $pager";
+        open $out_fh, "| nroff -man | $pager";  ## no critic
     }
     else {
-        open $out_fh, '>&STDOUT';
+        open $out_fh, '>&STDOUT';               ## no critic
     }
 
     # Read the POD contents, and have Pod::Man read from fake filehandle.
@@ -249,7 +249,7 @@ sub make_cache_dir {
     my $cache_dir = shift;                      # in: dir to create
     my @files = @_;                             # in: files to put in it
 
-    make_path($cache_dir, { mode => 0755 })
+    make_path($cache_dir, { mode => 0755 })     ## no critic
         or die "$ME: Could not mkdir $cache_dir: $!\n";
     for my $file (@files) {
         my $path = $file->{path};
