@@ -56,6 +56,8 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+- new rpmgrill-analyze-local tool
+
 * Tue Oct 22 2013 Ed Santiago <santiago@redhat.com> 0.26-1
 - bz1021298: Handle UnversionedDocdirs change in F20
 - internal fixes for updated perl-Encode module
