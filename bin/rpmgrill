@@ -46,7 +46,12 @@ sub usage {
     print  <<"END_USAGE";
 Usage: $ME [OPTIONS] ARGS [...]
 
-blah blah blah
+$ME analyzes a set of RPMs (typically from a Koji build),
+looking for nits to pick. Unlike rpmlint, $ME analyzes
+*full builds*.
+
+$ME is not intended to be run by mortals. It requires a
+pre-set-up set of extracted RPMs and metadata.
 
 OPTIONS:
 
