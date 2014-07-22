@@ -45,6 +45,7 @@ our @Non_FHS = qw(
                      /root
                      /usr/local
                      /(?:usr/|var/)?tmp
+                     /etc/tmpfiles\.d
              );
 our $Non_FHS = join('|', @Non_FHS);
 
