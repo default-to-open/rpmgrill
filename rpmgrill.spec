@@ -1,6 +1,6 @@
 Name:           rpmgrill
 Version:        0.26
-Release:        1%{?dist}
+Release:        3%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
@@ -57,6 +57,12 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 
 %changelog
 - new rpmgrill-analyze-local tool
+
+* Tue Aug 26 2014 Jitka Plesnikova <jplesnik@redhat.com> - 0.26-3
+- Perl 5.20 rebuild
+
+* Sun Jun 08 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.26-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
 * Tue Oct 22 2013 Ed Santiago <santiago@redhat.com> 0.26-1
 - bz1021298: Handle UnversionedDocdirs change in F20
