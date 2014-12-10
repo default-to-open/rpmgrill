@@ -8,6 +8,7 @@ Source0:        http://www.edsantiago.com/f/%{name}-%{version}.tar.bz2
 URL:            https://git.fedorahosted.org/git/rpmgrill.git
 BuildArch:      noarch
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+Requires:       perl(Module::Pluggable)
 BuildRequires:  perl(Module::Build)
 BuildRequires:  perl(Test::Simple)
 
@@ -27,6 +28,10 @@ Requires: /usr/bin/xsltproc
 # The SecurityPolicy plugin checks for vulnerabilities in Ruby gems;
 # the database is cached locally using git.
 Requires: git
+
+# Not strictly necessary for rpmgrill, but rpmgrill-fetch-build uses it
+# to download Fedora builds.
+Requires: koji
 
 %description
 rpmgrill runs a series of tests against a set of RPMs, reporting problems
@@ -56,6 +61,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+- bz1172584: missing deps on Module::Pluggable, koji
 - new rpmgrill-analyze-local tool
 
 * Tue Aug 26 2014 Jitka Plesnikova <jplesnik@redhat.com> - 0.26-3
