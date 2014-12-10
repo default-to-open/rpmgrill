@@ -1,6 +1,6 @@
 Name:           rpmgrill
-Version:        0.26
-Release:        3%{?dist}
+Version:        0.27
+Release:        1%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
@@ -61,6 +61,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+* Wed Dec 10 2014 Ed Santiago <santiago@redhat.com> 0.27-1
 - bz1172584: missing deps on Module::Pluggable, koji
 - bz1160153: fill in rpmgrill POD
 - new rpmgrill-analyze-local tool
