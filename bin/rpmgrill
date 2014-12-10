@@ -225,26 +225,43 @@ __DATA__
 
 =head1	NAME
 
-FIXME - description of what this script does
+rpmgrill - static analysis of koji builds
 
 =head1	SYNOPSIS
 
-FIXME [B<--foo>]  [B<--bar>]  [B<--verbose>] ARG1 [ARG2...] FIXME
+rpmgrill [--disable=LIST] [--verbose] BASEDIR
 
-FIXME  B<--help>  |  B<--version> | B<--man>
+rpmgrill  B<--help>  |  B<--version> | B<--man>
 
 =head1	DESCRIPTION
 
-B<FIXME> grobbles the frobniz on alternate Tuesdays, except where
-prohibited by law.
+rpmgrill analyzes a set of RPMs (typically from a Koji build),
+looking for problems with the source and/or generated RPMs.
+Unlike rpmlint, rpmgrill analyzes B<full builds>, not individual
+RPMs.
+
+rpmgrill is not intended to be run directly by humans: it requires
+complex prep work to fetch and unpack the build RPMs. rpmgrill is
+best suited toward a CI environment in which other tools monitor
+builds, fetch them, run rpmgrill, and report results.
+
+If you are reading this as a casual user, you are almost certainly
+better off looking into B<rpmgrill-analyze-local>.
 
 =head1	OPTIONS
 
 =over 4
 
-=item B<--foo>
+=item B<--list-plugins>
 
-FIXME
+List available plugins, then exit.
+
+=item B<--disable=LIST>
+
+Disable the given plugins when running. LIST is a comma-separated list
+of plugin names as listed with C<--list-plugins>. This can be useful
+for development, when you might want to do quick iterations of a test
+but not spend 10 minutes in the VirusCheck plugin.
 
 =item B<--verbose>
 
@@ -267,30 +284,26 @@ Display this man page.
 
 =head1	DIAGNOSTICS
 
-FIXME
-
-=head1	ENVIRONMENT
-
-FIXME
+rpmgrill writes its results to the files C<rpmgrill.*> in its
+working directory, for C<*> in json, xml, yaml. Unexpected errors
+(probably bugs or FIXMEs in rpmgrill) are emitted to stderr.
 
 =head1	FILES
 
-FIXME
-
-=head1	RESTRICTIONS
-
-FIXME
+rpmgrill requires a pre-set-up directory hierarchy containing
+unpacked RPMs. Documenting that is way beyond the scope of this
+man page. See README.unpacking in the rpmgrill source tree,
+or the rpmgrill-fetch-build tool, for more details.
 
 =head1	SEE ALSO
 
-FIXME
-
-e.g. L<Foo::Bar|Foo::Bar>
+rpmgrill-analyze-local, rpmgrill-fetch-build, rpmgrill-unpack-rpms
 
 =head1	AUTHOR
 
-Your Name <ed@edsantiago.com>
+Ed Santiago <santiago@redhat.com>
 
-Please report bugs or suggestions to <ed@edsantiago.com>
+Please report bugs or suggestions on
+L<bugzilla|https://bugzilla.redhat.com/enter_bug.cgi?product=Fedora&component=rpmgrill>
 
 =cut

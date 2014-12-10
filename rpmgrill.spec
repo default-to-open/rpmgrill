@@ -62,6 +62,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 
 %changelog
 - bz1172584: missing deps on Module::Pluggable, koji
+- bz1160153: fill in rpmgrill POD
 - new rpmgrill-analyze-local tool
 
 * Tue Aug 26 2014 Jitka Plesnikova <jplesnik@redhat.com> - 0.26-3
