@@ -109,7 +109,7 @@ foo2.pl: Perl script, ASCII text executable
 # This one invokes perl via env
 
 --------------------------------------------------------------------------------
-foo.pl.gz*: Perl script, ASCII text executable (gzip compressed data, was "foo.pl", from Unix, last modified: Thu Jul 26 13:33:23 2012, max compression)
+foo.pl.gz*: Perl script, ASCII text executable (gzip compressed data, was "foo.pl", last modified: Thu Jul 26 13:33:23 2012, max compression, from Unix)
 H4sICGN/EVACA2Zvby5wbABTVtQvLS7ST8rM0y9ILcrhUuZSVgjJyCxWyM9LVcjMK8vPTi1WAMko
 pGQWpSaX5FRyAQBWpq1nMwAAAA==
 
