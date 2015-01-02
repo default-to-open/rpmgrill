@@ -218,7 +218,7 @@ hi there
 -|    diag       => "Multilib errors may be due to the dependency generator being disabled",
 -|    context    => {
 -|                  path   => "mypkg.spec",
--|                  lineno => '2',
+-|                  lineno => 2,
 -|                  excerpt => [ '%filter_setup' ],
 -|    }
 -|  }

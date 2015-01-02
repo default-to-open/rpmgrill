@@ -146,7 +146,7 @@ Type=Application
    diag       => 'Exec file <var>/usr/bin/foo</var> is not o+x (mode is <var>-rwxr-xr--</var>)',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Exec=foo'],
-                   lineno=>'4' },
+                   lineno => 4 },
  }
 
 -------exec-missing-(no-path)----------------------------------------------------
@@ -170,7 +170,7 @@ Type=Application
    diag       => 'Exec file <var>/usr/bin/foo</var> not found',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Exec=foo'],
-                   lineno=>'4' },
+                   lineno => 4 },
  }
 
 -------exec-missing-(full-path)----------------------------------------------------
@@ -194,7 +194,7 @@ Type=Application
    diag       => 'Exec file <var>/usr/bin/foo</var> not found',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Exec=/usr/bin/foo'],
-                   lineno=>'4' },
+                   lineno => 4 },
  }
 
 
@@ -219,7 +219,7 @@ Type=Application
    diag       => 'Exec file <var>/usr/bin/foo</var> not found',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Exec=/usr/bin/foo'],
-                   lineno=>'4' },
+                   lineno => 4 },
  }
 
 -------exec-missing-(including-noarch)------------------------------------------
@@ -245,7 +245,7 @@ Type=Application
    diag       => 'Exec file <var>/usr/bin/foo</var> not found, even in noarch',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Exec=foo'],
-                   lineno=>'4' },
+                   lineno => 4 },
  }
 
 -------exec-missing-(src)------------------------------------------------------
@@ -301,7 +301,7 @@ Type=Application
    diag       => 'Exec file <var>/usr/bin/foo</var> not found',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Exec=/usr/bin/foo'],
-                   lineno=>'4' },
+                   lineno => 4 },
  },
  { arch       => 'ppc',
    subpackage => 'mypkg',
@@ -309,7 +309,7 @@ Type=Application
    diag       => 'Exec file <var>/usr/bin/foo</var> not found',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Exec=/usr/bin/foo'],
-                   lineno=>'4' },
+                   lineno => 4 },
  }
 
 
@@ -358,7 +358,7 @@ sdfdf
    diag       => 'Package should Require: htmlview',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Exec=/usr/bin/htmlview'],
-                   lineno=>'4' },
+                   lineno => 4 },
  }
 
 
@@ -428,7 +428,7 @@ Type=Application
    diag       => 'Icon file <var>/usr/share/icons/myicon.png</var> is not world-readable (mode is <var>-rwxr-x---</var>)',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Icon=/usr/share/icons/myicon.png'],
-                   lineno=>'5' },
+                   lineno => 5 },
  }
 
 -------icon-missing-(arch)--------------------------------------------
@@ -453,7 +453,7 @@ Type=Application
    diag       => 'Icon file <var>/usr/share/icons/myicon.png</var> not found',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Icon=/usr/share/icons/myicon.png'],
-                   lineno=>'5' },
+                   lineno => 5 },
  }
 
 -------icon-missing-(noarch)--------------------------------------------
@@ -478,7 +478,7 @@ Type=Application
    diag       => 'Icon file <var>/usr/share/icons/myicon.png</var> not found',
    context    => { path => '/usr/share/applications/foo.desktop',
                    excerpt => ['Icon=/usr/share/icons/myicon.png'],
-                   lineno=>'5' },
+                   lineno => 5 },
  }
 
 

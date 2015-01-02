@@ -6,7 +6,7 @@
         excerpt => [
           '* Fri May 20 2011 Eduardo Santiago &lt;santiago@redhat.com&gt; blahblah-1.2-3'
         ],
-        lineno => '10',
+        lineno => 10,
         path => 'zzz-8-cruft-in-changelog-1.2-3.spec'
       },
       diag => 'First %changelog entry includes unnecessary cruft (<var>blahblah-</var>) in the version string; You only need <var>1.2</var>.'

@@ -8,7 +8,7 @@
         ],
         'sub' => '%pre server',
         'path' => 'systemtap-1.3.4.el5.spec',
-        'lineno' => '334'
+        'lineno' => 334
       },
       'diag' => 'Invocation of <tt>useradd</tt> without specifying a UID; you should use <b>155</b>, as defined in <tt>/usr/share/doc/setup-2.8.28/uidgid</tt>',
       'code' => 'UseraddNoUid'

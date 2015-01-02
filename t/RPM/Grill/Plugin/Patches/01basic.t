@@ -95,7 +95,7 @@ Patch1: foo2.patch
 -|   code       => 'BadPatchFuzz',
 -|   context => {
 -|      excerpt => [ '%define _default_patch_fuzz 2' ],
--|      lineno => '2',
+-|      lineno => 2,
 -|      path => '<string>',
 -|    },
 -|    diag => 'Do not override _default_patch_fuzz. Please redo your patches instead.',
@@ -120,7 +120,7 @@ Patch1: foo2.patch
 -|   code       => 'BadPatchFuzz',
 -|   context => {
 -|      excerpt => [ '%define _default_patch_fuzz 9' ],
--|      lineno => '2',
+-|      lineno => 2,
 -|      path => '<string>',
 -|    },
 -|    diag => 'Do not override _default_patch_fuzz; *ESPECIALLY* not with anything >2. Please redo your patches instead.',
@@ -144,7 +144,7 @@ Patch0: this-is-a-dup.patch
 -|   code       => 'DuplicatePatch',
 -|   context => {
 -|      excerpt => [ "Patch0: foo1.patch\nPatch0: this-is-a-dup.patch" ],
--|      lineno => '7',
+-|      lineno => 7,
 -|      path => '<string>',
 -|    },
 -|    diag => 'Duplicate definition of Patch0',

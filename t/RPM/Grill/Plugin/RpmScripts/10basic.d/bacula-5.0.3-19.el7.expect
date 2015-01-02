@@ -7,7 +7,7 @@
         excerpt => [
           'fedora-groupadd 33 -r bacula'
         ],
-        lineno => '707',
+        lineno => 707,
         path => 'bacula-5.0.3-19.el7.spec',
         sub => '%pre common'
       },
@@ -20,7 +20,7 @@
         excerpt => [
           'fedora-useradd  33 -r -s /sbin/nologin -d /var/spool/bacula -M -c &#39;Bacula Backup System&#39; -g bacula bacula',
         ],
-        lineno => '708',
+        lineno => 708,
         path => 'bacula-5.0.3-19.el7.spec',
         sub => '%pre common'
       },

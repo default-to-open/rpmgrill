@@ -6,7 +6,7 @@
         excerpt => [
           '* Fri May 20 2011 Eduardo Santiago &lt;santiago@redhat.com&gt; 1.1-1'
         ],
-        lineno => '10',
+        lineno => 10,
         path => 'zzz-1-badversion-1.2.3-4.spec'
       },
       diag => 'First %changelog entry is for <var>1.1-1</var>; I was expecting <var>1.2.3</var> as the version, not 1.1'

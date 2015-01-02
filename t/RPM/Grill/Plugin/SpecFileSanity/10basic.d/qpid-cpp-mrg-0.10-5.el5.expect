@@ -7,7 +7,7 @@
           ' - Fix home dir permissions'
         ],
         'path' => 'qpid-cpp-mrg-0.10-5.el5.spec',
-        'lineno' => '1233'
+        'lineno' => 1233
       },
       'diag' => 'Leading whitespace in this %changelog entry will be lost',
       'code' => 'ChangelogLeadingWhitespace'

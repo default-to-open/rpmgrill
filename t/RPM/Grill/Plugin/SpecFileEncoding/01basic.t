@@ -86,6 +86,6 @@ eq_or_diff $obj_bad->{gripes}, +{ SpecFileEncoding => [ {
     arch    => 'src',
     code    => 'NonUtf8',
     diag    => 'non-UTF8 content',
-    context => { path    => '<string>', lineno  => '5',
+    context => { path    => '<string>', lineno  => 5,
       excerpt => ["* Thu Jul  1 2010 &#39;test&quot;: Mu<u>&ntilde;</u>oz <u>[80]</u>&lt;santiago\@redhat.com&gt; 1.0-1"], },
 } ] }, "Gripe message";

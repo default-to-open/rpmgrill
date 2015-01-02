@@ -7,7 +7,7 @@
         excerpt => [
           'useradd -M -N -g %amanda_group -o -r -d %{_localstatedir}/lib/amanda -s /bin/bash -c &quot;Amanda user&quot; -u 33 %amanda_user'
         ],
-        lineno => '160',
+        lineno => 160,
         path => 'amanda-3.3.0-5.el7.spec',
         sub => '%pre'
       },
@@ -20,7 +20,7 @@
         excerpt => [
           'useradd -M -N -g %amanda_group -o -r -d %{_localstatedir}/lib/amanda -s /bin/bash -c &quot;Amanda user&quot; -u 33 %amanda_user'
         ],
-        lineno => '160',
+        lineno => 160,
         path => 'amanda-3.3.0-5.el7.spec',
         sub => '%pre'
       },
