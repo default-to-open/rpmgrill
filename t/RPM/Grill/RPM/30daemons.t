@@ -16,37 +16,35 @@ my $n_tests = 3;
 while (my $line = <DATA>) {
     chomp $line;
 
-    given ($line) {
-        when (/^-{10,}\s+(.*)$/) {
-            push @packages, bless {
-                name  => $1,
-                files => [],
-                tests => [],
-            }, 'RPM::Grill::RPM';
-        }
-        when (/^\s*$/) {
-            # ignore blank lines
-        }
-        when (m{^(/\S+)(\s+\((.*)\))?$}) {
-            # FIXME: flag for is_daemon
-            push @{ $packages[-1]{files} }, bless {
-                path    => $1,
-                rpm     => $packages[-1],
-                content => '',
-                name    => $3 || 'no',
-                _expected_is_daemon => defined($2) ? 1 : undef,
-            }, 'RPM::Grill::RPM::Files';
+    if ($line =~ /^-{10,}\s+(.*)$/) {
+        push @packages, bless {
+            name  => $1,
+            files => [],
+            tests => [],
+        }, 'RPM::Grill::RPM';
+    }
+    elsif ($line =~ /^\s*$/) {
+        # ignore blank lines
+    }
+    elsif ($line =~ m{^(/\S+)(\s+\((.*)\))?$}) {
+        # FIXME: flag for is_daemon
+        push @{ $packages[-1]{files} }, bless {
+            path    => $1,
+            rpm     => $packages[-1],
+            content => '',
+            name    => $3 || 'no',
+            _expected_is_daemon => defined($2) ? 1 : undef,
+        }, 'RPM::Grill::RPM::Files';
 
-            ++$n_tests;
-        }
+        ++$n_tests;
+    }
 
-        when (m{^\s{2,}\|\s(.*)$}) {
-            $packages[-1]{files}[-1]{content} .= $1 . "\n";
-        }
+    elsif ($line =~ m{^\s{2,}\|\s(.*)$}) {
+        $packages[-1]{files}[-1]{content} .= $1 . "\n";
+    }
 
-        default {
-            die "Cannot grok: '$line'";
-        }
+    else {
+        die "Cannot grok: '$line'";
     }
 }
 
