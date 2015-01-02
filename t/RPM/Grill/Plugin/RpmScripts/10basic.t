@@ -58,7 +58,7 @@ for my $t (@tests) {
     if ($actual_gripes) {
         for my $href ($actual_gripes, $t->{expect}) {
             for my $gripe (@{ $href->{RpmScripts} }) {
-                $gripe->{diag} =~ s{/setup-[\d.]+/}{/setup-[v]/}g;
+                $gripe->{diag} =~ s{/setup(-[\d.]+)?/}{/setup-[v]/}g;
             }
         }
     }
