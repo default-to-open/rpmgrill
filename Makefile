@@ -31,3 +31,8 @@ $(NAME)-$(VERSION)-$(RELEASE).$(DIST).src.rpm: $(NAME)-$(VERSION).tar.bz2
 # Shortcut names for the above
 tarball:	$(NAME)-$(VERSION).tar.bz2
 srpm:		$(NAME)-$(VERSION)-$(RELEASE).$(DIST).src.rpm
+
+test:
+	prove -lrvc
+
+
