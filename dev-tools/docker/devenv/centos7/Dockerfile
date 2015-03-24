@@ -38,10 +38,14 @@ RUN yum install -y \
         perl-Digest-SHA1 perl-File-Slurp perl-Test-LongString \
         perl-Time-ParseDate perl-YAML-Syck perl-Time-Piece \
         perl-CGI perl-Test-Deep  perl-Module-Build perl-Net-DNS \
-        perl-Pod-POM perl-App-cpanminus file-libs gcc file-devel && \
+        perl-Pod-POM  && \
     yum clean all
 
 ### missing dependencies not package as RPMs (yet)
+### adding a few more dependencies to install File::LibMagic
+RUN yum install -y \
+        perl-App-cpanminus file-libs gcc file-devel && \
+    yum clean all
 
 cpanm install File::LibMagic
 
