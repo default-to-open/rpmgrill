@@ -272,6 +272,10 @@ RubyAdvisoryDB
   <code>Fix CVE-YYYY-NNNN</code> in your specfile's %changelog section. This
   will silence the warning for a given CVE.</p>
 
+SuspiciousPath
+  <p>Package contains a PATH assignment that includes a suspicious path component
+  (one of home, tmp or local).</p>
+
 # END   RPM::Grill::Plugin::SecurityPolicy
 ###############################################################################
 # BEGIN RPM::Grill::Plugin::Multilib

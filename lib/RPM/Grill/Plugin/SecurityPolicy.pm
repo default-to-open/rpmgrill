@@ -90,8 +90,38 @@ sub analyze {
             if ( $f->is_reg && $f->{path} =~ m{^/usr/share/polkit-1/actions/}) {
                 $self->_check_polkit_file($f);
             }
+
+            if ($f->is_reg) {
+                $self->_check_embedded_path($f);
+            }
         }
     }
+}
+
+
+sub _check_embedded_path {
+    my $self = shift;
+    my $f    = shift;
+
+    my @cmd = ("strings", "-a", $f->extracted_path);
+    open my $fh, '-|', @cmd
+        or die;
+    while (my $line = <$fh>) {
+        if ($line =~ /^PATH=/) {
+            if ($line =~ m{/(home|tmp|local)/}) {
+                chomp $line;
+                $f->gripe({
+                    code => 'SuspiciousPath',
+                    diag => "Potentially insecure PATH element <tt>/$1</tt>",
+                    context => {
+                        path => $f->path,
+                        excerpt => sanitize_text($line),
+                    },
+                });
+            }
+        }
+    }
+    close $fh;
 }
 
 ###############################################################################
