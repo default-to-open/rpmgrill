@@ -46,7 +46,8 @@ RUN yum install -y \
         perl-Time-ParseDate perl-YAML-Syck perl-Time-Piece \
         perl-CGI perl-Test-Deep  perl-Module-Build perl-Net-DNS \
         perl-Pod-POM perl-Test-MockObject perl-XMLRPC-Lite \
-        perl-Test-Exception perl-File-Fetch perl-List-AllUtils && \
+        perl-Test-Exception perl-File-Fetch perl-List-AllUtils \
+        perl-Test-MockModule && \
     yum -y clean all
 
 ### missing dependencies not package as RPMs (yet)
