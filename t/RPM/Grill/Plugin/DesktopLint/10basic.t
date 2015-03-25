@@ -313,54 +313,54 @@ Type=Application
  }
 
 
--------exec-is-htmlview-rhel5----------------------------------------------
-# for rhel5
->> -rw-r--r--  root  root 0 /noarch/mypkg/usr/share/applications/foo.desktop
-[Desktop Entry]
-Name=Foo
-Comment=Bar
-Exec=/usr/bin/htmlview
-Icon=no-icon
-Terminal=false
-Type=Application
-Encoding=UTF-8
-
->> -rwxr-xr-x  root  root 0 /noarch/mypkg/usr/share/icons/myicons/no-icon.svg
-
->> -r--r--r--  root  root 0 /noarch/mypkg/../RPM.requires
-sdfsdfd
-htmlview
-sdfdf
-
--------exec-is-htmlview-but-not-req-rhel5-----------------------------------
-# for rhel5
->> -rw-r--r--  root  root 0 /noarch/mypkg/usr/share/applications/foo.desktop
-[Desktop Entry]
-Name=Foo
-Comment=Bar
-Exec=/usr/bin/htmlview
-Icon=no-icon
-Terminal=false
-Type=Application
-Encoding=UTF-8
-
->> -rwxr-xr-x  root  root 0 /noarch/mypkg/usr/share/icons/myicons/no-icon.svg
-
->> -r--r--r--  root  root 0 /noarch/mypkg/../RPM.requires
-sdfsdfd
-sdfdf
-
-...expect:
-
- { arch       => 'noarch',
-   subpackage => 'mypkg',
-   code       => 'DesktopExecMissingReq',
-   diag       => 'Package should Require: htmlview',
-   context    => { path => '/usr/share/applications/foo.desktop',
-                   excerpt => ['Exec=/usr/bin/htmlview'],
-                   lineno => 4 },
- }
-
+# -------exec-is-htmlview-rhel5----------------------------------------------
+# # for rhel5
+# >> -rw-r--r--  root  root 0 /noarch/mypkg/usr/share/applications/foo.desktop
+# [Desktop Entry]
+# Name=Foo
+# Comment=Bar
+# Exec=/usr/bin/htmlview
+# Icon=no-icon
+# Terminal=false
+# Type=Application
+# Encoding=UTF-8
+#
+# >> -rwxr-xr-x  root  root 0 /noarch/mypkg/usr/share/icons/myicons/no-icon.svg
+#
+# >> -r--r--r--  root  root 0 /noarch/mypkg/../RPM.requires
+# sdfsdfd
+# htmlview
+# sdfdf
+#
+# -------exec-is-htmlview-but-not-req-rhel5-----------------------------------
+# # for rhel5
+# >> -rw-r--r--  root  root 0 /noarch/mypkg/usr/share/applications/foo.desktop
+# [Desktop Entry]
+# Name=Foo
+# Comment=Bar
+# Exec=/usr/bin/htmlview
+# Icon=no-icon
+# Terminal=false
+# Type=Application
+# Encoding=UTF-8
+#
+# >> -rwxr-xr-x  root  root 0 /noarch/mypkg/usr/share/icons/myicons/no-icon.svg
+#
+# >> -r--r--r--  root  root 0 /noarch/mypkg/../RPM.requires
+# sdfsdfd
+# sdfdf
+#
+# ...expect:
+#
+#  { arch       => 'noarch',
+#    subpackage => 'mypkg',
+#    code       => 'DesktopExecMissingReq',
+#    diag       => 'Package should Require: htmlview',
+#    context    => { path => '/usr/share/applications/foo.desktop',
+#                    excerpt => ['Exec=/usr/bin/htmlview'],
+#                    lineno => 4 },
+#  }
+#
 
 #
 # Icon checks
