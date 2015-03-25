@@ -14,6 +14,7 @@ Requires:       perl(File::Fetch)
 Requires:       perl(List::AllUtils)
 BuildRequires:  perl(Module::Build)
 BuildRequires:  perl(Test::Simple)
+BuildRequires:  perl(Test::MockModule)
 BuildRequires:  perl(Test::MockObject)
 
 # For the antivirus plugin
@@ -67,6 +68,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %changelog
 * Fri Apr 10 2015 Róman Joost <rjoost@redhat.com> 0.28-1
 - bz1202634: fixes fetch-build has a hardcoded koji URL
+- bz1213228: new test for suspicious PATH
 
 * Wed Dec 10 2014 Ed Santiago <santiago@redhat.com> 0.27-1
 - bz1172584: missing deps on Module::Pluggable, koji
