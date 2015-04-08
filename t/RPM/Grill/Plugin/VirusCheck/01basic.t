@@ -6,6 +6,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Deep;
 use Test::Differences;
 
 use File::Path                  qw(mkpath);
@@ -129,8 +130,7 @@ for my $t (@tests) {
                 }
             }
         }
-
-        eq_or_diff $obj->{gripes}, $expected_gripes, $t->{name};
+        cmp_deeply $obj->{gripes}, $expected_gripes, $t->{name};
     }
 }
 
@@ -205,15 +205,12 @@ END
 X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
 END
 
-# FIXME FIXME FIXME: how does clamav do ordering? file2 comes before file1,
-# but can we rely on that?
-
 -| { VirusCheck => [
 -|  { code    => 'ClamAV',
 -|    diag    => 'ClamAV <b>Eicar-Test-Signature</b> subtest triggered',
--|    context => { path => '/usr/bin/myfile1' },
+-|    context => { path => re('/usr/bin/myfile[12]') },
 -|  },
 -|  { code    => 'ClamAV',
 -|    diag    => 'ClamAV <b>Eicar-Test-Signature</b> subtest triggered',
--|    context => { path => '/usr/bin/myfile2' },
+-|    context => { path => re('/usr/bin/myfile[12]') },
 -|  } ] }
