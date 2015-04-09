@@ -1,0 +1,45 @@
+How is test data for ELF created?
+---------------------------------
+
+Create a minimal c file as below
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+.minimal.c
+----
+int main(int argc, char *argv[])
+{
+    return 0;
+}
+----
+
+Compile and generate minimal ELF executable that is statically linked
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,shell]
+----
+$ gcc -Wall -Wl,--build-id=none --static -nostartfiles test.c -o static-bin
+$ strip static-bin
+----
+
+Execute `file` to ensure you get the output below
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,shell]
+----
+$ file static-bin
+
+#output
+# static-bin: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped
+----
+
+Copy the base64 encoded version of the file as test data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,shell]
+----
+$ base64 static-bin
+----
+
+TIP: if you are using `vim` use `:r !base64 static-bin`
+
