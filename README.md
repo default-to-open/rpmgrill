@@ -4,23 +4,25 @@ RpmGrill
 Contribution Guideline
 -----------------------
 
-We use [gerrit hub](https://review.gerrithub.io). for code reviews and thus
-pull requests will not be looked at on github. Code submissions should be done
-via [gerrit hub].
+We use [gerrit hub] for code reviews and thus github pull requests will not be
+looked at. Code submissions should be done via [gerrit hub]. This allows us to
+track code review comments and how it is addressed in subsequent patches
+effortlessly.
 
-Please sign up with https://www.gerrithub.io and your github credentials to
-make submissions. Additional permissions on the project will need to be done
+Please sign up with [gerrit hub] and your github credentials to make
+submissions. Additional permissions on the project will need to be done
 on a per-user basis.
 
-When you set up your account on gerrithub.io, it is not necessary to import
+NOTE: When you set up your account on [gerrit hub], it is not necessary to import
 your existing rpmgrill fork.
 
-```shell
-    yum install git-review
+
+Install `git-review` to make code reviews easier.
+```
+    yum install -y git-review
 ```
 
-To set up your repo for gerrit:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Set up your repo for gerrit ###
 
 Add a new remote to your working tree:
 
@@ -35,3 +37,4 @@ Now run:
 
 Again, replace `<username>` with your gerrithub username.
 
+[gerrit hub]: https://review.gerrithub.io "gerrit hub"
