@@ -29,20 +29,22 @@ Install [git-review] to make code reviews easier.
 
 Add a new remote to your local repo:
 
-    git remote add gerrit ssh://<username>@review.gerrithub.io:29418/default-to-open/rpmgrill
+    git remote add gerrit ssh://<username>@review.gerrithub.io:29418/default-to-open/rpmgrill.git
 
 Replace `<username>` with your gerrithub username.
 
 TIP: make use of `~/.ssh/config` to setup gerrithub host as below
 
 ```
-Host gio
+Host gerrithub
     HostName gerrithub.io
     User <username>
     Port 29418
     IdentityFile <path/to/your/private-gerrithub-key.file>
 ```
 
+then you can clone `git clone gerrithub:default-to-open/rpmgrill.git` or
+`git remote add gerrit gerrithub:default-to-open/rpmgrill.git`
 
 Now run:
 
