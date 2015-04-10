@@ -20,18 +20,29 @@ Additional permissions on the project will need to be done on a per-user basis.
 NOTE: When you set up your account on [gerrithub], it is not necessary to import
 your existing rpmgrill fork.
 
-Install `git-review` to make code reviews easier.
+Install [git-review] to make code reviews easier.
 ```
     yum install -y git-review
 ```
 
 #### Set up your repo for gerrit ####
 
-Add a new remote to your working tree:
+Add a new remote to your local repo:
 
     git remote add gerrit ssh://<username>@review.gerrithub.io:29418/default-to-open/rpmgrill
 
 Replace `<username>` with your gerrithub username.
+
+TIP: make use of `~/.ssh/config` to setup gerrithub host as below
+
+```
+Host gio
+    HostName gerrithub.io
+    User <username>
+    Port 29418
+    IdentityFile <path/to/your/private-gerrithub-key.file>
+```
+
 
 Now run:
 
@@ -40,6 +51,19 @@ Now run:
         `git rev-parse --git-dir`/hooks/commit-msg
 
 Again, replace `<username>` with your gerrithub username.
+
+#### submitting changes ####
+Submitting changes usually only invokes something like:
+
+```
+    git fetch gerrit
+    git checkout -b my-cool-feature  gerrit/develop
+    # hack hack hack
+    git commit -a
+
+    # submit changes
+    git review
+```
 
 ### GitHub pull requests  ###
 
@@ -55,8 +79,10 @@ otherwise we would have to repeat the same exercise which is a bit cumbersome
 for all of us.
 
 
-[gerrithub]: https://review.gerrithub.io "gerrit hub"
-[gerrithub project]: https://review.gerrithub.io/#/q/project:default-to-open/rpmgrill "gerrit project"
 [gerrithub workflow]: #gerrithub-workflow "Gerrithub Workflow"
 [pull requests]: #github-pull-requests "Github pull requests"
-[gerrit]: http://www.vogella.com/tutorials/Gerrit/article.html "gerrit workflow"
+
+[gerrithub]: https://review.gerrithub.io "gerrit hub"
+[gerrithub project]: https://review.gerrithub.io/#/q/project:default-to-open/rpmgrill "gerrithub project"
+[gerrit]: https://review.gerrithub.io/Documentation/intro-quick.html "Gerrit"
+[git-review]: https://www.mediawiki.org/wiki/Gerrit/git-review "git-review"
