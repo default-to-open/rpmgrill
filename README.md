@@ -54,6 +54,6 @@ helpful to us if at this stage you choose to use the preferred
 
 [gerrithub]: https://review.gerrithub.io "gerrit hub"
 [gerrithub project]: https://review.gerrithub.io/#/q/project:default-to-open/rpmgrill "gerrit workflow"
-[gerrithub workflow]: .#gerrithub-workflow "Gerrithub Workflow"
-[pull requests]: .#github-pull-requests "Github pull requests"
+[gerrithub workflow]: #gerrithub-workflow "Gerrithub Workflow"
+[pull requests]: #github-pull-requests "Github pull requests"
 [gerrit]: http://www.vogella.com/tutorials/Gerrit/article.html "gerrit workflow"
