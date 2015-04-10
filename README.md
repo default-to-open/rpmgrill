@@ -20,39 +20,43 @@ Additional permissions on the project will need to be done on a per-user basis.
 NOTE: When you set up your account on [gerrithub], it is not necessary to import
 your existing rpmgrill fork.
 
-Install [git-review] to make code reviews easier.
-```
-    yum install -y git-review
-```
-
 #### Set up your repo for gerrit ####
 
 Add a new remote to your local repo:
-
+```
     git remote add gerrit ssh://<username>@review.gerrithub.io:29418/default-to-open/rpmgrill.git
 
-Replace `<username>` with your gerrithub username.
-
-TIP: make use of `~/.ssh/config` to setup gerrithub host as below
+    scp -p -P 29418 <username>@review.gerrithub.io:hooks/commit-msg \
+        `git rev-parse --git-dir`/hooks/commit-msg
 
 ```
-Host gerrithub
-    HostName gerrithub.io
-    User <username>
-    Port 29418
-    IdentityFile <path/to/your/private-gerrithub-key.file>
-```
 
-then you can clone `git clone gerrithub:default-to-open/rpmgrill.git` or
-`git remote add gerrit gerrithub:default-to-open/rpmgrill.git`
+**NOTE** Replace `<username>` with your gerrithub username.
+
+##### TIP: install [git-review] to make code reviews easier #####
+
+``` yum install -y git-review ```
 
 Now run:
 
     git review -s
-    scp -p -P 29418 <username>@review.gerrithub.io:hooks/commit-msg \
-        `git rev-parse --git-dir`/hooks/commit-msg
 
-Again, replace `<username>` with your gerrithub username.
+
+##### TIP: simplify gerrit repo url #####
+
+Consider making use of `~/.ssh/config` to setup `gerrithub` host as below
+
+```
+Host gerrithub
+    HostName gerrithub.io
+    Port 29418
+    User <username>
+    IdentityFile <path/to/your/private-gerrithub-key.file>
+```
+
+This allows you to clone `git clone gerrithub:default-to-open/rpmgrill.git` or
+`git remote add gerrit gerrithub:default-to-open/rpmgrill.git`
+
 
 #### submitting changes ####
 Submitting changes usually only invokes something like:
@@ -64,7 +68,7 @@ Submitting changes usually only invokes something like:
     git commit -a
 
     # submit changes
-    git review
+    git push gerrit HEAD:refs/for/develop
 ```
 
 ### GitHub pull requests  ###
