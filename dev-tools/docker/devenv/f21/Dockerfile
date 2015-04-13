@@ -46,7 +46,8 @@ RUN yum install -y \
         perl-Digest-SHA1 perl-File-Slurp perl-Test-LongString \
         perl-Time-ParseDate perl-YAML-Syck perl-Time-Piece \
         perl-CGI perl-Test-Deep  perl-Module-Build perl-Net-DNS \
-        perl-Pod-POM && \
+        perl-Pod-POM perl-Test-MockObject perl-XMLRPC-Lite \
+        perl-Test-Exception && \
     yum -y clean all
 
 USER dev
