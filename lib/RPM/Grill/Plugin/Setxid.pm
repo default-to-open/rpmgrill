@@ -11,12 +11,12 @@ package RPM::Grill::Plugin::Setxid;
 
 use base qw(RPM::Grill);
 use RPM::Grill::dprintf;
-
 use strict;
 use warnings;
 our $VERSION = '0.01';
 
 use Carp;
+use File::Spec::Functions qw(catfile);
 use RPM::Grill::Util		qw(sanitize_text);
 
 ###############################################################################
@@ -42,7 +42,7 @@ END_DOC
 # to determine the path, or some RPC mechanism, or many other cleaner
 # ways that don't require a hand-maintained flatfile. Fix when convenient.
 our $Whitelist_Dir = $ENV{RPMGRILL_SETXID_WHITELIST_DIR}
-                  || '/home/rpmgrill/setxid-whitelist';
+                  ||  catfile( $ENV{HOME}, 'setxid-whitelist');
 
 # END   user-configurable section
 ###############################################################################
