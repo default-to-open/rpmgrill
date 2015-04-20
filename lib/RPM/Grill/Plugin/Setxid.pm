@@ -11,13 +11,13 @@ package RPM::Grill::Plugin::Setxid;
 
 use base qw(RPM::Grill);
 use RPM::Grill::dprintf;
-
 use strict;
 use warnings;
 our $VERSION = '0.01';
 
 use Carp;
-use RPM::Grill::Util		qw(sanitize_text);
+use File::Spec::Functions   qw(catfile);
+use RPM::Grill::Util        qw(sanitize_text);
 
 ###############################################################################
 # BEGIN user-configurable section
@@ -42,7 +42,7 @@ END_DOC
 # to determine the path, or some RPC mechanism, or many other cleaner
 # ways that don't require a hand-maintained flatfile. Fix when convenient.
 our $Whitelist_Dir = $ENV{RPMGRILL_SETXID_WHITELIST_DIR}
-                  || '/home/rpmgrill/setxid-whitelist';
+                  ||  catfile($ENV{HOME}, qw(.rpmgrill plugins setxid));
 
 # END   user-configurable section
 ###############################################################################
@@ -155,10 +155,13 @@ sub _read_whitelist {
     # FIXME: should we be more specific, eg RHEL6.1?
     # FIXME: should we use cpe?  How the heck do we get cpe?
     # FIXME: get build tags?
-    my $whitelist = $Whitelist_Dir . '/' . $self->major_release;
-    open my $whitelist_fh, '<', $whitelist
-        or do {
-        warn "$ME: WARNING: Cannot read $whitelist: $!";
+    my $whitelist = catfile $Whitelist_Dir, $self->major_release;
+    open my $whitelist_fh, '<', $whitelist or do {
+        warn "$ME: WARNING: Unable to read whilelist file: '$whitelist' - $!\n",
+             "To suppress this warning: \n",
+             "     mkdir -p $Whitelist_Dir \n",
+             "     touch $whitelist \n ";
+
         $self->{_whitelist} = undef;
         return;
     };
@@ -257,21 +260,21 @@ sub _any_packages_whitelisting {
 # Documentation
 #
 
-=head1	NAME
+=head1  NAME
 
 FIXME - FIXME
 
-=head1	SYNOPSIS
+=head1  SYNOPSIS
 
     use Fixme::FIXME;
 
     ....
 
-=head1	DESCRIPTION
+=head1  DESCRIPTION
 
 FIXME fixme fixme fixme
 
-=head1	CONSTRUCTOR
+=head1  CONSTRUCTOR
 
 FIXME-only if OO
 
@@ -283,30 +286,30 @@ FIXME FIXME describe constructor
 
 =back
 
-=head1	METHODS
+=head1  METHODS
 
 FIXME document methods
 
 =over 4
 
-=item	B<method1>
+=item   B<method1>
 
 ...
 
-=item	B<method2>
+=item   B<method2>
 
 ...
 
 =back
 
 
-=head1	EXPORTED FUNCTIONS
+=head1  EXPORTED FUNCTIONS
 
-=head1	EXPORTED CONSTANTS
+=head1  EXPORTED CONSTANTS
 
-=head1	EXPORTABLE FUNCTIONS
+=head1  EXPORTABLE FUNCTIONS
 
-=head1	FILES
+=head1  FILES
 
 =head1  DIAGNOSTICS
 
@@ -355,11 +358,11 @@ a trusted whitelist. This whitelist is maintained by FIXME.
 
 =back
 
-=head1	SEE ALSO
+=head1  SEE ALSO
 
 L<>
 
-=head1	AUTHOR
+=head1  AUTHOR
 
 Ed Santiago <santiago@redhat.com>
 
