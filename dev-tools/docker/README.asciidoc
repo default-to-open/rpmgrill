@@ -6,38 +6,38 @@ This repository contains docker files relating to RpmGrill.
 
 Image Reference
 ---------------
+base::
+    `base` directory contains minimal changes common to `Fedora` and `CentOS`
+    images. They contain minimal set of tools like git, vim needed by all
+    other images. It also creates a default user is `dev` and has `sudo`
+    privileges. So that during development, one can ensure that tests run as
+    normal user and when needed can install new packages without exiting
+    the container.
+
 devenv::
     `devenv` directory contains development environments for various supported
-    repos. These images are based on  `Fedora` and `CentOS` docker images. They
-    contain all dependencies needed to run RpmGrill and its tests. Additionally,
-    the default user is `dev` and has `sudo` privileges. So that during
-    development, one can ensure that tests run as normal user and when needed
-    can install new packages without exiting the container.
-
-ci::
-    `ci` image is based on `Fedora 20` and contains all dependencies needed to
-    run `RpmGrill` tests. This image closely replicates the container used in
-    https://209.132.179.19/[RpmGrill Jenkins].
+    distros. These images are built on top of `base` images . They contain all
+    dependencies needed to run RpmGrill and its tests.
 
 Building Images
 ~~~~~~~~~~~~~~~~
 
-Uses docker-compose to build docker images. To build the images install latest
-docker-compose and run `docker-compose build`
+Uses `docker-compose` to build docker images. To build the images install
+latest docker-compose and run `docker-compose -p build`
 
 [source,bash]
 ----
 $ pip install --user -U docker-compose
 
 $ cd <project-dir>/dev-tools/docker/
-$ docker-compose build
+$ docker-compose -p rpmgrill build
 ----
 
-Individual images can be built as well. For e.g to build `ci` image
+Individual images can be built as well. For e.g to build `f20` image
 
 [source,bash]
 ----
-$ docker-compose build ci
+$ docker-compose -p rpmgrill build f20
 ----
 
 NOTE: you can use `-p` option with docker-compose to provide a project name.
@@ -49,7 +49,7 @@ Use docker-compose `run` to use docker image.
 
 [source, bash]
 ----
-$ docker-compose run f20 bash
+$ docker-compose -p rpmgrill run f20 bash
 ----
 
 To open another session use `docker exec`

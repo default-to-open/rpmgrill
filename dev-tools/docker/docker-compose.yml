@@ -1,25 +1,32 @@
+# build using docker-compose -p rpmgrill build [image]
 
-f21: &devenv
-  build: devenv/f21
+### base images ###
+f20: &base_image
+  build: base/f20
   privileged: true
   user: 1000
   volumes:
     - &code  ../../:/code
     - &projectdir ../../../:/project
 
-f20:
-  <<: *devenv
-  build: devenv/f20
+f21:
+  <<: *base_image
+  build: base/f21
 
 centos7:
-  <<: *devenv
-  build: devenv/centos7
+  <<: *base_image
+  build: base/centos7
 
-### minimal env to test rpmgrill ###
-ci:
-  build: ci/f20
-  privileged: true
-  volumes:
-    - *code
-    - *projectdir
+### development images ###
+devf20:
+  <<: *base_image
+  build: devenv/f20
+
+devf21:
+  <<: *base_image
+  build: devenv/f21
+
+devcentos7:
+  <<: *base_image
+  build: devenv/centos7
 
