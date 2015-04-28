@@ -14,7 +14,9 @@ Requires:       perl(File::Fetch)
 Requires:       perl(List::AllUtils)
 BuildRequires:  perl(Module::Build)
 BuildRequires:  perl(Test::Simple)
+%if 0%{?rhel} > 6
 BuildRequires:  perl(Test::MockModule)
+%endif
 BuildRequires:  perl(Test::MockObject)
 
 # For the antivirus plugin
