@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.27
+Version:        0.28
 Release:        1%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
@@ -66,7 +66,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
-* Fri Apr 10 2015 Róman Joost <rjoost@redhat.com> 0.28-1
+* Tue Apr 28 2015 Róman Joost <rjoost@redhat.com> 0.28-1
 - bz1202634: fixes fetch-build has a hardcoded koji URL
 - bz1213228: new test for suspicious PATH
 
