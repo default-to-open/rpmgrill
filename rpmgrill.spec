@@ -58,7 +58,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_fixperms} %{buildroot}/*
 
 %files
-%doc README.AAA_FIRST LICENSE
+%doc README.AAA_FIRST LICENSE AUTHORS
 %{perl_vendorlib}/*
 %{_bindir}/*
 %{_mandir}/man1/*
