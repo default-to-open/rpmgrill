@@ -5,7 +5,7 @@ Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
 Source0:        http://www.edsantiago.com/f/%{name}-%{version}.tar.bz2
-URL:            https://git.fedorahosted.org/git/rpmgrill.git
+URL:            https://github.com/default-to-open/rpmgrill
 BuildArch:      noarch
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl(Module::Pluggable)
