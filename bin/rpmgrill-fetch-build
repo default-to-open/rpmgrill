@@ -6,8 +6,11 @@
 #
 package RPM::Grill::FetchBuild;
 
+use v5.6.0;
 use strict;
 use warnings;
+use XMLRPC::Lite;
+use File::Spec;
 
 (our $ME = $0) =~ s|.*/||;
 
@@ -93,10 +96,8 @@ for my $line (split "\n", $Metadata_Files) {
 # These arches don't need a build log.
 our %Doesnt_Need_Build_Log = map { $_ => 1 } ('noarch');
 
-# Template for generating a URL to a build log. %s will be replaced
-# with N, V, R, arch respectively.
-our $Build_Log_URL_Template =
-  'http://kojipkgs.fedoraproject.org/packages/%s/%s/%s/data/logs/%s/build.log';
+our $DEFAULT_SERVER_URL = 'http://koji.fedoraproject.org/kojihub';
+our $DEFAULT_TOP_URL = 'http://kojipkgs.fedoraproject.org';
 
 # END   user-customizable section
 ###############################################################################
@@ -141,6 +142,10 @@ OPTIONS:
 
   --download-only  Create DESTDIR, download RPMs and build logs, then exit
                    without unpacking. Probably only useful for debugging.
+  --server-url     URL of the Koji XMLRPC endpoint.
+                   (Default: $DEFAULT_SERVER_URL)
+  --top-url        Download URL for the Koji file access.
+                   (Default: $DEFAULT_TOP_URL)
 
   -v, --verbose  show verbose progress indicators to stdout
 
@@ -185,6 +190,8 @@ sub man {
 
 # Command-line options.  Note that this operates directly on @ARGV !
 our $download_only;
+our $server_url = $DEFAULT_SERVER_URL;
+our $top_url = $DEFAULT_TOP_URL;
 our $debug   = 0;
 our $force   = 0;
 our $verbose = 0;
@@ -193,7 +200,8 @@ sub handle_opts {
     use Getopt::Long;
     GetOptions(
         'download-only!' => \$download_only,
-
+        'server-url=s'   => \$server_url,
+        'top-url=s'      => \$top_url,
         'debug!'         => \$debug,
         'dry-run|n!'     => sub { $NOT = ' [NOT]' },
         'force'          => \$force,
@@ -210,10 +218,9 @@ sub handle_opts {
 # BEGIN code for parsing koji buildinfo
 
 package Koji::Build;
-
 use Carp;
 use File::Copy                  qw(copy);
-use LWP::Simple                 qw(getstore);
+use List::AllUtils              qw(uniq);
 
 #########
 #  new  #  Given NVR or build ID, run 'koji buildinfo'
@@ -221,63 +228,33 @@ use LWP::Simple                 qw(getstore);
 sub new {
     my $proto = shift;
     my $class = ref($proto) || $proto;
-    my $build_arg = shift;                      # in: N-V-R or koji build ID
 
-    my $self = {};
-    my $context;
+    my $self = {
+        build_info => shift,
+    };
 
-    # Sample output from koji buildinfo:
-    #
-    #   BUILD: pv-1.2.0-3.fc17 [292940]
-    #   State: COMPLETE
-    #   Built by: ausil
-    #   Volume: DEFAULT
-    #   Task: 3699117 build (f17-rebuild, /pv:2bd42ca77f5fe3384948580489....)
-    #   Finished: Sun, 15 Jan 2012 22:24:07 EST
-    #   Tags: f17-final f17-rebuild f17
-    #   RPMs:
-    #   /mnt/koji/packages/pv/1.2.0/3.fc17/i686/pv-debuginfo-{V-R}.i686.rpm
-    #   /mnt/koji/packages/pv/1.2.0/3.fc17/i686/pv-1.2.0-3.fc17.i686.rpm
-    #   /mnt/koji/packages/pv/1.2.0/3.fc17/x86_64/pv-1.2.0-3.fc17.x86_64.rpm
-    #   /mnt/koji/packages/pv/1.2.0/3.fc17/x86_64/pv-debuginfo-{V-R}.x86_64.rpm
-    #   /mnt/koji/packages/pv/1.2.0/3.fc17/src/pv-1.2.0-3.fc17.src.rpm
-    #
-    # (some truncations made in order to fit in 80 columns).
-    # We attempt no interpretation of that; we just parse & save into
-    # a hash keyed on the lower-case label of each of the above.
-    #
-    my @cmd = ('koji', 'buildinfo', $build_arg);
-    print "\$ @cmd\n"                                           if $verbose;
+    $self = bless $self, $class;
+    $self->_validate();
 
-    open my $koji, '-|', @cmd
-        or die "$ME: Cannot fork: $!\n";
-    while (my $line = <$koji>) {
-        chomp $line;
-
-        if ($line =~ /^(\S.*?):\s+(.*)/) {                # eg 'State: COMPLETE'
-            $self->{lc $1} = $2;
-            undef $context;
-        }
-        elsif ($line =~ /^(\S+):$/) {                   # eg 'RPMs:'
-            $context = lc $1;
-            $self->{$context} = [];
-        }
-        elsif ($context) {                              # eg '/mnt/koji/...'
-            push @{ $self->{$context} }, $line;
-        }
-        elsif ($line =~ /^No such build/) {
-            die "$ME: $line\n";
-        }
-        else {
-            warn "$ME: In output of '@cmd': cannot grok '$line'\n";
-        }
-    }
-    close $koji
-        or die "$ME: Command failed: @cmd\n";
-
-    return bless $self, $class;
+    return $self;
 }
 
+sub _validate {
+    my $self = shift;
+    my $build_info = $self->{build_info};
+    my @expected_keys = qw(id nvr package_name);
+    my @missing_keys = grep { !defined $$build_info{$_} } @expected_keys;
+
+    croak "Keys @{[ join', ', @missing_keys ]} missing in build info.",
+          " Wrong build specified for this Koji instance?" if @missing_keys;
+    return 0;
+}
+
+sub id {
+    my $self = shift;
+
+    return $self->{build_info}->{id};
+}
 
 #########
 #  nvr  #  Returns the build N-V-R
@@ -285,25 +262,88 @@ sub new {
 sub nvr {
     my $self = shift;
 
-    my $b = $self->{build}
-        or die "$ME: No 'Build' field found in koji buildinfo";
+    my $b = $self->{build_info}->{nvr}
+        or die "$ME: No 'nvr' field found in koji buildinfo";
     $b =~ /^(\S+)-(\S+)-(\S+)/
         or die "$ME: Internal error: Cannot grok koji build string '$b'";
 
     return wantarray ? ($1, $2, $3) : "$1-$2-$3";
 }
 
+sub package_name {
+    my $self = shift;
+
+    return $self->{build_info}->{package_name},
+}
+
 ############
 #  arches  #  Returns a list of arches that had builds
 ############
 sub arches {
+    my ($self, $rpms) = @_;
+
+    return sort uniq map { $_->{'arch'} } @$rpms;
+}
+
+
+package Koji::Client;
+use File::Fetch;
+use Cwd                         qw(abs_path);
+
+sub new {
+    my $proto = shift;
+    my $class = ref($proto) || $proto;
+
+    my $self = {
+        _xmlrpc_client => shift,
+        top_url => shift,
+    };
+    return bless $self, $class;
+}
+
+sub get_xmlrpc_client {
     my $self = shift;
+    return $self->{_xmlrpc_client};
+}
 
-    my @arches = map { /\.([^.]+)\.rpm$/; $1 } @{$self->{rpms}};
-    my %arches = map { $_ => 1 } @arches;
+sub get_build_info {
+    my $self = shift;
+    my $build_nvr = shift;
 
-    my @arches_uniq_sorted = sort keys %arches;
-    return @arches_uniq_sorted;
+    return $self->_retrieve_build_info($build_nvr);
+}
+
+sub _retrieve_build_info {
+    my $self = shift;
+    my $build_nvr = shift;
+
+    # Sample output from koji buildinfo:
+    #
+    # {
+    # 'owner_name' => 'rjoost',
+    # 'creation_time' => '2015-02-12 19:56:36.420956',
+    # 'volume_name' => 'DEFAULT',
+    # 'owner_id' => '2385',
+    # 'package_name' => 'rpmdiff',
+    # 'name' => 'rpmdiff',
+    # 'creation_ts' => '1423788996.4209599',
+    # 'id' => '421490',
+    # 'creation_event_id' => '10729829',
+    # 'volume_id' => '0',
+    # 'state' => '1',
+    # 'completion_time' => '2015-02-12 19:59:07.602378',
+    # 'nvr' => 'rpmdiff-1.8.11-1.el5',
+    # 'package_id' => '2936',
+    # 'task_id' => '8731919',
+    # 'completion_ts' => '1423789147.60238',
+    # 'release' => '1.el5',
+    # 'epoch' => undef,
+    # 'version' => '1.8.11'
+    # };
+
+    my $xml_client = $self->get_xmlrpc_client();
+    my $build = $xml_client->getBuild($build_nvr);
+    return Koji::Build->new($build->result);
 }
 
 ##########
@@ -311,107 +351,74 @@ sub arches {
 ##########
 sub rpms {
     my $self = shift;
+    my $build = shift;
 
-    if (my $rpms = $self->{rpms}) {
-        return @$rpms;
-    }
-    return;
-}
+    # Call returns list of hashes:
+    #
+    # [{
+    # 'external_repo_name' => 'INTERNAL',
+    # 'version' => '1.8.11',
+    # 'payloadhash' => '460cb0c2e47ae5aba9e14788f21497f4',
+    # 'nvr' => 'rpmdiff-1.8.11-1.el5',
+    # 'buildtime' => '1423789075',
+    # 'arch' => 'src',
+    # 'size' => '3561764',
+    # 'release' => '1.el5',
+    # 'epoch' => undef,
+    # 'id' => '3740308',
+    # 'name' => 'rpmdiff',
+    # 'buildroot_id' => '2471950',
+    # 'build_id' => '421490',
+    # 'external_repo_id' => '0'
+    # }]
 
-##########
-#  logs  #  Returns a list of "build.log.<arch>" files (possibly empty)
-##########
-sub logs {
-    my $self = shift;
-
-    if (my $aref = $self->{logs}) {
-        return @$aref;
-    }
-    return;
+    my $build_id = $build->id();
+    my $xml_client = $self->get_xmlrpc_client();
+    my $rpms = $xml_client->listRPMs($build_id);
+    return @{$rpms->result};
 }
 
 # END   general build info code
 #-------------------------------------------------------------------------------
 # BEGIN rpm download
 
-########################
-#  _fetch_cached_rpms  #  Used if we have a locally cached copy of RPMs
-########################
-sub _fetch_cached_rpms {
-    my $self = shift;
-
-    # FIXME: should --download-only disable caching?
-    my $nvr = $self->nvr;
-    my $cache = $ENV{RPMGRILL_FETCH_BUILD_CACHE}                or return;
-    -d (my $build_cache = "$cache/$nvr")                        or return;
-    my @rpms = glob("$build_cache/*.rpm")                       or return;
-
-    # We have one or more *.rpm files. Copy them into place.
-    for my $rpm (@rpms) {
-        print "[cached: $rpm]\n"                                if $verbose;
-
-        (my $basename = $rpm) =~ s|^.*/||;
-
-        link($rpm => $basename)
-            or copy($rpm => $basename)
-            or die "$ME: Could not link or copy $rpm : $!";
-    }
-
-    return 1;                   # success
-}
-
 ##############################
 #  _download_rpms_from_koji  #  No local cache; use koji command to fetch rpms
 ##############################
 sub _download_rpms_from_koji {
     my $self = shift;
+    my $build = shift;
+    my $destdir = shift;
+    my $top_url = $self->{top_url};
 
-    my $nvr = $self->nvr;
-    my @cmd = ('koji', 'download-build', '--debuginfo', $nvr);
-    print "\$ @cmd\n"                                           if $verbose;
-    system(@cmd) == 0
-        or die "$ME: Command failed: @cmd\n";
+    # Template for generating a URL to a build log. %s will be replaced
+    # with N, V, R, arch respectively.
+    my $build_download_path_template = '/packages/%s/%s/%s/%s/%s';
+    my @rpms = $self->rpms($build);
+    die "$ME: Can't download rpms because RPM information is empty.\n" unless @rpms;
+
+    foreach my $rpm_info (@rpms) {
+        my $rpm_name = RPM::Grill::FetchBuild::get_full_rpm_name($rpm_info);
+        my $download_url = sprintf(
+            "$top_url/$build_download_path_template",
+            $build->package_name(),
+            $$rpm_info{'version'},
+            $$rpm_info{'release'},
+            $$rpm_info{'arch'},
+            $rpm_name,
+        );
+
+        print "\$ GET $download_url $destdir\n" if $verbose;
+        my $ff = File::Fetch->new(uri => $download_url);
+        $ff->fetch(to => $destdir) or warn $ff->error;
+
+    }
 }
 
-###################
-#  download_rpms  #  Invoke koji download-build for a given NVR
-###################
-sub download_rpms {
-    my $self = shift;
-
-    $self->_fetch_cached_rpms || $self->_download_rpms_from_koji;
-
-    # Preserve a list of those rpm files
-    $self->{rpms} = [ glob("*.rpm") ];
-
-    return;
-}
 
 # END   rpm download
 #-------------------------------------------------------------------------------
 # BEGIN log file download
-
-#######################
-#  _fetch_cached_log  #  Look for a build log file in our local cache
-#######################
-sub _fetch_cached_log {
-    my $self = shift;
-    my $arch = shift;                           # in: i386, x86_64, noarch, etc
-
-    # FIXME: should --download-only disable caching?
-    my $cache = $ENV{RPMGRILL_FETCH_BUILD_CACHE}                or return;
-    my $nvr   = $self->nvr;
-    -d (my $build_cache = "$cache/$nvr")                        or return;
-
-    my $basename = "build.log.$arch";
-    if (-e (my $log  = "$build_cache/$basename")) {
-        if (link($log => $basename) || copy($log => $basename)) {
-            return $basename;
-        }
-    }
-
-    return;
-}
 
 ###################
 #  build_log_url  #  URL to build.log for a given N-V-R and arch
@@ -419,8 +426,10 @@ sub _fetch_cached_log {
 sub build_log_url {
     my $self = shift;
     my $arch = shift;                           # in: 'i686', etc
+    my $build = shift;
+    my $build_log_path_template = '/packages/%s/%s/%s/data/logs/%s/build.log';
 
-    return sprintf($Build_Log_URL_Template, $self->nvr, $arch);
+    return sprintf("$top_url/$build_log_path_template", $build->nvr(), $arch);
 }
 
 ###################
@@ -429,18 +438,13 @@ sub build_log_url {
 sub _download_log {
     my $self = shift;
     my $arch = shift;                           # in: i386, x86_64, noarch, etc
+    my $build = shift;
 
-    my $url = $self->build_log_url($arch);
-    my $localpath = "build.log.$arch";
+    my $url = $self->build_log_url($arch, $build);
 
-    print "GET $url\n"                                      if $verbose;
-    my $st = getstore($url, $localpath);
-    if ($st != 200) {
-        warn "$ME: WARNING: Cannot fetch $url : $st [continuing]\n"
-            unless $Doesnt_Need_Build_Log{$arch};
-        return;
-    }
-    return $localpath;
+    print "GET $url $arch\n"   if $verbose;
+    my $ff = File::Fetch->new(uri => $url);
+    return $ff->fetch(to => $arch) or warn $ff->error;
 }
 
 ###################
@@ -448,17 +452,29 @@ sub _download_log {
 ###################
 sub download_logs {
     my $self = shift;
+    my $build = shift;
+    my @rpms = $self->rpms($build);
 
     # Now fetch the build logs.
     $self->{logs} = [];
-    for my $arch (grep { $_ ne 'src' } $self->arches) {
-        if (my $log = $self->_fetch_cached_log($arch)
-                   || $self->_download_log($arch)) {
+    for my $arch (grep { $_ ne 'src' } $build->arches(\@rpms)) {
+        if (my $log = $self->_download_log($arch, $build)) {
             push @{ $self->{logs} }, $log;
         }
     }
 }
 
+##########
+#  logs  #  Returns a list of "build.log.<arch>" files (possibly empty)
+##########
+sub logs {
+    my $self = shift;
+
+    if (my $build_log = $self->{logs}) {
+        return @$build_log;
+    }
+    return;
+}
 # END   log file download
 #-------------------------------------------------------------------------------
 
@@ -467,9 +483,11 @@ sub download_logs {
 ##############
 sub download {
     my $self = shift;
+    my $build = shift;
+    my $destdir = shift;
 
-    $self->download_rpms;
-    $self->download_logs;
+    $self->_download_rpms_from_koji($build, $destdir);
+    $self->download_logs($build);
 
     # FIXME: implement a --save or --preserve option, to copy rpms and logs
     # into a cachedir?
@@ -506,11 +524,14 @@ sub main {
     die "$ME: Too many arguments; try $ME --help\n"                 if @ARGV;
 
     # Destination directory must not exist.
+    $destdir = Cwd::abs_path($destdir);
     die "$ME: Will not overwrite existing $destdir\n"   if -d $destdir;
 
-    my $buildinfo = Koji::Build->new($build_arg);
+    my $xml_client = XMLRPC::Lite->new(proxy => $server_url);
+    $xml_client->on_debug( sub { print @_; } ) if $debug;
 
-    do_unpack($buildinfo, $destdir);
+    my $client = Koji::Client->new($xml_client, $top_url);
+    do_unpack($client, $build_arg, $destdir);
 }
 
 
@@ -518,8 +539,9 @@ sub main {
 #  do_unpack  #  Create output dir, unpack into it
 ###############
 sub do_unpack {
-    my $build   = shift;        # in: NVR or task ID
-    my $destdir = shift;        # in: dir (may be relative; must not exist)
+    my $koji_client = shift;
+    my $build_arg   = shift;        # in: NVR or task ID
+    my $destdir     = shift;        # in: dir (may be relative; must not exist)
 
     # Now's the time to create the destination directory
     mkdir $destdir, 0755
@@ -527,6 +549,7 @@ sub do_unpack {
     chdir $destdir
         or die "$ME: Cannot cd $destdir: $!\n";
 
+    my $build = $koji_client->get_build_info($build_arg);
     write_readme( $build, <<'END_TEMP_WARNING');
  **************************************************************************
 ***  WARNING: If you're reading this text, it means the unpacking is     ***
@@ -537,7 +560,7 @@ END_TEMP_WARNING
 
     # Download (or fetch) all RPMs and build logs. This leaves us with
     # one or more *.rpm files and zero or more build.log.<arch> files.
-    $build->download();
+    $koji_client->download($build, $destdir);
 
     # Called with --download-only? Update the README, then exit cleanly.
     if ($download_only) {
@@ -547,16 +570,7 @@ END_WARNING
         exit 0;
     }
 
-    extract_rpm($_)                     for $build->rpms;
-
-    # We have build.log.<arch>, but rpmgrill expects the builds logs to
-    # be named <arch>/build.log
-    for my $log ($build->logs) {
-        $log =~ /^build\.log\.(\S+)$/
-            or die "$ME: Internal error: Unexpected build log '$log'";
-        rename $log => "$1/build.log"
-            or die "$ME: Internal error: Could not mv $log $1/build.log : $!";
-    }
+    extract_rpm($_, $destdir, $verbose)         for $koji_client->rpms($build);
 
     # Done. Rewrite the README, without the in-progress warning.
     write_readme( $build );
@@ -568,6 +582,7 @@ END_WARNING
 ##################
 sub write_readme {
     my $build       = shift;            # in: build info
+    croak 'Something went wrong. Undefined build instance.' unless $build;
 
     # Write to a temp file, then mv it into place.
     my $readme_path = 'README';
@@ -598,20 +613,33 @@ END_README
         or die "$ME: Could not mv $tmpfile: $!\n";
 }
 
+################
+# return the full rpm name based on the information given by Koji.
+#
+# e.g. {'nvr' => 'rpmdiff-1.8.11-1.el5', 'arch' => 'i386' } results in:
+#
+#   'rpmdiff-1.8.11-1.el5.i386.rpm'
+#################
+sub get_full_rpm_name {
+    my $rpm = shift;
+
+    return sprintf('%s.%s.rpm', $$rpm{'nvr'}, $$rpm{'arch'});
+}
+
 #################
 #  extract_rpm  #  Extract one RPM file
 #################
 sub extract_rpm {
     my $rpm = shift;
+    my $destdir = shift;
+    my $verbose = shift;
 
     # Get the name of the package.  From that name, and the rpm architecture,
     # create a new directory into which we unpack.
-    my $P = run_rpm( [ '--queryformat' => '%{NAME}' ], $rpm );
+    my $rpm_file = File::Spec->catfile(
+        $destdir, RPM::Grill::FetchBuild::get_full_rpm_name($rpm) );
 
-    my ($arch) = ($rpm =~ /\.([a-z0-9_]+)\.rpm$/)
-        or die "$ME: RPM name does not end in .<arch>.rpm: $rpm";
-
-    my $rpmdir = "$arch/$P";
+    my $rpmdir = File::Spec->catfile($destdir, $$rpm{'arch'}, $$rpm{'name'});
     if (-d $rpmdir) {
         die "$ME: FATAL: Directory $rpmdir already exists."
             . " (this means we've already been invoked for this rpm)\n";
@@ -622,8 +650,8 @@ sub extract_rpm {
     die "$ME: Could not mkdir $rpmdir/payload: $@\n"    if $@;
 
     # Move the locally-cached rpm into that directory
-    rename $rpm => "$rpmdir/rpm.rpm"
-        or die "$ME: Cannot mv cached $rpm -> $rpmdir/rpm.rpm: $!\n";
+    rename $rpm_file => "$rpmdir/rpm.rpm"
+        or die "$ME: Cannot mv cached $rpm_file -> $rpmdir/rpm.rpm: $!\n";
 
     chdir $rpmdir
         or die "$ME: Cannot cd $rpmdir: $!";
@@ -720,6 +748,7 @@ sub run_rpm {
     die "$ME: Internal error: Expecting 1 line of output from @cmd, got: @retval\n";
 }
 
+
 1;
 
 __DATA__
@@ -779,6 +808,18 @@ Download the RPMs and build logs into DESTDIR, then exit cleanly.
 
 RPM filenames will be exactly as downloaded; log files will
 be named C<build.log.ARCH> for all available ARCHes.
+
+=item B<--server-url>
+
+URL of the Koji XMLRPC endpoint.
+
+(Default: http://koji.fedoraproject.org/kojihub)
+
+=item B<--top-url>
+
+Download URL for the Koji file access.
+
+(Default: http://kojipkgs.fedoraproject.org/)
 
 =item B<--verbose>
 

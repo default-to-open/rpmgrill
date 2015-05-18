@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.27
+Version:        0.28
 Release:        1%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
@@ -9,8 +9,13 @@ URL:            https://git.fedorahosted.org/git/rpmgrill.git
 BuildArch:      noarch
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl(Module::Pluggable)
+Requires:       perl(XMLRPC::Lite)
+Requires:       perl(File::Fetch)
+Requires:       perl(List::AllUtils)
 BuildRequires:  perl(Module::Build)
 BuildRequires:  perl(Test::Simple)
+BuildRequires:  perl(Test::MockModule)
+BuildRequires:  perl(Test::MockObject)
 
 # For the antivirus plugin
 Requires: clamav
@@ -53,7 +58,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_fixperms} %{buildroot}/*
 
 %files
-%doc README.AAA_FIRST LICENSE
+%doc README.AAA_FIRST LICENSE AUTHORS
 %{perl_vendorlib}/*
 %{_bindir}/*
 %{_mandir}/man1/*
@@ -61,6 +66,10 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 %{_datadir}/%{name}/*
 
 %changelog
+* Tue Apr 28 2015 Róman Joost <rjoost@redhat.com> 0.28-1
+- bz1202634: fixes fetch-build has a hardcoded koji URL
+- bz1213228: new test for suspicious PATH
+
 * Wed Dec 10 2014 Ed Santiago <santiago@redhat.com> 0.27-1
 - bz1172584: missing deps on Module::Pluggable, koji
 - bz1160153: fill in rpmgrill POD

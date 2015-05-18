@@ -267,10 +267,14 @@ RubyAdvisoryDB
   name and version (but not the release) against a master list of
   <a href="https://github.com/rubysec/ruby-advisory-db">known vulnerabilities</a>.
   If the name+version match a known CVE, this warning is triggered.</p>
-  
+
   <p>If you have backported a fix, please include the string
   <code>Fix CVE-YYYY-NNNN</code> in your specfile's %changelog section. This
   will silence the warning for a given CVE.</p>
+
+SuspiciousPath
+  <p>Package contains a PATH assignment that includes a suspicious path component
+  (one of home, tmp or local).</p>
 
 # END   RPM::Grill::Plugin::SecurityPolicy
 ###############################################################################
