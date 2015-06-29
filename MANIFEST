@@ -51,6 +51,7 @@ t/RPM/Grill/20multilib.t
 t/RPM/Grill/30aggregate_gripes.t
 t/RPM/Grill/40codes.t
 t/RPM/Grill/50as_xml.t
+t/RPM/Grill/60blacklisting.t
 t/RPM/Grill/Plugin/10order.t
 t/RPM/Grill/Plugin/20docs.t
 t/RPM/Grill/Plugin/90real-world.t

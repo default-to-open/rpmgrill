@@ -39,6 +39,7 @@ my $builder = Module::Build->new(
         'XML::Simple'       => 0,
         'YAML'              => 0,
         'YAML::Syck'        => 0,
+        'boolean'           => 0,
         'version'           => 0,
     },
 
