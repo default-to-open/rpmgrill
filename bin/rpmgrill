@@ -57,6 +57,16 @@ OPTIONS:
 
   --list-plugins     list available plugins
   --disable=[LIST]   disable one or more plugins, e.g.: --disable=virus,buildlog
+  --blacklist-config=FILE
+      Blacklisted tests will not be reported by $ME. Blacklist
+      configuration FILE is in YAML format:
+      ---
+      blacklist:
+        Plugin1: test1, test2
+        Plugin2: test3
+        ...
+      and tells $ME that it should not report fails for specified tests
+      within certain plugins.
 
   -v, --verbose  show verbose progress indicators
   -n, --dry-run  make no actual changes
@@ -104,6 +114,7 @@ sub man {
 our $debug   = 0;
 our $force   = 0;
 our $verbose = 0;
+our $blacklist = '';
 our $NOT     = '';              # print "blahing the blah$NOT\n" if $debug
 our $list_plugins;              # list plugins, and quit
 our @disable_plugin;            # plugins to disable
@@ -117,6 +128,7 @@ sub handle_opts {
 
         'list-plugins' => \$list_plugins,
         'disable=s'  => \@disable_plugin,
+        'blacklist-config=s' => \$blacklist,
 
         help         => \&usage,
         man          => \&man,
@@ -174,6 +186,9 @@ sub main {
     -d "$base_dir/src"
         or die "$ME: Base directory $base_dir does not have a 'src' subdir\n";
 
+    # Load blacklisted test cases.
+    RPM::Grill::load_blacklist($blacklist);
+
     # Find all plugins. Do this before cd'ing, in case we have relative
     # paths in our @INC.
     my @all_plugins = RPM::Grill->plugins();
@@ -229,7 +244,7 @@ rpmgrill - static analysis of koji builds
 
 =head1	SYNOPSIS
 
-rpmgrill [--disable=LIST] [--verbose] BASEDIR
+rpmgrill [--disable=LIST] [--verbose] [--blacklist-config=FILE] BASEDIR
 
 rpmgrill  B<--help>  |  B<--version> | B<--man>
 
@@ -266,6 +281,19 @@ but not spend 10 minutes in the VirusCheck plugin.
 =item B<--verbose>
 
 Show progress messages.
+
+=item B<--blacklist-config=FILE>
+
+Blacklisted tests will not be reported by rpmgrill. Blacklist configuration
+FILE is in YAML format:
+
+blacklist:
+  Plugin1: test1, test2
+  Plugin2: test3
+  ...
+
+and tells rpmgrill that it should not report fails for specified tests within
+certain plugins.
 
 =item B<--help>
 
