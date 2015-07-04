@@ -11,3 +11,4 @@ blib/
 jobs/
 tmp/
 wrangler-get-*
+.tags
