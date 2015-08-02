@@ -33,6 +33,7 @@ Makefile
 MANIFEST
 META.json
 META.yml
+AUTHORS
 README.AAA_FIRST
 README.about
 README.devel-deep
