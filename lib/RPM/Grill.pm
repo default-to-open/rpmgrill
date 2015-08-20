@@ -23,12 +23,16 @@ use JSON::XS;
 use YAML;
 use utf8;
 use open                qw(:std :utf8);
+use boolean;
 
 use RPM::Grill::dprintf;
 use RPM::Grill::RPM;
 
 ###############################################################################
 # BEGIN user-configurable section
+
+# Reference to the associative array of blacklisted test cases.
+our $blacklisted_tests;
 
 # When a plugin calls ->gripe, these are the fields it can set. A '*'
 # next to the name means 'this is a required field'.
@@ -99,6 +103,23 @@ $Is_64bit{$_} = 0  for @Non_RPM_Arches;
 
 ###############################################################################
 # BEGIN data-gathering code
+
+#
+# Loads blacklisted test cases from file passed as the first and only argument
+# into the global associative array referred to by $blacklisted_tests variable.
+sub load_blacklist {
+    my $blacklist = shift;
+
+    if ($blacklist eq '') {
+        return;
+    }
+
+    open my $fh, '<', $blacklist
+        or die "Unable to open $blacklist: $!";
+    $blacklisted_tests = YAML::LoadFile($blacklist);
+
+    close $fh
+}
 
 #
 # FIXME: what is $self going to be?
@@ -891,6 +912,28 @@ sub matching_plugins {
 # END   accessors
 ###############################################################################
 
+# Check if test case is blacklisted, returns true if it is, otherwise false.
+# Function has two arguments: a module name and a lookup key for detecting
+# semi-identical gripes.
+sub is_blacklisted {
+    my $module = shift;
+    my $sig = shift;
+
+    if (! exists $blacklisted_tests->{blacklist}
+        or ! defined $blacklisted_tests->{blacklist}->{$module}) {
+        return false;
+    }
+
+    $sig =~ /.*code:([a-zA-Z]+)\].*$/;
+    my $test_case = $1;
+    if (index($blacklisted_tests->{blacklist}->{$module}, $test_case) != -1) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 ###########
 #  gripe  #  Callback from a plugin; records a specific complaint
 ###########
@@ -940,10 +983,15 @@ sub gripe {
         }
     }
 
+    my $sig = gripe_signature(\%actual_gripe);
+
+    if (is_blacklisted($module, $sig)) {
+        return;
+    }
+
     # Usability: aggregate similar gripes. For instance, if we get two or
     # more gripes that are identical except for the arch (i686,x86_64,...)
     # we combine them into one.
-    my $sig = gripe_signature(\%actual_gripe);
     if (my $g = $self->{gripes_by_signature}{$module}{$sig}) {
         my $found = 0;
 
