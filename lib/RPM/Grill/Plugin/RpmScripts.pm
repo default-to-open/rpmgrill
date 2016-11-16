@@ -16,8 +16,8 @@ use warnings;
 our $VERSION = '0.01';
 
 use Carp;
-use RPM::Grill::Util		qw(sanitize_text);
-use Getopt::Long                qw(:config gnu_getopt);
+use RPM::Grill::Util      qw(sanitize_text);
+use Getopt::Long          qw(GetOptionsFromArray :config no_ignore_case);
 use Text::ParseWords;
 use RPM::Grill::dprintf;
 
@@ -284,19 +284,18 @@ sub _check_generic_add {
     # Parse the command-line options
     my $getopt_options = $Getopt_Options{$add_command}
         or die "$ME: Internal error: unknown add command '$add_command'";
-    local (@ARGV) = @words;
     my %options;
-    GetOptions( \%options, @{$getopt_options});
+    GetOptionsFromArray(\@words, \%options, @{$getopt_options});
 
     # There must be exactly one argument remaining, and that's the
     # name of the user or group to be added.
-    my $arg = shift(@ARGV)
+    my $arg = shift(\@words)
         or do {
             # FIXME: this deserves a gripe
             warn "$ME: WARNING: no user/group/etc in '$cmd'";
             return;
         };
-    warn "$ME: WARNING: command '$cmd' left \@ARGV with '@ARGV'" if @ARGV;
+    warn "$ME: WARNING: command '$cmd' left \@words with '@words'" if @words;
 
     # Invoke the specific checker for useradd or groupadd
     {
