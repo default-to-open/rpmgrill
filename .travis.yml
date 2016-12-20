@@ -1,0 +1,8 @@
+sudo: required
+services:
+  - docker
+
+script:
+  - cd dev-tools/docker
+  - sudo docker-compose build ci
+  - sudo docker-compose run ci /usr/bin/prove -lrcf t
