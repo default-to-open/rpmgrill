@@ -2,7 +2,7 @@
 f21: &devenv
   build: devenv/f21
   privileged: true
-  user: 1000
+  user: "1000"
   volumes:
     - &code  ../../:/code
     - &projectdir ../../../:/project
@@ -17,7 +17,7 @@ centos7:
 
 ### minimal env to test rpmgrill ###
 ci:
-  build: ci/f20
+  build: ci/f24
   privileged: true
   volumes:
     - *code

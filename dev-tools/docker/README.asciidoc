@@ -15,9 +15,8 @@ devenv::
     can install new packages without exiting the container.
 
 ci::
-    `ci` image is based on `Fedora 20` and contains all dependencies needed to
-    run `RpmGrill` tests. This image closely replicates the container used in
-    https://209.132.179.19/[RpmGrill Jenkins].
+    `ci` image is based on `Fedora 24` and contains all dependencies needed to
+    run `RpmGrill` tests. This image is used in our Travis CI environment.
 
 Building Images
 ~~~~~~~~~~~~~~~~
