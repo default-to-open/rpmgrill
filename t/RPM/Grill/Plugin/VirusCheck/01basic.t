@@ -176,7 +176,7 @@ END
 
 -| { VirusCheck => [
 -|  { code    => 'ClamAV',
--|    diag    => 'ClamAV <b>ClamAV-Test-File</b> subtest triggered',
+-|    diag    => 'ClamAV <b>Clamav.Test.File-6</b> subtest triggered',
 -|    context => { path => '/usr/bin/myfile' },
 -|  } ] }
 
