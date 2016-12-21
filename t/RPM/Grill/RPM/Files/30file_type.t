@@ -12,10 +12,6 @@ use File::Slurp         qw(write_file);
 use File::Temp          qw(tempdir);
 use MIME::Base64;
 
-# Because of the "last modified" timestamp in the gzip test, running this
-# test in different time zones can result in failure. Override that.
-$ENV{TZ} = 'EST5EDT';
-
 my @tests;
 while (my $line = <DATA>) {
     chomp $line;
@@ -111,7 +107,7 @@ foo2.pl: Perl script, ASCII text executable
 # This one invokes perl via env
 
 --------------------------------------------------------------------------------
-foo.pl.gz*: Perl script, ASCII text executable (gzip compressed data, was "foo.pl", last modified: Thu Jul 26 13:33:23 2012, max compression, from Unix)
+foo.pl.gz*: Perl script, ASCII text executable (gzip compressed data, was "foo.pl", last modified: Thu Jul 26 17:33:23 2012, max compression, from Unix)
 H4sICGN/EVACA2Zvby5wbABTVtQvLS7ST8rM0y9ILcrhUuZSVgjJyCxWyM9LVcjMK8vPTi1WAMko
 pGQWpSaX5FRyAQBWpq1nMwAAAA==
 

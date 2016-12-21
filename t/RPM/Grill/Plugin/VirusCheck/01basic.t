@@ -117,7 +117,7 @@ for my $t (@tests) {
         if ($obj->{gripes}) {
             if (my $gripes = $obj->{gripes}{VirusCheck}) {
                 for my $g (@$gripes) {
-                    if ($g->{diag} =~ s/\s+\(\ClamAV\s+(.*)\)$//) {
+                    if ($g->{diag} =~ s/\s+\(ClamAV\s+(.*)\)$//) {
                         my $v = $1;
 
                         # e.g. '0.97.3/15064/Wed Jun 20 13:03:45 2012'
@@ -176,7 +176,7 @@ END
 
 -| { VirusCheck => [
 -|  { code    => 'ClamAV',
--|    diag    => 'ClamAV <b>ClamAV-Test-File</b> subtest triggered',
+-|    diag    => 'ClamAV <b>Clamav.Test.File-6</b> subtest triggered',
 -|    context => { path => '/usr/bin/myfile' },
 -|  } ] }
 
