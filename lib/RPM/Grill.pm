@@ -66,6 +66,7 @@ our $Arch_Map = <<'END_ARCH_MAP';
 i386 i586 i686 athlon  | x86_64 ia64
 ppc                    | ppc64
 s390                   | s390x
+armv7hl                | aarch64
 END_ARCH_MAP
 
 # 2013-01-18 these are special Windows "architectures". They are not

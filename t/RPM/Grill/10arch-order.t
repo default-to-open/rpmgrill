@@ -18,6 +18,7 @@ my @tests = (
     [ qw( src i686 x86_64 ppc ppc64 s390 s390x ) ],
     [ qw( src             ppc ppc64 s390 s390x ) ],
     [ qw(                 ppc ppc64 s390 s390x ) ],
+    [ qw(     aarch64 armv7hl i686  x86_64     ) ],
 );
 plan tests => 1 + 2 * @tests;
 
