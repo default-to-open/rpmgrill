@@ -34,7 +34,7 @@ MANIFEST
 META.json
 META.yml
 AUTHORS
-README.AAA_FIRST
+README.asciidoc
 README.about
 README.devel-deep
 README.devel-tests
