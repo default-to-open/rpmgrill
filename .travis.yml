@@ -2,7 +2,14 @@ sudo: required
 services:
   - docker
 
-script:
+before_script:
   - cd dev-tools/docker
   - sudo docker-compose build ci
+  - cd $TRAVIS_BUILD_DIR
+  - docker pull mmornati/mock-rpmbuilder:v1.0
+
+script:
+  - cd dev-tools/docker
   - sudo docker-compose run ci /usr/bin/prove -lrcf t
+  - cd $TRAVIS_BUILD_DIR
+  - make rpmtest
