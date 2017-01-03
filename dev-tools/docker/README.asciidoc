@@ -6,14 +6,6 @@ This repository contains docker files relating to RpmGrill.
 
 Image Reference
 ---------------
-devenv::
-    `devenv` directory contains development environments for various supported
-    repos. These images are based on  `Fedora` and `CentOS` docker images. They
-    contain all dependencies needed to run RpmGrill and its tests. Additionally,
-    the default user is `dev` and has `sudo` privileges. So that during
-    development, one can ensure that tests run as normal user and when needed
-    can install new packages without exiting the container.
-
 ci::
     `ci` image is based on `Fedora 24` and contains all dependencies needed to
     run `RpmGrill` tests. This image is used in our Travis CI environment.
@@ -32,48 +24,11 @@ $ cd <project-dir>/dev-tools/docker/
 $ docker-compose build
 ----
 
-Individual images can be built as well. For e.g to build `ci` image
-
-[source,bash]
-----
-$ docker-compose build ci
-----
-
-NOTE: you can use `-p` option with docker-compose to provide a project name.
-For e.g. `docker-compose -p rpmgrill build`
-
 Using images
 ~~~~~~~~~~~~
 Use docker-compose `run` to use docker image.
 
 [source, bash]
 ----
-$ docker-compose run f20 bash
-----
-
-To open another session use `docker exec`
-
-[source, bash]
-----
-$ docker-compose ps
-# NOTE the container id something like: docker_f20_run_1
-$ docker exec -it docker_f20_run_1 bash
-----
-
-Preserve history
-~~~~~~~~~~~~~~~~
-To preserve bash or zsh history, consider mounting a directory on host as
-`home/dev/`. For this, change the `docker-compose.yml` files `f21` entry to
-look like the one below. Now the history will be wr
-
-[source,txt]
-----
-f21: &devenv
-  build: devenv/f21
-  privileged: true
-  user: 1000
-  volumes:
-    - &code  ../../:/code
-    - &projectdir ../../../:/project
-    - &homedir ~/docker/<rpmgrill>/home/:/home/dev
+$ docker-compose run ci
 ----
