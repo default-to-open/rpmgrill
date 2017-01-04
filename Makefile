@@ -5,29 +5,41 @@ NAME     = rpmgrill
 
 SPECFILE = $(NAME).spec
 
-VERSION = $(shell rpm -q --specfile $(SPECFILE) --queryformat '%{VERSION}')
+VERSION = $(shell git describe --abbrev=0)
 RELEASE = $(shell rpm -q --specfile $(SPECFILE) --queryformat '%{RELEASE}')
+BUILDDIR = /tmp/rpmbuild
 
 # Magic tag thingy for building
-DIST = fc19
+DIST = fc24
 
-$(NAME)-$(VERSION).tar.bz2:
-	@rm -rf $(NAME)-0.0 $(NAME)-$(VERSION)
-	perl Build.PL
-	./Build distdir
-	test -d $(NAME)-0.0 || exit 1
-	find $(NAME)-0.0 -type f | xargs perl -pi -e "s/VERSION\s+=\s+'.*?';/VERSION = '$(VERSION)';/"
-	-rm -f $(NAME)-0.0/doc/tooltips.txt
-	perl -Ilib bin/make-tooltips >| $(NAME)-0.0/doc/tooltips.txt
-	mv $(NAME)-0.0 $(NAME)-$(VERSION)
-	tar cjf $(NAME)-$(VERSION).tar.bz2 $(NAME)-$(VERSION)
-	rm -rf $(NAME)-$(VERSION)
+$(VERSION).tar.gz:
+	@rm -rf $(NAME)-$(VERSION)
+	git archive --prefix=$(NAME)-$(VERSION)/ -o $(VERSION).tar.gz HEAD
 
 
-$(NAME)-$(VERSION)-$(RELEASE).$(DIST).src.rpm: $(NAME)-$(VERSION).tar.bz2
+$(NAME)-$(VERSION)-$(RELEASE).src.rpm: $(VERSION).tar.gz
 	rpmbuild -bs --nodeps --define "_sourcedir ." --define "_srcrpmdir ." --define "dist .$(DIST)" $(SPECFILE)
 
+.PHONY: rpmbuild rpmtest
+rpmbuild: $(VERSION).tar.gz
+	@rm -rf $(BUILDDIR)
+	docker pull mmornati/mock-rpmbuilder:v1.0
+	mkdir $(BUILDDIR)
+	mv $< $(BUILDDIR)
+	cp rpmgrill.spec $(BUILDDIR)
+	chown -R 1000:1000 $(BUILDDIR)
+	docker run --cap-add=SYS_ADMIN -it\
+		-e MOCK_CONFIG=fedora-24-x86_64\
+		-e SOURCES=$< \
+		-e SPEC_FILE=rpmgrill.spec\
+		-v $(BUILDDIR):/rpmbuild\
+		mmornati/mock-rpmbuilder:v1.0
+
+# poor mans check if the rpm build was successful
+rpmtest: rpmbuild
+	find $(BUILDDIR)/output -name 'rpmgrill-*.noarch.rpm' | egrep '.*'
 
 # Shortcut names for the above
-tarball:	$(NAME)-$(VERSION).tar.bz2
-srpm:		$(NAME)-$(VERSION)-$(RELEASE).$(DIST).src.rpm
+.PHONY: tarball srpm
+tarball:	$(VERSION).tar.gz
+srpm:		$(NAME)-$(VERSION)-$(RELEASE).src.rpm

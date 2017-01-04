@@ -48,7 +48,7 @@ that may require a developer's attention.  For instance: unapplied patches,
 multilib incompatibilities.
 
 %prep
-%setup -q -n %{name}-%{version}-1
+%setup -q -n %{name}-%{version}
 
 %build
 %{__perl} Build.PL --installdirs vendor
