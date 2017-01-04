@@ -7,7 +7,7 @@ RPMGrill
 Overview
 --------
 
-image:https://travis-ci.org/default-to-open/rpmgrill.svg?branch=master[opts=svg]
+image:https://travis-ci.org/default-to-open/rpmgrill.svg?branch=master["Build Status", link="https://travis-ci.org/default-to-open/rpmgrill"]
 
 This is rpmgrill, a set of analysis tests that run against a
 particular RPM build. It principally differs from
