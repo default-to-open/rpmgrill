@@ -16,7 +16,7 @@ my @tests = (
     [ 'ccc&d'               => 'ccc&amp;d'           ], # HTML special char
     [ 'cccd'              => 'ccc[^V]d'            ], # ctrl character
     [ 'Muñoz'               => 'Muñoz'               ], # UTF-8 passthru
-    [ "Mu\361oz"            => 'Mu&amp;#241;oz'      ], # GAH! non-utf8
+    [ "Mu\361loloz"         => 'Mu&amp;#241;loloz'   ], # GAH! non-utf8
     [ "Embedded\011tab"     => "Embedded\011tab"     ],
     [ "Embedded\012newline" => "Embedded\012newline" ],
 );
