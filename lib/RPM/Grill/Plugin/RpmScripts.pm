@@ -289,7 +289,7 @@ sub _check_generic_add {
 
     # There must be exactly one argument remaining, and that's the
     # name of the user or group to be added.
-    my $arg = shift(\@words)
+    my $arg = shift(@{words})
         or do {
             # FIXME: this deserves a gripe
             warn "$ME: WARNING: no user/group/etc in '$cmd'";

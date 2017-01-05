@@ -6,9 +6,13 @@ This repository contains docker files relating to RpmGrill.
 
 Image Reference
 ---------------
-ci::
-    `ci` image is based on `Fedora 24` and contains all dependencies needed to
-    run `RpmGrill` tests. This image is used in our Travis CI environment.
+test_f25::
+    This image is based on `Fedora 25` and contains all dependencies
+    needed to run `RpmGrill` tests. This image is used in our Travis CI
+    environment.
+test_f24::
+    This image is based on `Fedora 24` to provide the environment of the current
+    maintenance distribution.
 
 Building Images
 ~~~~~~~~~~~~~~~~
@@ -30,5 +34,5 @@ Use docker-compose `run` to use docker image.
 
 [source, bash]
 ----
-$ docker-compose run ci
+$ docker-compose run test_f25
 ----

@@ -49,13 +49,18 @@ for my $t (@tests) {
 
     write_file($filename, $t->{content});
 
+    # Invoke the file command with peeking into gzip archives and short output.
+    # Use that as an expectation we assert against.
+    my $expected = qx(file -z -b $filename);
+    chomp($expected);
+
     my $obj = bless {
         extracted_path => $filename,
     }, 'RPM::Grill::RPM::Files';
 
     my $actual_type = $obj->file_type;
 
-    is_string $actual_type, $t->{expected_type}, $filename;
+    is_string $actual_type, $expected, $filename;
 }
 
 # Allow cleanup
