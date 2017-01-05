@@ -1,8 +1,14 @@
 ### minimal env to test rpmgrill ###
-ci:
+# current maintenance release
+test_f24:
   build: ci/f24
   privileged: true
   volumes:
-    - ../../:/code
-    - ../../../:/project
+    - &code  ../../:/code
 
+# stable release
+test_f25:
+  build: ci/f25
+  privileged: true
+  volumes:
+    - *code

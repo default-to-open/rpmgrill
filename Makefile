@@ -39,6 +39,13 @@ rpmbuild: $(VERSION).tar.gz
 rpmtest: rpmbuild
 	find $(BUILDDIR)/output -name 'rpmgrill-*.noarch.rpm' | egrep '.*'
 
+.PHONY: dockertest
+dockertest: dev-tools/docker/docker-compose.yml
+	for target in `egrep -o '^test_\w+' $<`; do \
+		docker-compose -f $< build $$target; \
+		docker-compose -f $< run $$target /usr/bin/prove -lrcf t || exit 1; \
+	done
+
 # Shortcut names for the above
 .PHONY: tarball srpm
 tarball:	$(VERSION).tar.gz
