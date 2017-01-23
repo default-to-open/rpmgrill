@@ -96,8 +96,8 @@ for my $line (split "\n", $Metadata_Files) {
 # These arches don't need a build log.
 our %Doesnt_Need_Build_Log = map { $_ => 1 } ('noarch');
 
-our $DEFAULT_SERVER_URL = 'http://koji.fedoraproject.org/kojihub';
-our $DEFAULT_TOP_URL = 'http://kojipkgs.fedoraproject.org';
+our $DEFAULT_SERVER_URL = 'https://koji.fedoraproject.org/kojihub';
+our $DEFAULT_TOP_URL = 'https://kojipkgs.fedoraproject.org';
 
 # END   user-customizable section
 ###############################################################################
