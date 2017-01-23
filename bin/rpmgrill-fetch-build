@@ -282,7 +282,7 @@ sub package_name {
 sub arches {
     my ($self, $rpms) = @_;
 
-    return sort uniq map { $_->{'arch'} } @$rpms;
+    return uniq sort map { $_->{'arch'} } @$rpms;
 }
 
 

@@ -39,6 +39,8 @@ subtest 'Koji Build' => sub {
     my $rpms = [
         { 'arch' => 'src', },
         { 'arch' => 'i386', },
+        { 'arch' => 'src', },
+        { 'arch' => 'i386', },
     ];
     my @got = $build->arches($rpms);
     eq_or_diff (\@got, [qw( i386 src )], 'returns correct arches');
