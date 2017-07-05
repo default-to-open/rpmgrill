@@ -17,6 +17,7 @@ BuildRequires:  perl(Module::Build)
 BuildRequires:  perl(Test::Simple)
 BuildRequires:  perl(Test::MockModule)
 BuildRequires:  perl(Test::MockObject)
+BuildRequires:  perl(Test::Harness)
 
 # For the antivirus plugin
 Requires: clamav
@@ -56,6 +57,9 @@ multilib incompatibilities.
 
 %install
 ./Build pure_install --destdir %{buildroot}
+
+%check
+prove -lrcf t
 
 find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 
