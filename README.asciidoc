@@ -110,3 +110,9 @@ To add, extend, or fix individual rpmgrill tests see README.devel-tests
 
 For deeper development, such as ongoing maintenance or infrastructure
 development (or perhaps infrastructure bug fixes), see README.devel-deep
+
+Nightly Builds
+--------------
+
+Easy installable packages are available via
+https://copr.fedorainfracloud.org/coprs/romanofski/rpmgrill/[Fedora copr].
