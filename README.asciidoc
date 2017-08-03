@@ -111,6 +111,19 @@ To add, extend, or fix individual rpmgrill tests see README.devel-tests
 For deeper development, such as ongoing maintenance or infrastructure
 development (or perhaps infrastructure bug fixes), see README.devel-deep
 
+Reporting Bugs
+~~~~~~~~~~~~~~
+
+Please report bugs or issues against
+https://bugzilla.redhat.com/enter_bug.cgi?product=rpmgrill[rpmgrill] in
+Bugzilla.
+
+You can browse existing bugs filed against the
+https://bugzilla.redhat.com/buglist.cgi?quicksearch=product%3AFedora%20component%3Arpmgrill&list_id=7668781[rpmgrill
+Fedora package] or
+https://bugzilla.redhat.com/buglist.cgi?quicksearch=product%3Arpmgrill&list_id=7668786[rpmgrill]
+itself.
+
 Nightly Builds
 --------------
 
