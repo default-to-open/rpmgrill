@@ -39,7 +39,7 @@ BEGIN {
         my $t = { name => $d };
 
         #
-        $t->{expect} = do "$test_subdir/$d/expect";
+        $t->{expect} = do "./$test_subdir/$d/expect";
         die "Internal error: eval $test_subdir/$d/expect: $@" if $@;
 
         push @tests, $t;
