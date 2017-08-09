@@ -7,6 +7,8 @@ RPMGrill
 Overview
 --------
 
+image:https://copr.fedorainfracloud.org/coprs/romanofski/rpmgrill/package/rpmgrill/status_image/last_build.png["Copr Build Status", link="https://copr.fedorainfracloud.org/coprs/romanofski/rpmgrill/]
+
 image:https://travis-ci.org/default-to-open/rpmgrill.svg?branch=master["Build Status", link="https://travis-ci.org/default-to-open/rpmgrill"]
 
 This is rpmgrill, a set of analysis tests that run against a
