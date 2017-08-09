@@ -154,6 +154,8 @@ t/RPM/Grill/RPM/30daemons.t
 t/RPM/Grill/RPM/Files/10numeric_mode.t
 t/RPM/Grill/RPM/Files/20eu-readelf.d/10-fullrelro-pie/eu-readelf
 t/RPM/Grill/RPM/Files/20eu-readelf.d/10-fullrelro-pie/expect
+t/RPM/Grill/RPM/Files/20eu-readelf.d/11-fullrelro-pie-newdtags/eu-readelf
+t/RPM/Grill/RPM/Files/20eu-readelf.d/11-fullrelro-pie-newdtags/expect
 t/RPM/Grill/RPM/Files/20eu-readelf.d/20-norelro-pie/eu-readelf
 t/RPM/Grill/RPM/Files/20eu-readelf.d/20-norelro-pie/expect
 t/RPM/Grill/RPM/Files/20eu-readelf.d/30-norelro-nopie/eu-readelf

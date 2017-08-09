@@ -73,6 +73,7 @@ our $ReadElf_Parse_Table = <<'END_READELF';
 -d Dynamic segment   > /^\s*NEEDED\s+Shared library:\s+\[(\S+)\]/ : @libs
 -d Dynamic segment   > /^\s*RPATH\s.*\s\[(.*)\]/                  : rpath
 -d Dynamic segment   > /^\s+BIND_NOW\b/                           : bind_now = 1
+-d Dynamic segment   > /^\s+FLAGS\s+.*\bBIND_NOW\b/               : bind_now = 1
 -d Dynamic segment   > /^\s+DEBUG\b/                              : debug    = 1
 
 -l Program Headers   > /^\s*GNU_RELRO\s.*\s(R\S*)\s+0x/           : gnu_relro
