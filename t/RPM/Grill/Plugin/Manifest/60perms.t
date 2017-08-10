@@ -10,7 +10,8 @@ use Test::Differences;
 
 use File::Temp                  qw(tempdir);
 
-require 't/lib/FakeTree.pm' or die "Could not require FakeTree.pm: $!";
+use lib "t/lib";
+use FakeTree;
 
 # pass 1: read DATA
 my @tests = FakeTree::read_tests( *DATA );

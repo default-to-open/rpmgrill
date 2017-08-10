@@ -9,6 +9,8 @@ use Test::More;
 use Test::Differences;
 use File::Temp                  qw(tempdir);
 
+use lib "t/lib";
+
 # Slurp in the DATA section, which defines the tests we'll run
 my @tests;
 while (my $line = <DATA>) {
@@ -33,8 +35,7 @@ plan tests => 3 + @tests;
 # Load required libraries
 use_ok 'RPM::Grill'                     or exit;
 use_ok 'RPM::Grill::Plugin::ManPages'   or exit;
-
-ok(require("t/lib/FakeTree.pm"), "loaded FakeTree.pm") or exit;
+use_ok 'FakeTree' or exit;
 
 # Make a temp dir
 my $tempdir = tempdir("t-ManPages.XXXXXX", CLEANUP => !$ENV{DEBUG});
