@@ -12,12 +12,6 @@ Requires:       perl(Module::Pluggable)
 Requires:       perl(XMLRPC::Lite)
 Requires:       perl(File::Fetch)
 Requires:       perl(List::AllUtils)
-BuildRequires:  perl-generators
-BuildRequires:  perl(Module::Build)
-BuildRequires:  perl(Test::Simple)
-BuildRequires:  perl(Test::MockModule)
-BuildRequires:  perl(Test::MockObject)
-BuildRequires:  perl(Test::Harness)
 
 # For the antivirus plugin
 Requires: clamav
@@ -42,6 +36,44 @@ Requires: binutils
 # Not strictly necessary for rpmgrill, but rpmgrill-fetch-build uses it
 # to download Fedora builds.
 Requires: koji
+
+# Test dependencies
+BuildRequires:  perl(CGI)
+BuildRequires:  perl(Digest::SHA1)
+BuildRequires:  perl(File::Fetch)
+BuildRequires:  perl(File::LibMagic)
+BuildRequires:  perl(File::Slurp)
+BuildRequires:  perl(File::Which)
+BuildRequires:  perl(HTML::Entities)
+BuildRequires:  perl(IPC::Run)
+BuildRequires:  perl(JSON::XS)
+BuildRequires:  perl(List::AllUtils)
+BuildRequires:  perl(Module::Build)
+BuildRequires:  perl(Module::Pluggable)
+BuildRequires:  perl(Net::DNS)
+BuildRequires:  perl(Sort::Versions)
+BuildRequires:  perl(Test::Deep)
+BuildRequires:  perl(Test::Differences)
+BuildRequires:  perl(Test::Exception)
+BuildRequires:  perl(Test::Harness)
+BuildRequires:  perl(Test::LongString)
+BuildRequires:  perl(Test::MockModule)
+BuildRequires:  perl(Test::MockObject)
+BuildRequires:  perl(Test::Perl::Critic)
+BuildRequires:  perl(Test::Simple)
+BuildRequires:  perl(Time::ParseDate)
+BuildRequires:  perl(Time::Piece)
+BuildRequires:  perl(XML::Simple)
+BuildRequires:  perl(XMLRPC::Lite)
+BuildRequires:  perl(YAML)
+BuildRequires:  perl(YAML::Syck)
+BuildRequires:  perl(boolean)
+BuildRequires:  perl(open)
+BuildRequires:  perl-generators
+BuildRequires:  clamav
+BuildRequires:  clamav-data
+BuildRequires: /usr/bin/xsltproc
+BuildRequires: /usr/bin/desktop-file-validate
 
 %description
 rpmgrill runs a series of tests against a set of RPMs, reporting problems
