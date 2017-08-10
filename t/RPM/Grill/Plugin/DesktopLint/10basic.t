@@ -12,6 +12,8 @@ use File::Path                  qw(mkpath rmtree);
 use File::Temp                  qw(tempdir);
 use File::Basename              qw(basename);
 
+use lib "t/lib";
+
 # pass 1: read DATA
 my @tests;
 while (my $line = <DATA>) {
@@ -47,8 +49,7 @@ my $tempdir = tempdir("t-DesktopLint.XXXXXX", CLEANUP => 1);
 use_ok 'RPM::Grill'                       or exit;
 use_ok 'RPM::Grill::RPM'                  or exit;
 use_ok 'RPM::Grill::Plugin::DesktopLint'  or exit;
-
-ok(require("t/lib/FakeTree.pm"), "loaded FakeTree.pm") or exit;
+use_ok 'FakeTree' or exit;
 
 package RPM::Grill::RPM;
 use subs qw(nvr);

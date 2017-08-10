@@ -1,0 +1,17 @@
+{
+          'debug' => '1',
+          'elf_type' => 'DYN (Shared object file)',
+          'libs' => [
+                      'libperl.so.5.26',
+                      'libpthread.so.0',
+                      'libresolv.so.2',
+                      'libnsl.so.1',
+                      'libdl.so.2',
+                      'libm.so.6',
+                      'libcrypt.so.1',
+                      'libutil.so.1',
+                      'libc.so.6'
+                    ],
+          'gnu_relro' => 'R',
+          'bind_now' => '1'
+        };
