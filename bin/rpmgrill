@@ -323,9 +323,22 @@ unpacked RPMs. Documenting that is way beyond the scope of this
 man page. See README.unpacking in the rpmgrill source tree,
 or the rpmgrill-fetch-build tool, for more details.
 
+=head1 Examples
+
+Test a new set of builds from Koji:
+
+    $ mkdir testdir && cd testdir
+    $ koji download-task --logs <task id>
+
+    # unpack all rpms in the current directory
+    $ rpmgrill-unpack .
+
+    # the unpacked directory is created by rpmgrill-unpack
+    $ rpmgrill unpacked
+
 =head1	SEE ALSO
 
-rpmgrill-analyze-local, rpmgrill-fetch-build, rpmgrill-unpack-rpms
+rpmgrill-unpack-rpms
 
 =head1	AUTHOR
 

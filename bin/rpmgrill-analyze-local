@@ -132,6 +132,19 @@ __PACKAGE__->main()                                     unless caller();
 
 # Main code.
 sub main {
+    my $deprecation = <<'END_DEPRECATION';
+
+WARNING: rpmgrill-analyze-local is deprecated and will be removed in the next release.
+
+Instead use:
+    mkdir testdir
+    cd testdir
+    koji download-task --logs <task id>
+    rpmgrill-unpack .  # current directory holding the downloaded
+    rpmgrill unpacked  # run rpmgrill against the unpacked RPMs
+
+END_DEPRECATION
+    print $deprecation;
     # Note that we operate directly on @ARGV, not on function parameters.
     # This is deliberate: it's because Getopt::Long only operates on @ARGV
     # and there's no clean way to make it use @_.

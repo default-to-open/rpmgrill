@@ -508,6 +508,14 @@ our @ARGV_orig;
 
 # Main starting point.
 sub main {
+    my $deprecation = <<'END_DEPRECATION';
+
+WARNING: rpmgrill-fetch-build is deprecated and will be removed in the next release.
+Instead use the koji client. For example: koji download-task --logs <task id>
+
+END_DEPRECATION
+    print $deprecation;
+
     # Preserve original ARGV; used for logging details about this run
     @ARGV_orig = @ARGV;
 
