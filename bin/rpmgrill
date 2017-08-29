@@ -186,6 +186,13 @@ sub main {
     -d "$base_dir/src"
         or die "$ME: Base directory $base_dir does not have a 'src' subdir\n";
 
+    my $exitcode = run_checks($base_dir);
+    exit($exitcode);
+}
+
+sub run_checks {
+    my $base_dir = shift;
+
     # Load blacklisted test cases.
     RPM::Grill::load_blacklist($blacklist);
 
@@ -226,6 +233,8 @@ sub main {
         rename $tmpfile => $outfile
             or die "$ME: Cannot rename $tmpfile: $!\n";
     }
+
+    return $grill->get_exit_code_for_test_run();
 }
 
 

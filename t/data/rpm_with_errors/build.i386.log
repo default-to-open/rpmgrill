@@ -1,0 +1,12 @@
+Building target platforms: i386
+Building for target i386
+Executing(%prep): /bin/sh -e /var/tmp/rpm-tmp.lGCCtw
+Executing(%build): /bin/sh -e /var/tmp/rpm-tmp.CF9mLp
+Executing(%install): /bin/sh -e /var/tmp/rpm-tmp.OGSE3i
+Processing files: librpmgrill-1.2.3-2.fc25.i386
+Provides: librpmgrill = 1.2.3-2.fc25 librpmgrill(x86-32) = 1.2.3-2.fc25
+Requires(rpmlib): rpmlib(CompressedFileNames) <= 3.0.4-1 rpmlib(FileDigests) <= 4.6.0-1 rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+Checking for unpackaged file(s): /usr/lib/rpm/check-files /home/rjoost/works/rpmgrill/t/data/rpm_with_errors/test-rpmbuild-librpmgrill-1.2.3-2.fc25/BUILDROOT/librpmgrill-1.2.3-2.fc25.i386
+Wrote: /home/rjoost/works/rpmgrill/t/data/rpm_with_errors/test-rpmbuild-librpmgrill-1.2.3-2.fc25/SRPMS/librpmgrill-1.2.3-2.fc25.src.rpm
+Wrote: /home/rjoost/works/rpmgrill/t/data/rpm_with_errors/test-rpmbuild-librpmgrill-1.2.3-2.fc25/RPMS/i386/librpmgrill-1.2.3-2.fc25.i386.rpm
+Executing(%clean): /bin/sh -e /var/tmp/rpm-tmp.T8bDsd

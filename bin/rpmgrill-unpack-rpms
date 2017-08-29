@@ -419,7 +419,7 @@ sub run_rpm {
     return                      if !@retval;
     die "$ME: Internal error: Expecting 1 line of output from @cmd, got: @retval\n";
 }
-
+1;
 
 __DATA__
 
