@@ -6,6 +6,8 @@ package RPM::Grill::UnpackRPMs;
 
 use strict;
 use warnings;
+use File::Spec;
+use RPM::Grill;
 
 (our $ME = $0) =~ s|.*/||;
 
@@ -210,6 +212,7 @@ sub main {
 ###############
 sub do_unpack {
     my $input_dir = shift;              # in: dir (may be relative)
+    my @rpms;
 
     # Input directory must exist. Duh.
     chdir $input_dir
@@ -228,7 +231,69 @@ sub do_unpack {
         my ($arch) = ($rpm =~ /\.([^.]+)\.rpm$/)
             or die "$ME: Internal error: Bad RPM name '$rpm'";
         extract_rpm($rpm, $Unpack_Into);
+
+        # skip copying log files for src RPMs;
+        next if $arch eq 'src';
+
+        my $logf = get_build_log_for_rpm($rpm);
+        if (defined $logf) {
+            copy($logf, File::Spec->catfile($Unpack_Into, $arch, "build.log"))
+        } else {
+            warn "Unable to find build.log for rpm: $rpm";
+        }
     }
+}
+
+# thanks Stack Overflow
+sub flatten {
+     my $arg = @_ > 1 ? [@_] : shift;
+     my @output = map {ref $_ eq 'ARRAY' ? flatten($_) : $_} @$arg;
+     return @output;
+}
+
+sub uniq {
+    my %seen;
+    grep !$seen{$_}++, @_;
+}
+
+# build logs sometimes have a different architecture than the target build,
+# which means, if we won't find a corresponding log for our build arch, we'll
+# have to do some guess work to find the corresponding by looking into its peers.
+sub get_build_log_for_rpm {
+    my $rpm = shift;
+    my ($arch) = ($rpm =~ /\.([^.]+)\.rpm$/);
+    my $log = undef;
+    my $archlog = "build.$arch.log";
+
+    # If it's noarch, figuring out the log is easy
+    if (-e "build.log" || ! defined $arch) {
+        $log = "build.log";
+    } elsif (-e $archlog) {
+        # Try a one-to-one mapping with the given rpm arch
+        $log = $archlog;
+    } else {
+        # If that doesn't exist, well start guessing by traversing the arch
+        # mapping ..
+        my @peer_arches = flatten $RPM::Grill::Multilib_Peers{$arch};
+        my @visited = ($arch);
+
+        for my $peer_arch (@peer_arches) {
+            if (defined $peer_arch && -e "build.$peer_arch.log") {
+                $log = "build.$peer_arch.log";
+                last;
+            } else {
+                # traverse depth first in case we haven't already visited this
+                # architecture
+                if (grep {$_ ne $peer_arch} @visited) {
+                    my @new = flatten $RPM::Grill::Multilib_Peers{$peer_arch};
+                    unshift @peer_arches, @new;
+                    @peer_arches = uniq @peer_arches;
+                }
+                push @visited, $peer_arch;
+            }
+        }
+    }
+    return $log;
 }
 
 #################
