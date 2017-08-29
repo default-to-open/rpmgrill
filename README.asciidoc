@@ -92,3 +92,17 @@ Nightly Builds
 
 Easy installable packages are available via
 https://copr.fedorainfracloud.org/coprs/romanofski/rpmgrill/[Fedora copr].
+
+Changelog
+---------
+
+v0.31 (unreleased)
+~~~~~~~~~~~~~~~~~~
+* `rpmgrill-unpack-rpms`: now also attempts in copying downloaded build logs from
+  Koji into unpacked sub directories.
+* `rpmgrill-fetch-build` and `rpmgrill-analyze-local` marked as deprecated and
+  will be removed in the next release.
+* `rpmgrill` will now exit with an exit code of 1 to indicate the test run had
+  failures and 0 to indicate a success.
+* `rpmgrill` now recognizes executables linked with new dtags (BIND_NOW) (Petr
+  Pisar).
