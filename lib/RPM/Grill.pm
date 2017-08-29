@@ -683,6 +683,17 @@ sub results_as_json {
     return JSON::XS->new->pretty(1)->canonical(1)->encode($j);
 }
 
+##############################
+# get_exit_code_for_test_run # Returns 0 for all pass and 1 for at least one
+#                            # plugin reporting failure or warning
+##############################
+sub get_exit_code_for_test_run {
+    my $self = shift;
+
+    my $gripe_count = keys %{$self->{gripes}};
+    return $gripe_count > 0 ? 1 : 0;
+}
+
 ################
 #  results_as  #  Returns results as a string in JSON, YAML, or XML format
 ################
