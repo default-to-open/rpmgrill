@@ -9,8 +9,6 @@ Overview
 
 image:https://copr.fedorainfracloud.org/coprs/romanofski/rpmgrill/package/rpmgrill/status_image/last_build.png["Copr Build Status", link="https://copr.fedorainfracloud.org/coprs/romanofski/rpmgrill/]
 
-image:https://travis-ci.org/default-to-open/rpmgrill.svg?branch=master["Build Status", link="https://travis-ci.org/default-to-open/rpmgrill"]
-
 This is rpmgrill, a set of analysis tests that run against a
 particular RPM build. It principally differs from
 https://fedoraproject.org/wiki/Common_Rpmlint_issues[rpmlint]
@@ -92,6 +90,32 @@ Nightly Builds
 
 Easy installable packages are available via
 https://copr.fedorainfracloud.org/coprs/romanofski/rpmgrill/[Fedora copr].
+
+Debugging test failures in Fedora Copr
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In case tests fail in the copr builds, you can run the mock command locally.
+Here is an example illustrating the process:
+
+[source, bash]
+----
+# create an archive of the current release (check the spec file)
+# Also note, that this makes an archive from the current HEAD. Whatever is not
+# in a commit in git will not be part of the archive.
+$ git archive --format=tar --prefix=rpmgrill-0.30/ HEAD | gzip > 0.30.tar.gz
+
+# copy it into your rpmbuild directory
+$ mv 0.30.tar.gz ~/rpmbuild/SOURCES
+
+# create an src.rpm from your local spec file and the created archive
+$ rpmbuild -bs rpmgrill.spec
+
+# build it in mock which runs the tests
+$ mock -r fedora-26-x86_64 --rebuild ~/rpmbuild/SRPMS/rpmgrill-0.30-1.fc25.src.rpm
+
+# Now log in and debug. Don't forget --no-clean.
+$ mock -r fedora-26-x86_64 --no-clean --shell
+----
 
 Changelog
 ---------

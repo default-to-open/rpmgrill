@@ -1,9 +1,0 @@
-sudo: required
-services:
-  - docker
-
-before_script:
-  - docker pull mmornati/mock-rpmbuilder:v1.0
-
-script:
-  - make dockertest
