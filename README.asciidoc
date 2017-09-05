@@ -120,7 +120,7 @@ $ mock -r fedora-26-x86_64 --no-clean --shell
 Changelog
 ---------
 
-v0.31 (unreleased)
+v0.31 (2017-09-05)
 ~~~~~~~~~~~~~~~~~~
 * `rpmgrill-unpack-rpms`: now also attempts in copying downloaded build logs from
   Koji into unpacked sub directories.
