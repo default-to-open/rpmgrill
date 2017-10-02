@@ -387,19 +387,15 @@ sub _check_useradd {
             # and somehow extract the macro value ... but that's fragile.
             # Even worse: what if the macro is conditional? (rhel5/rhel6).
             # So ask the user to deal with it.
-            my $diag = "Invocation of <tt>useradd</tt> with non-numeric UID <var>$uid</var>";
 
             if (defined $expected_uid) {
-                $diag .= "; please verify that this =<b>$expected_uid</b>, as defined in $UidGid_File";
-            }
-            else {
-                $diag .= "; this is probably OK, but I have no robust way of checking. Note that there is no UID defined for <var>$username</var> in $UidGid_File";
+                my $diag = "Invocation of <tt>useradd</tt> with non-numeric UID <var>$uid</var>; please verify that this =<b>$expected_uid</b>, as defined in $UidGid_File";
+                $spec->gripe({
+                    code => 'UseraddCheckUid',
+                    diag => $diag,
+                             });
             }
 
-            $spec->gripe({
-                code => 'UseraddCheckUid',
-                diag => $diag,
-            });
         }
     }
     else {
