@@ -86,7 +86,13 @@ multilib incompatibilities.
 ./Build pure_install --destdir %{buildroot}
 
 %check
+%if 0%{?fedora} >= 24 || 0%{?rhel} >= 8
 prove -lrcf t
+%else
+# only run acceptance tests, since the unit tests compare output which is highly
+# platform dependent
+prove -lcf t
+%endif
 
 find %{buildroot} -type f -name .packlist -exec rm -f {} \;
 
