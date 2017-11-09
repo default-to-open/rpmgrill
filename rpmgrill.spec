@@ -9,9 +9,6 @@ URL:            https://github.com/default-to-open/rpmgrill
 BuildArch:      noarch
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl(Module::Pluggable)
-Requires:       perl(XMLRPC::Lite)
-Requires:       perl(File::Fetch)
-Requires:       perl(List::AllUtils)
 
 # For the antivirus plugin
 Requires: clamav
@@ -40,7 +37,6 @@ Requires: koji
 # Test dependencies
 BuildRequires:  perl(CGI)
 BuildRequires:  perl(Digest::SHA1)
-BuildRequires:  perl(File::Fetch)
 BuildRequires:  perl(File::LibMagic)
 BuildRequires:  perl(File::Slurp)
 BuildRequires:  perl(File::Which)
@@ -48,7 +44,6 @@ BuildRequires:  perl(File::Copy::Recursive)
 BuildRequires:  perl(HTML::Entities)
 BuildRequires:  perl(IPC::Run)
 BuildRequires:  perl(JSON::XS)
-BuildRequires:  perl(List::AllUtils)
 BuildRequires:  perl(Module::Build)
 BuildRequires:  perl(Module::Pluggable)
 BuildRequires:  perl(Net::DNS)
@@ -65,7 +60,6 @@ BuildRequires:  perl(Test::Simple)
 BuildRequires:  perl(Time::ParseDate)
 BuildRequires:  perl(Time::Piece)
 BuildRequires:  perl(XML::Simple)
-BuildRequires:  perl(XMLRPC::Lite)
 BuildRequires:  perl(YAML)
 BuildRequires:  perl(YAML::Syck)
 BuildRequires:  perl(boolean)
