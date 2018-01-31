@@ -1,6 +1,6 @@
 Name:           rpmgrill
 Version:        0.32
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
@@ -11,8 +11,8 @@ Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $versi
 Requires:       perl(Module::Pluggable)
 
 # For the antivirus plugin
-Requires: clamav
-Requires: clamav-data
+Requires: data(clamav)
+Suggests: clamav-data
 
 # For checking desktop/icon files using /usr/bin/desktop-file-validate
 Requires: /usr/bin/desktop-file-validate
