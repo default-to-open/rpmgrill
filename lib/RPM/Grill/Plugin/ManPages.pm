@@ -239,12 +239,9 @@ sub _file_needs_manpage {
     #   * regular files (i.e. not symlinks or directories) that are:
     return 0 if ! $bin->is_reg;
 
-    #      * executable and in an important directory, or
+    #      * executable and in an important directory
     return 1 if $bin->numeric_mode & 0x100
              && $bin->path =~ m{^($Important_Bin_Directories)/};
-
-    #      * marked (in rpm) as config files (bz647369)
-    return 1 if $bin->is_config;
 
     # Not one of the above. File does not need a man page.
     return;
