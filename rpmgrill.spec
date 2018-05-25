@@ -1,6 +1,6 @@
 Name:           rpmgrill
 Version:        0.32
-Release:        2%{?dist}
+Release:        5%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools
 License:        Artistic 2.0
@@ -11,6 +11,7 @@ Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $versi
 Requires:       perl(Module::Pluggable)
 
 # For the antivirus plugin
+Requires: clamav
 Requires: data(clamav)
 Suggests: clamav-data
 
@@ -85,6 +86,10 @@ multilib incompatibilities.
 %install
 ./Build pure_install --destdir %{buildroot}
 
+find %{buildroot} -type f -name .packlist -exec rm -f {} \;
+
+%{_fixperms} %{buildroot}/*
+
 %check
 %if 0%{?fedora} >= 24 || 0%{?rhel} >= 8
 prove -lrcf t
@@ -93,10 +98,6 @@ prove -lrcf t
 # platform dependent
 prove -lcf t
 %endif
-
-find %{buildroot} -type f -name .packlist -exec rm -f {} \;
-
-%{_fixperms} %{buildroot}/*
 
 %files
 %doc README.asciidoc LICENSE AUTHORS
