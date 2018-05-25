@@ -13,7 +13,6 @@ Requires:       perl(Module::Pluggable)
 # For the antivirus plugin
 Requires: clamav
 Requires: data(clamav)
-Suggests: clamav-data
 
 # For checking desktop/icon files using /usr/bin/desktop-file-validate
 Requires: /usr/bin/desktop-file-validate
