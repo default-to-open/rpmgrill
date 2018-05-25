@@ -138,20 +138,20 @@ __DATA__
 
 ...expect:
 
-------------manpage-in-arch-but-configfile-is-in-noarch-----------------
+------------manpage-in-arch-but-executable-is-in-noarch-----------------
 
->> -rw-r--r--  root root 1 /noarch/mypkg/etc/gitweb.conf
->> -rw-r--r--  root root 0 /i686/mypkg/usr/share/man/man5/gitweb.conf.5
+>> -rw-r--r--  root root 1 /noarch/mypkg/bin/gitweb
+>> -rw-r--r--  root root 0 /i686/mypkg/usr/share/man/man5/gitweb.5
 .Dd to make it look like a valid man page
->> -rw-r--r--  root root 0 /x86_64/mypkg/usr/share/man/man5/gitweb.conf.5
+>> -rw-r--r--  root root 0 /x86_64/mypkg/usr/share/man/man5/gitweb.5
 .Dd to make it look like a valid man page
 
 ...expect:
 
 ------------manpage-in-only-some-arches----------------------
 
->> -rw-r--r--  root root 1 /noarch/mypkg/etc/gitweb.conf
->> -rw-r--r--  root root 0 /i686/mypkg/usr/share/man/man5/gitweb.conf.5
+>> -rw-r--r--  root root 1 /noarch/mypkg/bin/gitweb
+>> -rw-r--r--  root root 0 /i686/mypkg/usr/share/man/man5/gitweb.5
 .Dd to make it look like a valid man page
 >> -rw-r--r--  root root 0 /x86_64/mypkg/usr/bin/add-x86_64-to-arch-list
 
@@ -162,7 +162,7 @@ __DATA__
     {
       arch => 'noarch',
       code => 'ManPageMissing',
-      diag => 'Man page for <tt>/etc/gitweb.conf</tt> shipped on i686 but missing on x86_64',
+      diag => 'Man page for <tt>/bin/gitweb</tt> shipped on i686 but missing on x86_64',
       subpackage => 'mypkg'
     }
   ]
@@ -224,21 +224,4 @@ sdfsdfsdf
             diag => "Man pages are expected to end in .[0-9n][a-z]*.gz",
         }
     ]
-}
-
---------------config-file-missing-manpage------------------
-
->> -rw-r--r--   root root 1 /noarch/mypkg/etc/foo.rc
-
-...expect:
-
-{
-  ManPages => [
-    {
-      arch => 'noarch',
-      code => 'ManPageMissing',
-      diag => 'No man page for <tt>/etc/foo.rc</tt>',
-      subpackage => 'mypkg'
-    }
-  ]
 }
