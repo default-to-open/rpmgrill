@@ -119,6 +119,14 @@ $ mock -r fedora-26-x86_64 --no-clean --shell
 
 Changelog
 ---------
+v0.33 (2018-06-04)
+~~~~~~~~~~~~~~~~~~
+
+* `rpmgrill` will not record a failure any more if a config file will not
+  have a corresponding man page. (Thanks to Adam Williamson)
+* The deprecated scripts `rpmgrill-fetch-build` and `rpmgrill-analyze-local`
+  have been removed.
+
 v0.32 (2017-11-03)
 ~~~~~~~~~~~~~~~~~~
 * rpmgrill will not warn anymore if scripts use dynamic UIDs, based on a patch
