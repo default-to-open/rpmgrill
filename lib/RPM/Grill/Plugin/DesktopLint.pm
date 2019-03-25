@@ -337,7 +337,7 @@ sub _check_icon {
         $icon_re = qr{^\Q$icon\E$};
     }
     else {
-        $icon_re = qr{^/usr/share/(icons|pixmaps)/.*\Q/$icon\E\.(png|xpm|svg)$};
+        $icon_re = qr{^/usr/share/(?:icons|pixmaps)/(?:.*/)?\Q$icon\E\.(?:png|xpm|svg)$};
     }
 
     # Look through all packages on this arch.  (And, if we're a binary arch

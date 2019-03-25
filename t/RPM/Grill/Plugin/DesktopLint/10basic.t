@@ -407,6 +407,22 @@ Type=Application
 >> -rwxr-xr-x  root  root 0   /noarch/mypkg/usr/bin/foo
 >> -rwxr-xr-x  root  root 0   /noarch/mypkg-icons/usr/share/icons/myicon.png
 
+-------icon-ok-(without-theme)------------------------------------------------
+# Icons specified as a base file name without a path can be located in
+# a top-level base directory out of any theme (see LookupFallbackIcon in Theme
+# specification), bug #1539633.
+>> -rw-r--r--  root  root 0 /i386/mypkg/usr/share/applications/foo.desktop
+[Desktop Entry]
+Name=Foo
+Comment=Bar
+Exec=foo
+Icon=myicon
+Terminal=false
+Type=Application
+
+>> -rwxr-xr-x  root  root 0   /i386/mypkg/usr/bin/foo
+>> -rwxr-xr-x  root  root 0   /i386/mypkg/usr/share/icons/myicon.png
+
 -------icon-badmode-------------------------------------------------
 # icon is not world-readable
 >> -rw-r--r--  root  root 0 /noarch/mypkg/usr/share/applications/foo.desktop
