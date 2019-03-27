@@ -1,5 +1,5 @@
 Name:           rpmgrill
-Version:        0.33
+Version:        0.34
 Release:        0%{?dist}
 Summary:        A utility for catching problems in koji builds
 Group:          Development/Tools

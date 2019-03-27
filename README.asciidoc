@@ -119,6 +119,12 @@ $ mock -r fedora-26-x86_64 --no-clean --shell
 
 Changelog
 ---------
+v0.34 (2019-03-27)
+~~~~~~~~~~~~~~~~~~
+
+* `rpmgrill` will not record a failure if icons are declared with a base
+  filename without a path in the theme specification. (Thanks to Petr Pisar).
+
 v0.33 (2018-06-04)
 ~~~~~~~~~~~~~~~~~~
 
