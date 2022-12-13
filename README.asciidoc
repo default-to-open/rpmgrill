@@ -42,7 +42,7 @@ download your RPMs including logs and run rpmgrill over them.
 ----
 $ mkdir testdir && cd testdir
 $ koji download-task --logs <task id>
-$ rpmgrill-unpack .  # unpack all rpms in the current directory
+$ rpmgrill-unpack-rpms .  # unpack all rpms in the current directory
 $ rpmgrill unpacked  # the unpacked directory is created by rpmgrill-unpack
 ----
 
